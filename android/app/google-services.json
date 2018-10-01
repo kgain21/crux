@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "514273409976",
+    "firebase_url": "https://crux-439d7.firebaseio.com",
+    "project_id": "crux-439d7",
+    "storage_bucket": "crux-439d7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514273409976:android:2e90ce9f0cfeaee6",
+        "android_client_info": {
+          "package_name": "com.kgain.crux"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "514273409976-5ci6uami7nq6viep7oq9g6s8ccs356f0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAj0C3xoi0IRN5CKK7V9OCawYCT0ScVKrg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
