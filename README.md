@@ -11,5 +11,5 @@ Crux has a wide variety of workouts from many professional rock climbers, and al
 
 ## Getting Started
 
-~~For help getting started with Crux, download the app from the Google Play Store or the Apple App Store. ~~
+~~For help getting started with Crux, download the app from the Google Play Store or the Apple App Store.~~
 [documentation](https://flutter.io/).
