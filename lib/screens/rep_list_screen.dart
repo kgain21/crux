@@ -1,34 +1,48 @@
 import 'dart:async';
 
+import 'package:crux/shared_layouts/appbar.dart';
 import 'package:crux/shared_layouts/bottom_nav_bar.dart';
+import 'package:crux/utils/base_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-class StopwatchScreen extends StatefulWidget {
+class RepListScreen extends StatefulWidget {
   final String title;
+  final BaseAuth auth;
 
-  StopwatchScreen({Key key, this.title}) : super(key: key);
+  RepListScreen({Key key, this.title, this.auth}) : super(key: key);
 
   @override
-  _StopwatchScreenState createState() => new _StopwatchScreenState();
+  _RepListScreenState createState() => new _RepListScreenState();
 }
 
-class _StopwatchScreenState extends State<StopwatchScreen> {
+class _RepListScreenState extends State<RepListScreen> {
   Stopwatch stopwatch = new Stopwatch();
 
-  /*bool isLapPressed = false;*/
+  bool isLapPressed = false;
+
+  void _signOut() {
+    try {
+      widget.auth.signOut(this.context);
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
+      appBar: SharedAppBar.sharedAppbar(
+        widget.title,
+        _signOut,
+        this.context,
       ),
       body: new Container(
         child: Column(
           children: <Widget>[
             new Center(
-              child: new StopwatchWidgetText(
+              child: new RepListWidgetText(
                 stopwatch: stopwatch,
               ),
             ),
@@ -47,6 +61,32 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
                 ),
               ],
             ),
+            new ListTile(
+              leading: const Icon(Icons.ac_unit),
+              title: const Text('AC UNIT'),
+              subtitle: const Text('this is a test'),
+              onTap: rightButtonPressed,
+            ),
+            new SwitchListTile(
+              title: const Text('Lights'),
+              value: isLapPressed,
+              onChanged: (bool value) {
+                setState(() {
+                  isLapPressed = value;
+                });
+              },
+              secondary: const Icon(Icons.lightbulb_outline),
+            ),
+            new CheckboxListTile(
+              title: const Text('Animate Slowly'),
+              value: timeDilation != 1.0,
+              onChanged: (bool value) {
+                setState(() {
+                  timeDilation = value ? 20.0 : 1.0;
+                });
+              },
+              secondary: const Icon(Icons.hourglass_empty),
+            ),
           ],
         ),
       ),
@@ -54,7 +94,7 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
     );
   }
 
-  /*Widget createStopwatchText(bool isLapPressed) {
+  /*Widget createRepListText(bool isLapPressed) {
     if(isLapPressed) {
       isLapPressed = false;
     }
@@ -98,24 +138,24 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
     );
   }
 
-  _StopwatchScreenState();
+/*_RepListScreenState({this.auth});*/
 }
 
-class StopwatchWidgetText extends StatefulWidget {
+class RepListWidgetText extends StatefulWidget {
   final Stopwatch stopwatch;
 
   @override
-  State<StopwatchWidgetText> createState() =>
-      new _StopwatchWidgetTextState(stopwatch);
+  State<RepListWidgetText> createState() =>
+      new _RepListWidgetTextState(stopwatch);
 
-  StopwatchWidgetText({this.stopwatch});
+  RepListWidgetText({this.stopwatch});
 }
 
-class _StopwatchWidgetTextState extends State<StopwatchWidgetText> {
+class _RepListWidgetTextState extends State<RepListWidgetText> {
   final Stopwatch stopwatch;
   Timer timer;
 
-  _StopwatchWidgetTextState(this.stopwatch) {
+  _RepListWidgetTextState(this.stopwatch) {
     timer = new Timer.periodic(new Duration(milliseconds: 30), callback);
   }
 
@@ -130,7 +170,7 @@ class _StopwatchWidgetTextState extends State<StopwatchWidgetText> {
       fontFamily: "Open Sans",
     );
     String formattedTime =
-        StopwatchTextFormatter.format(stopwatch.elapsedMilliseconds);
+        RepListTextFormatter.format(stopwatch.elapsedMilliseconds);
     return new Text(
       formattedTime,
       style: timerTextStyle,
@@ -138,21 +178,21 @@ class _StopwatchWidgetTextState extends State<StopwatchWidgetText> {
   }
 }
 
-class StopwatchWidgetLapText extends StatefulWidget {
+class RepListWidgetLapText extends StatefulWidget {
   final Stopwatch stopwatch;
 
   @override
-  State<StopwatchWidgetLapText> createState() =>
-      new _StopwatchWidgetLapTextState(stopwatch);
+  State<RepListWidgetLapText> createState() =>
+      new _RepListWidgetLapTextState(stopwatch);
 
-  StopwatchWidgetLapText({this.stopwatch});
+  RepListWidgetLapText({this.stopwatch});
 }
 
-class _StopwatchWidgetLapTextState extends State<StopwatchWidgetLapText> {
+class _RepListWidgetLapTextState extends State<RepListWidgetLapText> {
   final Stopwatch stopwatch;
   Timer timer;
 
-  _StopwatchWidgetLapTextState(this.stopwatch) {
+  _RepListWidgetLapTextState(this.stopwatch) {
     timer = new Timer.periodic(new Duration(milliseconds: 30), callback);
   }
 
@@ -167,28 +207,28 @@ class _StopwatchWidgetLapTextState extends State<StopwatchWidgetLapText> {
       fontFamily: "Open Sans",
     );
     String formattedTime =
-        StopwatchTextFormatter.format(stopwatch.elapsedMilliseconds);
+        RepListTextFormatter.format(stopwatch.elapsedMilliseconds);
     return new Text(
       formattedTime,
       style: timerTextStyle,
     );
   }
 }
-/*class StopwatchWidgetSubText extends StatefulWidget {
-  final Stopwatch stopwatch;
+/*class RepListWidgetSubText extends StatefulWidget {
+  final RepList stopwatch;
 
   @override
-  State<StopwatchWidgetSubText> createState() =>
-      new _StopwatchWidgetSubTextState(stopwatch);
+  State<RepListWidgetSubText> createState() =>
+      new _RepListWidgetSubTextState(stopwatch);
 
-  StopwatchWidgetSubText({this.stopwatch});
+  RepListWidgetSubText({this.stopwatch});
 }
 
-class _StopwatchWidgetSubTextState extends State<StopwatchWidgetSubText> {
-  final Stopwatch stopwatch;
+class _RepListWidgetSubTextState extends State<RepListWidgetSubText> {
+  final RepList stopwatch;
   Timer timer;
 
-  _StopwatchWidgetSubTextState(this.stopwatch) {
+  _RepListWidgetSubTextState(this.stopwatch) {
     timer = new Timer.periodic(new Duration(milliseconds: 30), callback);
   }
 
@@ -203,7 +243,7 @@ class _StopwatchWidgetSubTextState extends State<StopwatchWidgetSubText> {
       fontFamily: "Open Sans",
     );
     String formattedTime =
-    StopwatchTextFormatter.format(stopwatch.elapsedMilliseconds);
+    RepListTextFormatter.format(stopwatch.elapsedMilliseconds);
     return new Text(
       formattedTime,
       style: timerTextStyle,
@@ -211,7 +251,7 @@ class _StopwatchWidgetSubTextState extends State<StopwatchWidgetSubText> {
   }
 }*/
 
-class StopwatchTextFormatter {
+class RepListTextFormatter {
   static String format(int milliseconds) {
     int hundreds = (milliseconds / 10).truncate();
     int seconds = (hundreds / 100).truncate();

@@ -1,23 +1,28 @@
-import 'dart:async';
-
 import 'package:crux/screens/welcome_screen.dart';
+import 'package:crux/utils/base_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class SignInScreen extends StatefulWidget {
-  SignInScreen({Key key, this.title}) : super(key: key);
+  SignInScreen({Key key, this.title, this.auth}) : super(key: key);
 
   final String title;
+  final BaseAuth auth;
 
   @override
   _SignInScreenState createState() => new _SignInScreenState();
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  //final BaseAuth auth;
+
+  // _SignInScreenState({this.auth});
+
+  /*final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = new GoogleSignIn();
+
+  //TODO: Prevent navigating back to signin w/o signing out - keep getting exceptions trying to sign in again
   Future<String> _message = new Future<String>.value('');
 
   Future<FirebaseUser> _testSignInWithGoogle() async {
@@ -38,7 +43,8 @@ class _SignInScreenState extends State<SignInScreen> {
     final FirebaseUser currentUser = await _firebaseAuth.currentUser();
     assert(user.uid == currentUser.uid);
     return user;
-  }
+
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +59,9 @@ class _SignInScreenState extends State<SignInScreen> {
             child: new RaisedButton(
                 child: const Text('SIGN IN'),
                 onPressed: () {
-                  _testSignInWithGoogle().then((FirebaseUser user) {
+                  //TODO: Find way to prevent people from clicking more than once
+                  widget.auth.signInWithGoogleEmailAndPassword().then(
+                      (FirebaseUser user) {
                     String username = user.displayName
                         .split(' ')[0]; //todo: unit tests around this?
                     Navigator.push(

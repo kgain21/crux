@@ -7,17 +7,15 @@ class DashboardScreen extends StatefulWidget {
   DashboardScreen({Key key, this.title}) : super(key: key);
 
   @override
-  _DashboardScreenState createState() => new _DashboardScreenState(title);
+  _DashboardScreenState createState() => new _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final String title;
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(title),
+        title: new Text(widget.title),
       ),
       body: new Container(
         child: Row(
@@ -31,11 +29,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   new Text('Made it to dashboard!'),
                   new RaisedButton(
                     onPressed: () =>
-                        Navigator.pushNamed(context, 'stopwatch_screen'),
+                        Navigator.pushNamed(context, '/stopwatch_screen'),
                     child: new Text('Stopwatch'),
                   ),
                   new RaisedButton(
-                    onPressed: null,
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/rep_list_screen'),
+                    child: new Text('Rep List'),
                   ),
                   new RaisedButton(
                     onPressed: null,
@@ -67,5 +67,5 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  _DashboardScreenState(this.title);
+  _DashboardScreenState();
 }
