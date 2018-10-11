@@ -12,5 +12,5 @@ abstract class BaseAuth {
 
   Future<String> currentUser();
 
-  Future<void> signOut(BuildContext context);
+  void signOut(BuildContext context);
 }

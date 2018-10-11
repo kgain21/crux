@@ -6,8 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class Auth implements BaseAuth {
-  Auth();
-
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
@@ -47,7 +45,7 @@ class Auth implements BaseAuth {
   }
 
   @override
-  Future<void> signOut(BuildContext context) async {
+  void signOut(BuildContext context) async {
     await _firebaseAuth.signOut();
     await _googleSignIn.signOut();
   }

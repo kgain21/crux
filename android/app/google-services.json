@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "514273409976-bmq34ablg5fpb1o7n8bokt2g36mnfrl0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kgain.crux",
+            "certificate_hash": "026d2bf27c8500317810f6d32251f635862aab6d"
+          }
+        },
+        {
           "client_id": "514273409976-5ci6uami7nq6viep7oq9g6s8ccs356f0.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "514273409976-5ci6uami7nq6viep7oq9g6s8ccs356f0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

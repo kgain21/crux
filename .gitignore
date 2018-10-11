@@ -1,12 +1,12 @@
 .DS_Store
 .dart_tool/
-
 .packages
 .pub/
-
 build/
-
 .flutter-plugins
-
+pubspec.lock
 .idea/
 *.iml
+build/
+ios/.generated/
+*/google-services.json

@@ -44,7 +44,7 @@ packages:
     source: hosted
     version: "0.7.4"
   collection:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: collection
       url: "https://pub.dartlang.org"
@@ -85,6 +85,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.0.6"
+  firebase_analytics:
+    dependency: "direct main"
+    description:
+      name: firebase_analytics
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.3"
   firebase_auth:
     dependency: "direct main"
     description:
@@ -93,12 +100,12 @@ packages:
     source: hosted
     version: "0.5.20"
   firebase_core:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.5"
+    version: "0.2.5+1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -134,7 +141,7 @@ packages:
       name: google_sign_in
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.5"
+    version: "3.2.1"
   html:
     dependency: transitive
     description:
@@ -213,7 +220,7 @@ packages:
     source: hosted
     version: "0.12.3+1"
   meta:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: meta
       url: "https://pub.dartlang.org"

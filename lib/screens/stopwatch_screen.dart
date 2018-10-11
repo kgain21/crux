@@ -219,7 +219,7 @@ class StopwatchTextFormatter {
 
     String minuteStr = (minutes % 60).toString().padLeft(2, '0');
     String secondsStr = (seconds % 60).toString().padLeft(2, '0');
-    String hundredsStr = (hundreds % 60).toString().padLeft(2, '0');
+    String hundredsStr = (hundreds % 100).toString().padLeft(2, '0');
 
     return "$minuteStr:$secondsStr:$hundredsStr";
   }

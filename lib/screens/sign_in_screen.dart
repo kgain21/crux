@@ -15,74 +15,50 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  //final BaseAuth auth;
-
-  // _SignInScreenState({this.auth});
-
-  /*final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = new GoogleSignIn();
-
-  //TODO: Prevent navigating back to signin w/o signing out - keep getting exceptions trying to sign in again
-  Future<String> _message = new Future<String>.value('');
-
-  Future<FirebaseUser> _testSignInWithGoogle() async {
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-
-    final FirebaseUser user = await _firebaseAuth.signInWithGoogle(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    assert(user.email != null);
-    assert(user.displayName != null);
-    assert(!user.isAnonymous);
-    assert(await user.getIdToken() != null);
-
-    final FirebaseUser currentUser = await _firebaseAuth.currentUser();
-    assert(user.uid == currentUser.uid);
-    return user;
-
-  }*/
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
+        //TODO: different appbar here?
+        //backgroundColor: Color.fromARGB(255, 103, 126, 116),
         title: new Text(widget.title),
       ),
-      body: new Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new Center(
-            child: new RaisedButton(
-                child: const Text('SIGN IN'),
-                onPressed: () {
-                  //TODO: Find way to prevent people from clicking more than once
-                  widget.auth.signInWithGoogleEmailAndPassword().then(
-                      (FirebaseUser user) {
-                    String username = user.displayName
-                        .split(' ')[0]; //todo: unit tests around this?
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WelcomeScreen(username: username),
-                      ),
-                    ); //TODO: pass username to a welcome screen? Smooth fade in with 'Welcome $User'
-                    //todo: SIGN OUT OPTION
-                  }).catchError((e) => print(
-                      'Sign in failed. Please try again.')); //TODO: make this a toast/snackbar message
-                }),
-          ),
-          /*new FutureBuilder<String>(
-              future: _message,
-              builder: (_, AsyncSnapshot<String> snapshot) {
-                return new Text(snapshot.data ?? '',
-                    style:
-                    const TextStyle(color: Color.fromARGB(255, 0, 155, 0)));
-              }),*/
-        ],
+      body: Container(
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new Center(
+              child: new RaisedButton(
+                  //color: Color.fromARGB(255, 146, 164, 172),
+                  //color: Color.fromARGB(255, 221, 219, 219),
+                  child: const Text('SIGN IN'),
+                  onPressed: () {
+                    //TODO: Find way to prevent people from clicking more than once
+                    widget.auth.signInWithGoogleEmailAndPassword().then(
+                        (FirebaseUser user) {
+                      String username = user.displayName
+                          .split(' ')[0]; //todo: unit tests around this?
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WelcomeScreen(
+                              title: widget.title, username: username),
+                        ),
+                      ); //TODO: pass username to a welcome screen? Smooth fade in with 'Welcome $User'
+                      //todo: SIGN OUT OPTION
+                    }).catchError((e) => print(
+                        'Sign in failed. Please try again.')); //TODO: make this a toast/snackbar message
+                  }),
+            ),
+            /*new FutureBuilder<String>(
+                future: _message,
+                builder: (_, AsyncSnapshot<String> snapshot) {
+                  return new Text(snapshot.data ?? '',
+                      style:
+                      const TextStyle(color: Color.fromARGB(255, 0, 155, 0)));
+                }),*/
+          ],
+        ),
       ),
     );
   }

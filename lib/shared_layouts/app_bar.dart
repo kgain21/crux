@@ -1,15 +1,17 @@
+import 'package:crux/utils/base_auth.dart';
 import 'package:flutter/material.dart';
 
 class SharedAppBar {
-  static AppBar sharedAppbar(
-      String title, VoidCallback callback, BuildContext context) {
+  static AppBar sharedAppBar(
+      String title, BaseAuth auth, BuildContext context) {
     return new AppBar(
+      //backgroundColor: Color.fromARGB(255, 103, 126, 116),
       title: new Text(title),
       actions: <Widget>[
         PopupMenuButton<String>(
           onSelected: (value) {
             if (value == 'signOut') {
-              callback();
+              auth.signOut(context);
               Navigator.popUntil(context, ModalRoute.withName('/'));
             } else {
               print('pressed test2 button');

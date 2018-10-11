@@ -1,10 +1,13 @@
+import 'package:crux/shared_layouts/app_bar.dart';
+import 'package:crux/utils/base_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String title;
+  final BaseAuth auth;
 
-  DashboardScreen({Key key, this.title}) : super(key: key);
+  DashboardScreen({Key key, this.title, this.auth}) : super(key: key);
 
   @override
   _DashboardScreenState createState() => new _DashboardScreenState();
@@ -14,9 +17,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
-      ),
+      appBar:
+          SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
       body: new Container(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

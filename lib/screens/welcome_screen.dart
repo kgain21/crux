@@ -10,25 +10,33 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(),
-      body: new Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                new Text('Welcome $username!'),
-                new RaisedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/dashboard_screen');
-                  },
-                  child: new Text('Continue'),
-                )
-              ],
+      appBar: new AppBar(
+        automaticallyImplyLeading: false, //Removes back button
+        title: Text(title),
+      ),
+      body: Stack(
+        children: <Widget>[
+          Center(
+            child: Container(
+              decoration: new BoxDecoration(
+                //color: Color.fromARGB(255, 127, 140, 141),
+                image: new DecorationImage(
+                  image: new AssetImage(
+                      'assets/images/rock-climbing-indoor-2.jpg'),
+                  fit: BoxFit.scaleDown,
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+          Center(
+              child: /*new Text('Welcome $username!'),*/
+                  new RaisedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/dashboard_screen');
+            },
+            child: new Text('Continue'),
+          )),
+        ],
       ),
     );
   }
