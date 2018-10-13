@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/shared_layouts/bottom_nav_bar.dart';
 import 'package:crux/utils/base_auth.dart';
+import 'package:crux/widgets/hangboard_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -26,15 +27,9 @@ class RepListScreen extends StatefulWidget {
 class _RepListScreenState extends State<RepListScreen> {
   Stopwatch stopwatch = new Stopwatch();
   CollectionReference maxHangs;
-  DocumentReference documentReference;
-  String _depth = '';
-  String _grip = '';
+  DocumentSnapshot snapshot;
 
-  @override
-  void initState() {
-    /*maxHangs = widget.firestore.collection('workouts/hangboard/max_hangs');
-    documentReference = widget.firestore.document('workouts/hangboard');*/
-  }
+  //AsyncMemoizer _memoizer = AsyncMemoizer();
 
   @override
   Widget build(BuildContext context) {
@@ -47,16 +42,6 @@ class _RepListScreenState extends State<RepListScreen> {
       body: new Container(
         child: Column(
           children: <Widget>[
-            /*new ListTile(
-              leading: const Icon(Icons.timer),
-              title: const Text('Rep 1'),
-              trailing: const Text('22mm \nHalf-Crimp'),
-              subtitle: RepListWidgetText(
-                stopwatch: stopwatch,
-              ),
-              onTap: rightButtonPressed,
-              onLongPress: leftButtonPressed,
-            ),*/
             //TODO: look at separated listview
             Container(
               child: new StreamBuilder<DocumentSnapshot>(
@@ -64,31 +49,27 @@ class _RepListScreenState extends State<RepListScreen> {
                     .document('workouts/hangboard')
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Text('Loading data... Please wait.');
-                  } else {
-                    return Flexible(
-                      child: ListView.builder(
-                        itemCount: snapshot.data['max_hangs'].length,
-                        itemBuilder: (context, index) {
-                          /*DocumentSnapshot set =
-                              snapshot.data['max_hangs'][index]['set1'];*/
-                          return ListTile(
-                            leading: const Icon(Icons.timer),
-                            title: Text('Rep 1'),
-                            trailing: Text(_depth +
-                                '\n' +
-                                _grip /*'$set["depth"] \n$set["grip"]'*/),
-                            subtitle: RepListWidgetText(
-                              stopwatch: stopwatch,
-                            ),
-                            onTap: rightButtonPressed,
-                            onLongPress: leftButtonPressed,
-                          );
-                        },
-                      ),
-                    );
-                    //return Text(snapshot.data['max_hangs'][0]['set1']['grip']);
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                    case ConnectionState.waiting:
+                      return Row(
+                        children: <Widget>[
+                          Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ],
+                      );
+                    default:
+                      return Flexible(
+                        child: ListView.builder(
+                          itemCount: snapshot.data['max_hangs'].length,
+                          itemBuilder: (context, index) {
+                            return HangboardListTile(
+                              index: index,
+                            );
+                          },
+                        ),
+                      );
                   }
                 },
               ),
@@ -98,24 +79,6 @@ class _RepListScreenState extends State<RepListScreen> {
       ),
       bottomNavigationBar: SharedBottomNavBar.bottomNavBar(),
     );
-  }
-
-  void leftButtonPressed() {
-    setState(() {
-      if (stopwatch.isRunning) {
-        print('${stopwatch.elapsedMilliseconds}');
-      } else
-        stopwatch.reset();
-    });
-  }
-
-  void rightButtonPressed() {
-    setState(() {
-      if (stopwatch.isRunning)
-        stopwatch.stop();
-      else
-        stopwatch.start();
-    });
   }
 
   Widget buildFloatingButton(
@@ -132,23 +95,6 @@ class _RepListScreenState extends State<RepListScreen> {
       ),
       heroTag: heroTag,
     );
-  }
-
-  Future<void> getParams() async {
-    DocumentSnapshot snapshot = await Firestore.instance
-        .collection('workouts')
-        .document('hangboard')
-        .get();
-    var depth = snapshot['max_hangs'][0]['set1']['depth'];
-    var grip = snapshot['max_hangs'][0]['set1']['grip'];
-    if (depth is int && grip is String) {
-      setState(() {
-        _depth = depth.toString();
-        _grip = grip;
-      });
-    } else {
-      throw new Exception('Unable to find depth');
-    }
   }
 }
 
