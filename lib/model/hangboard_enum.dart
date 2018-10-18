@@ -1,0 +1,1 @@
+enum Hangboard { GRIP, DEPTH, REPTIME, RESTTIME, SETS, WEIGHT, REPS }

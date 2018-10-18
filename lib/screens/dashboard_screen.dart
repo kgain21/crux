@@ -37,10 +37,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   new RaisedButton(
                     onPressed: () =>
                         Navigator.pushNamed(context, '/rep_list_screen'),
-                    child: new Text('Rep List'),
+                    child: new Text('Workouts'),
                   ),
                   new RaisedButton(
-                    onPressed: null,
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/countdown_timer_screen'),
+                    child: new Text('Countdown Timer'),
                   ),
                 ],
               ),

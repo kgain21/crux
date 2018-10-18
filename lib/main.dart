@@ -7,6 +7,7 @@ import 'package:crux/screens/sign_in_screen.dart';
 import 'package:crux/screens/stopwatch_screen.dart';
 import 'package:crux/utils/auth.dart';
 import 'package:crux/utils/base_auth.dart';
+import 'package:crux/widgets/timer_text.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
         '/rep_list_screen': (context) =>
             RepListScreen(title: title, auth: auth, firestore: firestore),
+        '/countdown_timer_screen': (context) => TimerTextAnimator(),
       },
     );
   }
