@@ -24,6 +24,8 @@ class _HangboardListTileState extends State<HangboardListTile> {
   @override
   Widget build(BuildContext context) {
     return Card(
+      //color: Colors.amber,
+      elevation: 3.0,
       margin: EdgeInsets.all(3.0),
       //todo:is this necessary? look into  clipbehavior
       clipBehavior: Clip.antiAlias,
@@ -52,7 +54,7 @@ class _HangboardListTileState extends State<HangboardListTile> {
           )*/
           trailing: ConstrainedBox(
             constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width / 5.0),
+                maxWidth: MediaQuery.of(context).size.width / 4.0),
             child: TimerTextAnimator(
               repTime: _repTime,
               restTime: _restTime,

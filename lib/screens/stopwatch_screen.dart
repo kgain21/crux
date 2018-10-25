@@ -50,7 +50,7 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: SharedBottomNavBar.bottomNavBar(),
+      bottomNavigationBar: SharedBottomNavBar(),
     );
   }
 

@@ -24,7 +24,7 @@ class SharedAppBar {
                 value: 'signOut',
               ),
               new PopupMenuItem(
-                child: new Text('test 2'),
+                child: new Text('Settings'),
                 value: 'test2',
               ),
             ];

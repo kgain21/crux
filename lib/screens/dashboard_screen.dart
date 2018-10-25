@@ -14,12 +14,48 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final Map<String, String> screenMap = {
+    'Profile': null,
+    'Hangboard': '/hangboard_workout_screen',
+    'Campus Board': null,
+    /*'/campus_workout_screen',*/
+    'ARC Training': null /*'/arc_training_workout_screen'*/,
+    '4 x 4s': null,
+    'Stopwatch': '/stopwatch_screen',
+  };
+
+  List<String> screenMapKeys;
+
+  @override
+  void initState() {
+    super.initState();
+    screenMapKeys = screenMap.keys.toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       appBar:
           SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
-      body: new Container(
+      body: GridView.builder(
+          itemCount: screenMapKeys.length,
+          gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              child: Card(
+                elevation: 5.0,
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Text('${screenMapKeys[index]}'),
+                ),
+              ),
+              onTap: () {
+                Navigator.pushNamed(context, screenMap[screenMapKeys[index]]);
+              },
+            );
+          }),
+      /*new Container(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -67,7 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-      ),
+      ),*/
     );
   }
 

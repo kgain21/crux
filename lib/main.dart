@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/dashboard_screen.dart';
-import 'package:crux/screens/rep_list_screen.dart';
+import 'package:crux/screens/hangboard_workout_screen.dart';
 import 'package:crux/screens/sign_in_screen.dart';
 import 'package:crux/screens/stopwatch_screen.dart';
 import 'package:crux/utils/auth.dart';
@@ -38,7 +38,10 @@ class MyApp extends StatelessWidget {
       title: title,
       theme: ThemeData(
         //primaryColor: Color.fromARGB(255, 103, 126, 116),
-        primaryColor: Color.fromARGB(255, 44, 62, 80),
+        primaryColor: Color.fromARGB(255, 44, 62, 80), //midnight blue
+        backgroundColor: Colors.grey,
+        scaffoldBackgroundColor: Colors.blueGrey,
+        //bottomAppBarColor: Colors.grey,
         //olor.fromARGB(255, 68, 77, 71),
         //secondaryHeaderColor: Color.fromARGB(255, 103, 126, 116),
         //buttonColor: Color.fromARGB(255, 146, 164, 172),
@@ -48,8 +51,8 @@ class MyApp extends StatelessWidget {
         '/dashboard_screen': (context) =>
             DashboardScreen(title: title, auth: auth),
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
-        '/rep_list_screen': (context) =>
-            RepListScreen(title: title, auth: auth, firestore: firestore),
+        '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
+            title: title, auth: auth, firestore: firestore),
         '/countdown_timer_screen': (context) => TimerTextAnimator(),
       },
     );

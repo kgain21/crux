@@ -90,7 +90,7 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
     return GestureDetector(
       onTap: () {
         if (controller.isAnimating)
-          controller.stop();
+          controller.stop(canceled: false);
         else {
           controller.reverse(
               from: controller.value == 0.0 ? 1.0 : controller.value);
@@ -113,16 +113,17 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
                 children: <Widget>[
                   Positioned.fill(
                     child: AnimatedBuilder(
-                        animation: controller,
-                        builder: (context, child) {
-                          return new CustomPaint(
-                            painter: TimerPainter(
-                              animation: controller,
-                              backgroundColor: Colors.white,
-                              color: Colors.green,
-                            ),
-                          );
-                        }),
+                      animation: controller,
+                      builder: (context, child) {
+                        return new CustomPaint(
+                          painter: TimerPainter(
+                            animation: controller,
+                            backgroundColor: Colors.black,
+                            color: Colors.green,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   Align(
                     alignment: FractionalOffset.center,
@@ -168,7 +169,7 @@ class TimerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
       ..color = backgroundColor
-      ..strokeWidth = 5.0
+      ..strokeWidth = 6.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
