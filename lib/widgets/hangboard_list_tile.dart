@@ -30,7 +30,7 @@ class _HangboardListTileState extends State<HangboardListTile> {
       //todo:is this necessary? look into  clipbehavior
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(10.0),
         child: ListTile(
           //leading: const Icon(Icons.timer),
           leading: Text(
@@ -54,7 +54,7 @@ class _HangboardListTileState extends State<HangboardListTile> {
           )*/
           trailing: ConstrainedBox(
             constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width / 4.0),
+                maxWidth: MediaQuery.of(context).size.width / 6.0),
             child: TimerTextAnimator(
               repTime: _repTime,
               restTime: _restTime,

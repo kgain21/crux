@@ -135,7 +135,7 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
                           animation: controller,
                           builder: (context, child) {
                             return new Text(
-                              timerString,
+                              timerString, //TODO: make repTime show right away - displays 0 initially
                             );
                           },
                         )

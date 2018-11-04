@@ -17,51 +17,57 @@ class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
       onWillPop: () async {
         return true; //todo: do i need this? might need for somehtign in the future
       },
-      child: new Column(
-        children: <Widget>[
-          //TODO: look at separated listview
-          new StreamBuilder<DocumentSnapshot>(
-            stream:
-                Firestore.instance.document('workouts/hangboard').snapshots(),
-            builder: (context, snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.none:
-                case ConnectionState.waiting:
-                  return Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('Retrieving workout...'),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          child: new Column(
+            children: <Widget>[
+              //TODO: look at separated listview
+              new StreamBuilder<DocumentSnapshot>(
+                stream: Firestore.instance
+                    .document('workouts/hangboard')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                    case ConnectionState.waiting:
+                      return Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('Retrieving workout...'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                      );
+                    default:
+                      return Flexible(
+                        fit: FlexFit.tight,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data['max_hangs'].length,
+                          itemBuilder: (context, index) {
+                            return HangboardListTile(
+                              index: index,
+                              snapshot: snapshot.data,
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  );
-                default:
-                  return Flexible(
-                    fit: FlexFit.tight,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data['max_hangs'].length,
-                      itemBuilder: (context, index) {
-                        return HangboardListTile(
-                          index: index,
-                          snapshot: snapshot.data,
-                        );
-                      },
-                    ),
-                  );
-              }
-            },
+                      );
+                  }
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

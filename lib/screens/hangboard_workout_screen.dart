@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/create_hangboard_workout_tab.dart';
+import 'package:crux/screens/edit_hangboard_workout_tab.dart';
 import 'package:crux/screens/hangboard_workout_list_tab.dart';
 import 'package:crux/shared_layouts/bottom_nav_bar.dart';
 import 'package:crux/utils/base_auth.dart';
@@ -32,16 +33,20 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
 
   TabController tabController;
 
-  void _handleTabSelection() {
-    setState(() {});
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(length: 3, vsync: this, initialIndex: 1);
   }
 
   @override
   Widget build(BuildContext context) {
-    tabController = TabController(length: 2, vsync: this);
-    //tabController.addListener(_handleTabSelection);
     var appBarTabs = TabBar(
       tabs: <Tab>[
+        Tab(
+          icon: Icon(Icons.edit),
+          text: 'Edit',
+        ),
         Tab(
           icon: Icon(Icons.list),
           text: 'Workout',
@@ -66,6 +71,7 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
       body: TabBarView(
         controller: tabController,
         children: <Widget>[
+          EditHangboardWorkoutTab(),
           HangboardWorkoutListTab(),
           CreateHangboardWorkoutTab(),
         ],

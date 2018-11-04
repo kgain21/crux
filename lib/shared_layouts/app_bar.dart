@@ -10,6 +10,7 @@ class SharedAppBar {
       actions: <Widget>[
         PopupMenuButton<String>(
           onSelected: (value) {
+            //TODO: switch statement for more menuButtons
             if (value == 'signOut') {
               auth.signOut(context);
               Navigator.popUntil(context, ModalRoute.withName('/'));

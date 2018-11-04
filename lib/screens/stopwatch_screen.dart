@@ -16,8 +16,6 @@ class StopwatchScreen extends StatefulWidget {
 class _StopwatchScreenState extends State<StopwatchScreen> {
   Stopwatch stopwatch = new Stopwatch();
 
-  /*bool isLapPressed = false;*/
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -54,20 +52,10 @@ class _StopwatchScreenState extends State<StopwatchScreen> {
     );
   }
 
-  /*Widget createStopwatchText(bool isLapPressed) {
-    if(isLapPressed) {
-      isLapPressed = false;
-    }
-    return stopwatchText;
-  }*/
-
   void leftButtonPressed() {
     setState(() {
       if (stopwatch.isRunning) {
         print('${stopwatch.elapsedMilliseconds}');
-/*
-        isLapPressed = true;
-*/
       } else
         stopwatch.reset();
     });
@@ -126,7 +114,7 @@ class _StopwatchWidgetTextState extends State<StopwatchWidgetText> {
   @override
   Widget build(BuildContext context) {
     final TextStyle timerTextStyle = const TextStyle(
-      fontSize: 72.0, //todo: just build another timerText -_-
+      fontSize: 72.0,
       fontFamily: "Open Sans",
     );
     String formattedTime =

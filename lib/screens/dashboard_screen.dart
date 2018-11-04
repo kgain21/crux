@@ -22,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     'ARC Training': null /*'/arc_training_workout_screen'*/,
     '4 x 4s': null,
     'Stopwatch': '/stopwatch_screen',
+    //todo: add calendar view
   };
 
   List<String> screenMapKeys;
@@ -38,72 +39,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar:
           SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
       body: GridView.builder(
-          itemCount: screenMapKeys.length,
-          gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              child: Card(
-                elevation: 5.0,
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Text('${screenMapKeys[index]}'),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushNamed(context, screenMap[screenMapKeys[index]]);
-              },
-            );
-          }),
-      /*new Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  new Text('Made it to dashboard!'),
-                  new RaisedButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/stopwatch_screen'),
-                    child: new Text('Stopwatch'),
-                  ),
-                  new RaisedButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/rep_list_screen'),
-                    child: new Text('Workouts'),
-                  ),
-                  new RaisedButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/countdown_timer_screen'),
-                    child: new Text('Countdown Timer'),
-                  ),
-                ],
+        itemCount: screenMapKeys.length,
+        gridDelegate:
+            SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            child: Card(
+              elevation: 5.0,
+              child: Container(
+                alignment: Alignment.center,
+                child: Text('${screenMapKeys[index]}'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  new Text('Column 2'),
-                  new RaisedButton(
-                    onPressed: null,
-                  ),
-                  new RaisedButton(
-                    onPressed: null,
-                  ),
-                  new RaisedButton(
-                    onPressed: null,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),*/
+            onTap: () {
+              Navigator.pushNamed(context, screenMap[screenMapKeys[index]]);
+            },
+          );
+        },
+      ),
     );
   }
 
