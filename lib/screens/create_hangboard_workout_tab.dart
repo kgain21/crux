@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/model/grip_enum.dart';
 import 'package:crux/widgets/exercise_form_tile.dart';
+import 'package:crux/widgets/unit_picker_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateHangboardWorkoutTab extends StatefulWidget {
   @override
@@ -12,6 +13,20 @@ class CreateHangboardWorkoutTab extends StatefulWidget {
 
 class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     with AutomaticKeepAliveClientMixin {
+
+
+ /* @override
+  void initState() {
+    super.initState();
+    _depthMeasurementSystem =
+        _sharedPreferences.then((SharedPreferences prefs) {
+          return (prefs.getString('depthMeasurementSystem') ?? 'millimeters');
+        });
+    _resistanceMeasurementSystem =
+        _sharedPreferences.then((SharedPreferences prefs) {
+          return (prefs.getString('resistanceMeasurementSystem') ?? 'kilograms');
+        });
+  }*/
   String _workoutTitle;
   Grip _grip;
   int _repTime;
@@ -34,7 +49,7 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
   bool _restTimeSelected;
   bool _autoValidate;
 
-  List<Widget> formTiles = [];
+  List<Widget> formTiles;
 
   final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
 
@@ -42,7 +57,6 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
   void initState() {
     super.initState();
     setState(() {
-      _depthMeasurementSystem = 'millimeters';
       _resistanceMeasurementSystem = 'kilograms';
       _autoValidate = false;
       _depthSelected = true;
@@ -52,9 +66,9 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
       _restTimeSelected = true;
       _exerciseIndex = 1;
       _exerciseTitle = 'Exercise $_exerciseIndex';
+      //formTiles = initializeFormTiles();
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -77,29 +91,45 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     );
   }
 
+  /// Builds the [Form] for adding a new workout. Right now I have a title,
+  /// the unit picker, and n number of [exercises].
   Widget buildExerciseForm() {
     return new Expanded(
       child: new Form(
         key: formKey,
         child: ListView(
           controller: new ScrollController(),
-          children: formTiles,
+          //TODO: make sure these are disposed of properly
+          children: <Widget>[
+            workoutTitleTile(),
+            UnitPickerTile(title: 'Choose your units'),
+            ExerciseFormTile(
+              formKey: formKey,
+              exerciseTitle: 'Exercise 1',
+            ),
+            ExerciseFormTile(
+              formKey: formKey,
+              exerciseTitle: 'Exercise 2',
+            ),
+            ExerciseFormTile(
+              formKey: formKey,
+              exerciseTitle: 'Exercise 3',
+            ),
+          ],
         ),
       ),
     );
   }
 
-  List<Widget> populateFormTiles() {
+  /*List<Widget> initializeFormTiles() {
+    List<Widget> list = [];
+    list.add(workoutTitleTile());
+    list.add(expandingUnitsTile());
+    return list;
+  }*/
 
-    formTiles.add(workoutTitleTile());
-    formTiles.add(expandingUnitsTile());
-    if(_workoutTitle != null)
-
-      //TODO: left off here*** trying to only add this if title is populated so that i can pass title into formTile widget
-      //TODO: need title to give tile path to save to - maybe pass db connection? not sure just a thought
-      formTiles.add(ExerciseFormTile(formKey: formKey,));
-    formTiles.add(addExerciseTileButton());
-  }
+  /// Placeholder for button that will eventually be pressed to add another
+  /// [exercise].
   Widget addExerciseTileButton() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -110,6 +140,11 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     );
   }
 
+  /// Method called when save button is clicked on an [exercise] ExpansionTile.
+  /// This has been moved to [exercise_form_tile] so I should also move
+  /// Firebase interaction there as well. Do I want to make saving incremental?
+  /// I could keep updating the [workout] as each [exercise] is added rather
+  /// than one big bang write to the db.
   //TODO: put general message about form errors below save button
   void saveHangboardForm() {
     if (this.formKey.currentState.validate()) {
@@ -121,6 +156,10 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     }
   }
 
+  /// Basically gets the connection to the Firestore and writes data to it.
+  /// This and some of the other methods should probably be refactored/combined
+  /// in some way. Not sure if I'll need this if saving is moved to the individual
+  /// tiles but I may need it for something else.
   void saveHangboardWorkoutToFirebase() {
     DocumentReference reference =
         Firestore.instance.document('hangboard/$_workoutTitle');
@@ -134,6 +173,11 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     //onTap: () => record.reference.updateData({'votes': record.votes + 1})
   }
 
+  /// This method currently packages the data to be sent to the Firestore.
+  /// Not sure if I need this or want to make a separate object (probably should
+  /// do that anyway) to send the data instead. I could also make the [exercises]
+  /// field a member var of this tab, and then each [exercise] could add it's own
+  /// state info like [_depth] and [_grip] to the global [exercises].
   Map createHangboardData() {
     Map<String, dynamic> data = {};
 
@@ -162,6 +206,8 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     return data;
   }
 
+  /// Tile that holds the title of your workout. This title is used as a reference
+  /// in the Firestore to pull out the workout information so it cannot be empty.
   Widget workoutTitleTile() {
     return new Card(
       //elevation: 4.0,
@@ -185,6 +231,14 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
             onFieldSubmitted: (value) {
               setState(() {
                 _workoutTitle = value;
+                if (value.isNotEmpty)
+                  //TODO: trying to only add this if title is populated so that i can pass title into formTile widget
+                  //TODO: need title to give tile path to save to - maybe pass db connection? not sure just a thought
+                  formTiles.add(ExerciseFormTile(
+                    formKey: formKey,
+                    workoutTitle: value,
+                  ));
+                formTiles.add(addExerciseTileButton());
               });
             },
           ),
@@ -192,113 +246,6 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
       ),
     );
   }
-
-  Widget expandingUnitsTile() {
-    return Card(
-      child: Column(
-        children: <Widget>[
-          new ExpansionTile(
-            initiallyExpanded: true,
-            title: new Text('Select your units'),
-            children: <Widget>[
-              new Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child: Column(
-                      children: <Widget>[
-                        new Text(
-                          'Depth',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        new RadioListTile(
-                          title: Text(
-                            'Metric (mm)',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          groupValue: _depthMeasurementSystem,
-                          value: 'millimeters',
-                          onChanged: (value) {
-                            setState(() {
-                              _depthMeasurementSystem = value;
-                            });
-                          },
-                        ),
-                        new RadioListTile(
-                          title: Text(
-                            'English (in)',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          groupValue: _depthMeasurementSystem,
-                          value: 'inches',
-                          onChanged: (value) {
-                            setState(() {
-                              _depthMeasurementSystem = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child: Column(
-                      children: <Widget>[
-                        new Text(
-                          'Resistance',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        new RadioListTile(
-                          title: Text(
-                            'Metric (kg)',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          groupValue: _resistanceMeasurementSystem,
-                          value: 'kilograms',
-                          onChanged: (value) {
-                            setState(() {
-                              _resistanceMeasurementSystem = value;
-                            });
-                          },
-                        ),
-                        new RadioListTile(
-                          title: Text(
-                            'English (lb)',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                            ),
-                          ),
-                          groupValue: _resistanceMeasurementSystem,
-                          value: 'pounds',
-                          onChanged: (value) {
-                            setState(() {
-                              _resistanceMeasurementSystem = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
 
 
   // TODO: implement wantKeepAlive

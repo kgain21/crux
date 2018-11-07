@@ -38,25 +38,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar:
           SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
-      body: GridView.builder(
-        itemCount: screenMapKeys.length,
-        gridDelegate:
+      body:/* Column(
+        children: <Widget>[*/
+          GridView.builder(
+            itemCount: screenMapKeys.length,
+            gridDelegate:
             SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            child: Card(
-              elevation: 5.0,
-              child: Container(
-                alignment: Alignment.center,
-                child: Text('${screenMapKeys[index]}'),
-              ),
-            ),
-            onTap: () {
-              Navigator.pushNamed(context, screenMap[screenMapKeys[index]]);
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                child: Card(
+                  elevation: 5.0,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Text('${screenMapKeys[index]}'),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pushNamed(context, screenMap[screenMapKeys[index]]);
+                },
+              );
             },
-          );
-        },
-      ),
+          ),
+          //TODO: play with this at some point
+          // https://www.youtube.com/watch?v=ORiTTaVY6mM&index=12&list=PLOU2XLYxmsIL0pH0zWe_ZOHgGhZ7UasUE
+          /*SliverList(
+            delegate: SliverChildListDelegate(
+                [
+                  new ListTile(),
+                  new ListTile(),
+                  new ListTile(),
+                ],
+            ),
+          ),*/
+        /*],
+      ),*/
+
+
     );
   }
 
