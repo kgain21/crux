@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/create_hangboard_workout_tab.dart';
 import 'package:crux/screens/edit_hangboard_workout_tab.dart';
 import 'package:crux/screens/hangboard_workout_list_tab.dart';
-import 'package:crux/shared_layouts/bottom_nav_bar.dart';
+import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -25,10 +25,6 @@ class HangboardWorkoutScreen extends StatefulWidget {
 
 class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
     with TickerProviderStateMixin {
-  Stopwatch stopwatch = new Stopwatch();
-  CollectionReference maxHangs;
-  DocumentSnapshot snapshot;
-
   //AsyncMemoizer _memoizer = AsyncMemoizer();
 
   TabController tabController;
@@ -41,7 +37,61 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
 
   @override
   Widget build(BuildContext context) {
-    var appBarTabs = TabBar(
+    return new Scaffold(
+      appBar: AppBar(
+        title: Text('Hangboard'),
+        bottom: appBarTabs(),
+      ),
+      /*SharedAppBar.sharedAppBar(
+            widget.title,
+            widget.auth,
+            this.context,
+          ),*/
+      body: TabBarView(
+        key: new PageStorageKey<String>('Hangboard'),
+        controller: tabController,
+        children: <Widget>[
+          EditHangboardWorkoutTab(),
+          HangboardWorkoutListTab(),
+          CreateHangboardWorkoutTab(),
+        ],
+      ),
+      bottomNavigationBar: FABBottomAppBar(
+        backgroundColor: Color.fromARGB(255, 217, 236, 255),
+        color: Colors.black54,
+        selectedColor: Colors.black,
+        items: <FABBottomAppBarItem>[
+          FABBottomAppBarItem(
+            iconData: Icons.home,
+            text: 'Home',
+          ),
+          FABBottomAppBarItem(
+            iconData: Icons.menu,
+            text: 'Menu',
+          ),
+        ],
+        onTabSelected: (index) {
+          if (index == 0) {
+            Navigator.popUntil(
+                context, ModalRoute.withName('/dashboard_screen'));
+          } else {
+            return null;
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          null;
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Color.fromARGB(255, 44, 62, 80),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget appBarTabs() {
+    return TabBar(
       tabs: <Tab>[
         Tab(
           icon: Icon(Icons.edit),
@@ -57,26 +107,6 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
         ),
       ],
       controller: tabController,
-    );
-
-    return new Scaffold(
-      appBar: AppBar(
-        bottom: appBarTabs,
-      ),
-      /*SharedAppBar.sharedAppBar(
-            widget.title,
-            widget.auth,
-            this.context,
-          ),*/
-      body: TabBarView(
-        controller: tabController,
-        children: <Widget>[
-          EditHangboardWorkoutTab(),
-          HangboardWorkoutListTab(),
-          CreateHangboardWorkoutTab(),
-        ],
-      ),
-      bottomNavigationBar: SharedBottomNavBar(),
     );
   }
 

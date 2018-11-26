@@ -49,6 +49,8 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
   bool _restTimeSelected;
   bool _autoValidate;
 
+  ScrollController _exerciseFormScrollController;
+
   List<Widget> formTiles;
 
   final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
@@ -67,6 +69,7 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
       _exerciseIndex = 1;
       _exerciseTitle = 'Exercise $_exerciseIndex';
       //formTiles = initializeFormTiles();
+      _exerciseFormScrollController = new ScrollController();
     });
   }
 
@@ -98,23 +101,23 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
       child: new Form(
         key: formKey,
         child: ListView(
-          controller: new ScrollController(),
+          controller: _exerciseFormScrollController,
           //TODO: make sure these are disposed of properly
           children: <Widget>[
             workoutTitleTile(),
             UnitPickerTile(title: 'Choose your units'),
             ExerciseFormTile(
               formKey: formKey,
-              exerciseTitle: 'Exercise 1',
+              exerciseTitle: 'Exercise Details',
             ),
-            ExerciseFormTile(
+            /*ExerciseFormTile(
               formKey: formKey,
               exerciseTitle: 'Exercise 2',
             ),
             ExerciseFormTile(
               formKey: formKey,
               exerciseTitle: 'Exercise 3',
-            ),
+            ),*/
           ],
         ),
       ),
@@ -146,7 +149,7 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
   /// I could keep updating the [workout] as each [exercise] is added rather
   /// than one big bang write to the db.
   //TODO: put general message about form errors below save button
-  void saveHangboardForm() {
+  /*void saveHangboardForm() {
     if (this.formKey.currentState.validate()) {
       this.formKey.currentState.save();
       saveHangboardWorkoutToFirebase(); //TODO: make dao here?
@@ -154,13 +157,13 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     } else {
       setState(() => _autoValidate = true);
     }
-  }
+  }*/
 
   /// Basically gets the connection to the Firestore and writes data to it.
   /// This and some of the other methods should probably be refactored/combined
   /// in some way. Not sure if I'll need this if saving is moved to the individual
   /// tiles but I may need it for something else.
-  void saveHangboardWorkoutToFirebase() {
+  /*void saveHangboardWorkoutToFirebase() {
     DocumentReference reference =
         Firestore.instance.document('hangboard/$_workoutTitle');
     CollectionReference collectionReference =
@@ -171,40 +174,8 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     reference.setData(data);
 
     //onTap: () => record.reference.updateData({'votes': record.votes + 1})
-  }
+  }*/
 
-  /// This method currently packages the data to be sent to the Firestore.
-  /// Not sure if I need this or want to make a separate object (probably should
-  /// do that anyway) to send the data instead. I could also make the [exercises]
-  /// field a member var of this tab, and then each [exercise] could add it's own
-  /// state info like [_depth] and [_grip] to the global [exercises].
-  Map createHangboardData() {
-    Map<String, dynamic> data = {};
-
-    data.putIfAbsent("exercises", () {
-      var exercises = [];
-
-      var exercise = {
-        "depth": _depth,
-        "grip": _grip.toString(),
-        "resistance": _resistance,
-      };
-
-      exercises.add(exercise);
-      return exercises;
-    });
-
-    data.putIfAbsent("created_date", () {
-      return DateTime.now();
-    });
-
-    /* Map<String, Object> data = new LinkedHashMap();
-    DateTime createdTimestamp = DateTime.now();
-
-    Map<String, Object> exercise = new LinkedHashMap();
-    exercise.putIfAbsent('depth', _depth);*/
-    return data;
-  }
 
   /// Tile that holds the title of your workout. This title is used as a reference
   /// in the Firestore to pull out the workout information so it cannot be empty.
@@ -247,6 +218,11 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     );
   }
 
+  @override
+  void dispose() {
+    _exerciseFormScrollController.dispose();
+    super.dispose();
+  }
 
   // TODO: implement wantKeepAlive
   // TODO:-- update: not sure if i need to or if this is an old message, look into this for keeping timer alive outside of this screen

@@ -1,13 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/widgets/timer_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class HangboardListTile extends StatefulWidget {
   final int index;
-  final DocumentSnapshot snapshot;
+  final Map<String, dynamic> exerciseParameters;
 
-  HangboardListTile({this.index, this.snapshot});
+  HangboardListTile({this.index, this.exerciseParameters});
 
   @override
   State<HangboardListTile> createState() => _HangboardListTileState();
@@ -18,7 +17,7 @@ class _HangboardListTileState extends State<HangboardListTile> {
   String _depth = '';
   String _grip = '';
   int _repTime = 0;
-  String _weight = '';
+  String _resistance = '';
   int _restTime = 0;
 
   @override
@@ -32,11 +31,12 @@ class _HangboardListTileState extends State<HangboardListTile> {
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: ListTile(
+          key: PageStorageKey('${widget.index}'),
           //leading: const Icon(Icons.timer),
-          leading: Text(
+          /*leading: Text(
             'Rep ${widget.index + 1}',
             style: TextStyle(fontSize: 15.0),
-          ),
+          ),*/
           title: Text(
             '${_depth}mm $_grip',
             style: TextStyle(fontSize: 15.0),
@@ -44,7 +44,7 @@ class _HangboardListTileState extends State<HangboardListTile> {
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            '$_weight pounds',
+            '$_resistance pounds',
             style: TextStyle(fontSize: 15.0),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -53,6 +53,7 @@ class _HangboardListTileState extends State<HangboardListTile> {
             timer: timer,
           )*/
           trailing: ConstrainedBox(
+            key: PageStorageKey('Timer${widget.index}'),
             constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width / 6.0),
             child: TimerTextAnimator(
@@ -70,69 +71,83 @@ class _HangboardListTileState extends State<HangboardListTile> {
   @override
   void initState() {
     super.initState();
-    getParams(widget.snapshot);
+    getParams(widget.exerciseParameters);
   }
 
-  void getParams(DocumentSnapshot snapshot) {
-    getDepth(snapshot);
-    getGrip(snapshot);
-    getRepTime(snapshot);
-    getRestTime(snapshot);
-    getWeight(snapshot);
+  void getParams(Map<String, dynamic> exerciseParameters) {
+    getDepth(exerciseParameters);
+    getGrip(exerciseParameters);
+    getRepTime(exerciseParameters);
+    getRestTime(exerciseParameters);
+    getResistance(exerciseParameters);
   }
 
-  void getDepth(DocumentSnapshot snapshot) {
-    var depth = snapshot['max_hangs'][widget.index]['set1']['depth'];
-    if (depth is int) {
-      setState(() {
-        _depth = depth.toString();
-      });
-    } else {
-      throw new Exception('Unable to find depth');
+  void getDepth(Map<String, dynamic> exerciseParameters) {
+    try {
+      var depth = exerciseParameters['depth'];
+      if(depth is int) {
+        setState(() {
+          _depth = depth.toString();
+        });
+      }
+    } on Exception catch(e) {
+      print('Unable to find depth: $e');
     }
   }
 
-  void getGrip(DocumentSnapshot snapshot) {
-    var grip = snapshot['max_hangs'][widget.index]['set1']['grip'];
+  //TODO: required
+  void getGrip(Map<String, dynamic> exerciseParameters) {
+    try {var grip = exerciseParameters['grip'];
     if (grip is String) {
       setState(() {
         _grip = grip;
       });
-    } else {
-      throw new Exception('Unable to find grip');
+    }
+    } on Exception catch(e) {
+      print('Unable to find grip: $e');
     }
   }
 
-  void getRepTime(DocumentSnapshot snapshot) {
-    var repTime = snapshot['max_hangs'][widget.index]['set1']['repTime'];
-    if (repTime is int) {
-      setState(() {
-        _repTime = repTime;
-      });
-    } else {
-      throw new Exception('Unable to find repTime');
+  //TODO: required
+  void getRepTime(Map<String, dynamic> exerciseParameters) {
+    try {
+      var repTime =
+      exerciseParameters['repTime'];
+      if (repTime is int) {
+        setState(() {
+          _repTime = repTime;
+        });
+      }
+    } on Exception catch(e) {
+      print('Unable to find repTime: $e');
     }
   }
 
-  void getRestTime(DocumentSnapshot snapshot) {
-    var restTime = snapshot['max_hangs'][widget.index]['set1']['restTime'];
-    if (restTime is int) {
-      setState(() {
-        _restTime = restTime;
-      });
-    } else {
-      throw new Exception('Unable to find restTime');
+  void getRestTime(Map<String, dynamic> exerciseParameters) {
+    try {
+      var restTime =
+      exerciseParameters['restTime'];
+      if (restTime is int) {
+        setState(() {
+          _restTime = restTime;
+        });
+      }
+    } on Exception catch(e) {
+      print('Unable to find restTime: $e');
     }
   }
 
-  void getWeight(DocumentSnapshot snapshot) {
-    var weight = snapshot['max_hangs'][widget.index]['set1']['weight'];
-    if (weight is int) {
-      setState(() {
-        _weight = weight.toString();
-      });
-    } else {
-      throw new Exception('Unable to find weight');
+  void getResistance(Map<String, dynamic> exerciseParameters) {
+    try {
+      var resistance =
+      exerciseParameters['resistance'];
+      if(resistance is int) {
+        setState(() {
+          _resistance = resistance.toString();
+        });
+      }
+    } on Exception catch(e) {
+      print('Unable to find resistance: $e');
     }
   }
 

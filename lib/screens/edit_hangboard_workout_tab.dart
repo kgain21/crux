@@ -53,7 +53,7 @@ class _EditHangboardWorkoutTabState extends State<EditHangboardWorkoutTab>
                       itemBuilder: (context, index) {
                         return HangboardListTile(
                           index: index,
-                          snapshot: snapshot.data,
+                          //exerciseParameters: snapshot.data,
                         );
                       },
                     ),

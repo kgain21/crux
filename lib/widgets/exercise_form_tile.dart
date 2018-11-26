@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/model/grip_enum.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,46 +11,47 @@ class ExerciseFormTile extends StatefulWidget {
   final String workoutTitle;
 
   //TODO: how do I want to handle units here????
-  ExerciseFormTile(
-      {@required this.formKey,
-      this.exerciseTitle,
-      this.workoutTitle,})
-      : assert(formKey != null);
+  ExerciseFormTile({
+    @required this.formKey,
+    this.exerciseTitle,
+    this.workoutTitle,
+  }) : assert(formKey != null);
 
   @override
   State createState() => new _ExerciseFormTileState();
 }
 
 class _ExerciseFormTileState extends State<ExerciseFormTile> {
+  Future<SharedPreferences> _sharedPreferences =
+      SharedPreferences.getInstance();
 
-  Future<SharedPreferences> _sharedPreferences = SharedPreferences.getInstance();
-
-  Future<Null> getDepthMeasurementSystem() async {
-    final SharedPreferences preferences = await _sharedPreferences;
-    setState(() {
-      _depthMeasurementSystem = preferences
-          .getString("depthMeasurementSystem");
+  Future<String> getDepthMeasurementSystem() async {
+    final String depthMeasurementSystem = await _sharedPreferences.then((value) {
+      return value.getString("depthMeasurementSystem")?? 'millimeters';
     });
+    return depthMeasurementSystem;
   }
+
 
   Future<Null> getResistanceMeasurementSystem() async {
     final SharedPreferences preferences = await _sharedPreferences;
     setState(() {
-      _resistanceMeasurementSystem = preferences
-          .getString("resistanceMeasurementSystem");
+      _resistanceMeasurementSystem =
+          preferences.getString("resistanceMeasurementSystem") ?? 'kilograms';
     });
   }
+
   Grip _grip;
   int _repTime;
   int _restTime;
   int _resistance;
   int _depth;
   int _reps;
-  int _sets;
 
-
-  String _depthMeasurementSystem;
+ // String _depthMeasurementSystem;
   String _resistanceMeasurementSystem;
+  Stream<String> depthPrefs;
+  Stream<String> resistancePrefs;
 
   bool _depthSelected;
   bool _repsSelected;
@@ -57,12 +59,17 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   bool _repTimeSelected;
   bool _restTimeSelected;
   bool _autoValidate;
+  bool _isExpanded;
 
   @override
   void initState() {
     super.initState();
     setState(() {
-      getDepthMeasurementSystem();//TODO: getting nulls here - prob need a futurebuilder?
+      /// Not sure if i even want this functionality so i'm moving on for now,
+      /// but I'm looking to pull the unit from sharedPrefs if possible, dana
+      /// said it was ugly so maybe not but we'll see
+      //https://stackoverflow.com/questions/33905268/returning-a-string-from-an-async
+     // String _depthMeasurementSystem = await getDepthMeasurementSystem();
       getResistanceMeasurementSystem();
       _depthSelected = true;
       _repsSelected = true;
@@ -70,6 +77,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
       _repTimeSelected = true;
       _restTimeSelected = true;
       _autoValidate = false;
+      _isExpanded = true;
     });
   }
 
@@ -78,7 +86,8 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
     return new Card(
       //color: Colors.grey,
       child: ExpansionTile(
-        //key: PageStorageKey<String>(widget.exerciseTitle),//TODO: cant get this to work wtf
+        key: PageStorageKey<String>(widget.exerciseTitle),
+        initiallyExpanded: _isExpanded,
         title: new Text(widget.exerciseTitle),
         children: <Widget>[
           gripDropdownTile(),
@@ -121,24 +130,24 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
       return '${gripArray[0].substring(0, 1).toUpperCase()}${gripArray[0].substring(1).toLowerCase()}';
   }
 
-  /*void saveHangboardWorkoutToFirebase() {
+  void saveHangboardWorkoutToFirebase() {
     DocumentReference reference =
-    Firestore.instance.document('hangboard/$_workoutTitle');
+        Firestore.instance.document('hangboard/${widget.workoutTitle}');
     CollectionReference collectionReference =
-    Firestore.instance.collection('hangboard/$_workoutTitle');
+        Firestore.instance.collection('hangboard/${widget.workoutTitle}');
 
     var data = createHangboardData();
 
     reference.setData(data);
 
     //onTap: () => record.reference.updateData({'votes': record.votes + 1})
-  }*/
+  }
 
   //TODO: put general message about form errors below save button
   void saveTileFields() {
     if (widget.formKey.currentState.validate()) {
       widget.formKey.currentState.save();
-      //saveHangboardWorkoutToFirebase(); //TODO: make dao here?
+      saveHangboardWorkoutToFirebase(); //TODO: make dao here?
       print('saved');
     } else {
       setState(() => _autoValidate = true);
@@ -177,6 +186,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   Widget depthTile() {
     return new Card(
       child: SwitchListTile(
+        key: PageStorageKey<String>('depth'),
         selected: _depthSelected,
         onChanged: (value) {
           setState(() {
@@ -196,7 +206,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             },
             decoration: InputDecoration(
               icon: Icon(Icons.keyboard_tab),
-              labelText: 'Depth ($_depthMeasurementSystem)',
+              labelText: '(${getDepthMeasurementSystem()})',
               hintText: 'Enter the depth of the hold.',
               //helperText: 'Unit: $_depthMeasurementSystem.',
             ),
@@ -211,6 +221,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   Widget resistanceTile() {
     return new Card(
       child: SwitchListTile(
+        key: PageStorageKey<String>('resistance'),
         selected: _resistanceSelected,
         onChanged: (value) {
           setState(() {
@@ -247,6 +258,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   Widget hangDurationTile() {
     return new Card(
       child: SwitchListTile(
+        key: PageStorageKey<String>('duration'),
         onChanged: (value) {
           setState(() {
             _repTimeSelected = value;
@@ -281,6 +293,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   Widget restTimeTile() {
     return new Card(
       child: SwitchListTile(
+        key: PageStorageKey<String>('rest'),
         onChanged: (value) {
           setState(() {
             _restTimeSelected = value;
@@ -315,6 +328,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   Widget numberOfHangsTile() {
     return new Card(
       child: SwitchListTile(
+        key: PageStorageKey<String>('hangs'),
         selected: _repsSelected,
         onChanged: (value) {
           setState(() {
@@ -359,6 +373,50 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
         //TODO: make add another set button appear when this is saved, this doesn't appear until all fields entered
       ),
     );
+  }
+
+  /// ***Moved this from the tab screen - not sure if i want it within the
+  /// individual expansionTiles or not -- trying it out here for now.
+  ///
+  /// Do i want there to only be one tile available at a time? Multiple could be
+  /// very slow and cluttered. Having it here works for using a single tile,
+  /// having it in the tab view probable works better for multiple tiles. NEED TO
+  /// FIGURE THIS SCHEMA OUT STILL***
+  ///
+  ///
+  /// This method currently packages the data to be sent to the Firestore.
+  /// Not sure if I need this or want to make a separate object (probably should
+  /// do that anyway) to send the data instead. I could also make the [exercises]
+  /// field a member var of this tab, and then each [exercise] could add it's own
+  /// state info like [_depth] and [_grip] to the global [exercises].
+  Map createHangboardData() {
+    Map<String, dynamic> data = {};
+
+    data.putIfAbsent("exercises", () {
+      var exercises = [];
+
+      var exercise = {
+        "depth": _depth,
+        "grip": _grip.toString(),
+        "resistance": _resistance,
+        "repTime": _repTime,
+        "restTime": _restTime,
+      };
+
+      exercises.add(exercise);
+      return exercises;
+    });
+
+    data.putIfAbsent("created_date", () {
+      return DateTime.now();
+    });
+
+    /* Map<String, Object> data = new LinkedHashMap();
+    DateTime createdTimestamp = DateTime.now();
+
+    Map<String, Object> exercise = new LinkedHashMap();
+    exercise.putIfAbsent('depth', _depth);*/
+    return data;
   }
 /*
 Just keeping these around in case i ever want to use them
