@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/model/grip_enum.dart';
 import 'package:crux/widgets/exercise_form_tile.dart';
-import 'package:crux/widgets/unit_picker_tile.dart';
+import 'package:crux/widgets/shared_prefs_unit_picker_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -3,7 +3,6 @@ import 'package:crux/model/grip_enum.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ExerciseFormTile extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -22,36 +21,17 @@ class ExerciseFormTile extends StatefulWidget {
 }
 
 class _ExerciseFormTileState extends State<ExerciseFormTile> {
-  Future<SharedPreferences> _sharedPreferences =
-      SharedPreferences.getInstance();
-
-  Future<String> getDepthMeasurementSystem() async {
-    final String depthMeasurementSystem = await _sharedPreferences.then((value) {
-      return value.getString("depthMeasurementSystem")?? 'millimeters';
-    });
-    return depthMeasurementSystem;
-  }
-
-
-  Future<Null> getResistanceMeasurementSystem() async {
-    final SharedPreferences preferences = await _sharedPreferences;
-    setState(() {
-      _resistanceMeasurementSystem =
-          preferences.getString("resistanceMeasurementSystem") ?? 'kilograms';
-    });
-  }
 
   Grip _grip;
   int _repTime;
   int _restTime;
-  int _resistance;
-  int _depth;
+  //TODO: MAKE DEPTH/RES STRINGS W/ SELECTED UNITS ATTACHED
+  String _resistance;
+  String _depth;
   int _reps;
 
- // String _depthMeasurementSystem;
+  String _depthMeasurementSystem;
   String _resistanceMeasurementSystem;
-  Stream<String> depthPrefs;
-  Stream<String> resistancePrefs;
 
   bool _depthSelected;
   bool _repsSelected;
@@ -69,8 +49,8 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
       /// but I'm looking to pull the unit from sharedPrefs if possible, dana
       /// said it was ugly so maybe not but we'll see
       //https://stackoverflow.com/questions/33905268/returning-a-string-from-an-async
-     // String _depthMeasurementSystem = await getDepthMeasurementSystem();
-      getResistanceMeasurementSystem();
+      _depthMeasurementSystem = 'mm';
+      _resistanceMeasurementSystem = 'kg';
       _depthSelected = true;
       _repsSelected = true;
       _resistanceSelected = true;
@@ -139,9 +119,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
     var data = createHangboardData();
 
     reference.setData(data);
-
-    //onTap: () => record.reference.updateData({'votes': record.votes + 1})
-  }
+    }
 
   //TODO: put general message about form errors below save button
   void saveTileFields() {
@@ -187,6 +165,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
     return new Card(
       child: SwitchListTile(
         key: PageStorageKey<String>('depth'),
+        //TODO: gray out if not selected
         selected: _depthSelected,
         onChanged: (value) {
           setState(() {
@@ -201,12 +180,12 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             validator: (value) {
               return hangboardFieldValidator(_depthSelected, value);
             },
-            onSaved: (value) {
-              _depth = int.tryParse(value);
+            onSaved: (value) {//TODO: this seems wrong but i'll look at this later
+              _depth = value + _depthMeasurementSystem;
             },
             decoration: InputDecoration(
               icon: Icon(Icons.keyboard_tab),
-              labelText: '(${getDepthMeasurementSystem()})',
+              labelText: 'Depth ($_depthMeasurementSystem)',
               hintText: 'Enter the depth of the hold.',
               //helperText: 'Unit: $_depthMeasurementSystem.',
             ),
@@ -237,7 +216,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
               return hangboardFieldValidator(_resistanceSelected, value);
             },
             onSaved: (value) {
-              _resistance = int.tryParse(value);
+              _resistance = value + _resistanceMeasurementSystem;
               //TODO: Need negative resistance too
             },
             decoration: InputDecoration(
@@ -277,7 +256,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             },
             decoration: InputDecoration(
               icon: Icon(Icons.timer),
-              labelText: 'Hang Duration (seconds)',
+              labelText: 'Hang Duration (sec)',
               hintText: 'How long each hang should last.',
               //helperText: 'Unit: seconds',
             ),
@@ -313,7 +292,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             decoration: InputDecoration(
               icon: Icon(Icons.watch_later),
               hintText: 'Time in between hangs.',
-              labelText: 'Rest Time (seconds)',
+              labelText: 'Rest Time (sec)',
               //helperText: 'Unit: seconds',
             ),
             keyboardType: TextInputType.numberWithOptions(),
@@ -364,10 +343,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
       child: new RaisedButton(
         onPressed: () {
           saveTileFields();
-          setState(() {
-            //TODO: Trying to figure out a way to shrink tile sets once they're
-            //TODO: saved to reduce clutter for the user
-          });
+          setState(() {});
         },
         child: new Text('Save Set'),
         //TODO: make add another set button appear when this is saved, this doesn't appear until all fields entered

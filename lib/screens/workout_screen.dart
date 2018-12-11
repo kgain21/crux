@@ -3,6 +3,7 @@ import 'package:crux/screens/exercise_screen.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
+import 'package:crux/widgets/exercise_form_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -24,6 +25,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       appBar:
           SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
       body: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           StreamBuilder<QuerySnapshot>(
             stream: widget.firestore.collection('/hangboard').snapshots(),
@@ -51,32 +53,39 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     ),
                   );
                 default:
+                  //TODO: make these draggable on edit
                   return new Flexible(
                     child: ListView.builder(
+                      shrinkWrap: true,
                       itemCount: snapshot.data.documents.length,
                       itemBuilder: (context, index) {
-                        return new Card(
-                          child: ListTile(
-                            title:
-                                Text(snapshot.data.documents[index].documentID),
-                            trailing: Icon(Icons.chevron_right),
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (context) {
-                                  return new ExerciseScreen(
-                                      title:
-                                          '${snapshot.data.documents[index].documentID} Exercises',
-                                      snapshot: snapshot.data.documents[index], auth: widget.auth,);
-                                },
-                              ));
-                            },
-                          ),
+                        return Draggable(
+                          axis: Axis.horizontal,
+                          child: workoutTile(snapshot, index),
+                          feedback: workoutTile(snapshot, index),
+                          childWhenDragging: new Container(),
                         );
                       },
                     ),
                   );
               }
             },
+          ),
+          //TODO: make this an overlay? could be difficult w/ multiple sets/exercises - maybe just a new screen
+          RaisedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return ExerciseFormTile(
+                    formKey: new GlobalKey<FormState>(),
+                    exerciseTitle: 'exerciseTitle',
+                    workoutTitle: 'workouttitle',
+                  );
+                }),
+              );
+            },
+            child: Text('Add Workout'),
           ),
         ],
       ),
@@ -112,6 +121,26 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         backgroundColor: Color.fromARGB(255, 44, 62, 80),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget workoutTile(AsyncSnapshot snapshot, int index) {
+    return new Card(
+      child: ListTile(
+        title: Text(snapshot.data.documents[index].documentID),
+        trailing: Icon(Icons.menu),
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) {
+              return new ExerciseScreen(
+                title: '${snapshot.data.documents[index].documentID} Exercises',
+                snapshot: snapshot.data.documents[index],
+                auth: widget.auth,
+              );
+            },
+          ));
+        },
+      ),
     );
   }
 }

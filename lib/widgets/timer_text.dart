@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class TimerText extends StatefulWidget {
-  //final Stopwatch stopwatch;
   final Timer timer;
 
   @override
@@ -56,8 +54,9 @@ class TimerTextFormatter {
 class TimerTextAnimator extends StatefulWidget {
   final int repTime;
   final int restTime;
+  final int hangs;
 
-  TimerTextAnimator({this.repTime, this.restTime});
+  TimerTextAnimator({this.repTime, this.restTime, this.hangs});
 
   @override
   State createState() => _TimerTextAnimatorState();
@@ -66,6 +65,7 @@ class TimerTextAnimator extends StatefulWidget {
 class _TimerTextAnimatorState extends State<TimerTextAnimator>
     with TickerProviderStateMixin {
   AnimationController controller;
+  Timer timer;
 
   String get timerString {
     Duration duration = controller.duration * controller.value;
@@ -80,6 +80,7 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
   void initState() {
     super.initState();
     controller = AnimationController(
+      value: widget.repTime.toDouble(),
       vsync: this,
       duration: Duration(seconds: widget.repTime),
     );
@@ -89,16 +90,46 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (controller.isAnimating)
+        if (controller.isAnimating) {
           controller.stop(canceled: false);
-        else {
-          controller.reverse(
-              from: controller.value == 0.0 ? 1.0 : controller.value);
+          print(controller.toString() + ' pause');
+        } else {
+          try {
+            controller
+                .reverse()
+                .orCancel
+                .whenComplete(() {
+              //Make sure it is finished and not just paused
+              if (controller.status == AnimationStatus.completed ||
+                  controller.status == AnimationStatus.dismissed) {
+                print(controller.toString() + ' reverse complete');
+                setState(() {
+                  //TODO: want to keep timer alive on navigating away
+                  //TODO: getting error calling setstate on disposed timer
+                  //TODO: Find out way to not dispose() timer with closing expansiontile?
+                  controller.value = widget.restTime.toDouble();
+                  controller.duration = Duration(seconds: widget.restTime);
+                });
+                print(controller.toString() + ' forward started');
+                controller
+                    .forward()
+                    .orCancel.whenComplete(() {
+                      setState(() {
+                        //TODO: Subtract 1 from hangs somehow
+                      });
+                });
+              }
+            });
+          } on TickerCanceled {
+            print('Ticker Failed');
+          }
         }
       },
       onLongPress: () {
         if (controller.value > 0.0 && controller.value < 1.0) {
-          controller.reset();
+          controller
+              .reset(); //TODO: seems resetting in middle is throwing errors
+          print(controller.toString());
         }
       },
       child: Column(
@@ -135,7 +166,10 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
                           animation: controller,
                           builder: (context, child) {
                             return new Text(
-                              timerString, //TODO: make repTime show right away - displays 0 initially
+                              timerString,
+                              style: TextStyle(
+                                fontSize: 30.0,
+                              ),
                             );
                           },
                         )
@@ -169,7 +203,7 @@ class TimerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
       ..color = backgroundColor
-      ..strokeWidth = 6.0
+      ..strokeWidth = 12.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 

@@ -26,11 +26,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     'Workouts': '/workout_screen',
     'Test2': null,
     'Test3': null,
-    'Test4': null,
-    'Test5': null,
-    'Test6': null,
-    'Test7': null,
-    //todo: add calendar view
   };
 
   List<String> screenMapKeys;
@@ -44,8 +39,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
+      appBar: new AppBar(
+        leading: new IconButton(
+          icon: new Icon(Icons.menu),
+          onPressed: () {
+            //TODO: interesting Context problem here -- just wanted this as a placeholder
+            //TODO: but this is definitely something to look into. https://docs.flutter.io/flutter/material/Scaffold/of.html
+            /*Scaffold.of(context).showSnackBar(SnackBar(
+                content:
+                new Text('Save your shit')));*/
+            return null;
+          },
+        ),
+        //backgroundColor: Color.fromARGB(255, 103, 126, 116),
+        title: new Text('Dashboard'),
+        actions: <Widget>[
+
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'signOut') {
+                widget.auth.signOut(context);
+                Navigator.popUntil(context, ModalRoute.withName('/'));
+              } else {
+                print('pressed test2 button');
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<String>>[
+                new PopupMenuItem(
+                  child: new Text('Sign Out'),
+                  value: 'signOut',
+                ),
+                new PopupMenuItem(
+                  child: new Text('Settings'),
+                  value: 'test2',
+                ),
+              ];
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: <Widget>[
           Card(
@@ -82,7 +115,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Card(
                         child: new ListTile(
                           title: new Text('Limit Boulder'),
-
                           trailing: new Icon(Icons.chevron_right),
                         ),
                       ),
