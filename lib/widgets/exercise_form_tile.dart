@@ -5,26 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class ExerciseFormTile extends StatefulWidget {
-  final GlobalKey<FormState> formKey;
-  final String exerciseTitle;
   final String workoutTitle;
 
   //TODO: how do I want to handle units here????
   ExerciseFormTile({
-    @required this.formKey,
-    this.exerciseTitle,
     this.workoutTitle,
-  }) : assert(formKey != null);
+  });
 
   @override
   State createState() => new _ExerciseFormTileState();
 }
 
 class _ExerciseFormTileState extends State<ExerciseFormTile> {
-
   Grip _grip;
   int _repTime;
   int _restTime;
+  GlobalKey<FormState> formKey;
+
+
   //TODO: MAKE DEPTH/RES STRINGS W/ SELECTED UNITS ATTACHED
   String _resistance;
   String _depth;
@@ -39,12 +37,12 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   bool _repTimeSelected;
   bool _restTimeSelected;
   bool _autoValidate;
-  bool _isExpanded;
 
   @override
   void initState() {
     super.initState();
     setState(() {
+      formKey = new GlobalKey<FormState>();
       /// Not sure if i even want this functionality so i'm moving on for now,
       /// but I'm looking to pull the unit from sharedPrefs if possible, dana
       /// said it was ugly so maybe not but we'll see
@@ -57,27 +55,36 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
       _repTimeSelected = true;
       _restTimeSelected = true;
       _autoValidate = false;
-      _isExpanded = true;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Card(
-      //color: Colors.grey,
-      child: ExpansionTile(
-        key: PageStorageKey<String>(widget.exerciseTitle),
-        initiallyExpanded: _isExpanded,
-        title: new Text(widget.exerciseTitle),
-        children: <Widget>[
-          gripDropdownTile(),
-          depthTile(),
-          resistanceTile(),
-          hangDurationTile(),
-          restTimeTile(),
-          numberOfHangsTile(),
-          saveButton()
-        ],
+    return Material(
+      elevation: 4.0,
+      child: Form(
+        //key: widget.formKey,
+          /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
+          TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
+          https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
+          TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
+           */
+        child: AnimatedContainer(
+          padding: MediaQuery.of(context).viewInsets,
+          duration: const Duration(milliseconds: 300),
+          child: ListView(
+            children: <Widget>[
+              //titleTile(),
+              gripDropdownTile(),
+              resistanceTile(),
+              depthTile(),
+              hangDurationTile(),
+              restTimeTile(),
+              numberOfHangsTile(),
+              saveButton()
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -119,12 +126,12 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
     var data = createHangboardData();
 
     reference.setData(data);
-    }
+  }
 
   //TODO: put general message about form errors below save button
   void saveTileFields() {
-    if (widget.formKey.currentState.validate()) {
-      widget.formKey.currentState.save();
+    if (formKey.currentState.validate()) {
+      formKey.currentState.save();
       saveHangboardWorkoutToFirebase(); //TODO: make dao here?
       print('saved');
     } else {
@@ -134,14 +141,29 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
 
   /// Dropdown box to select from a defined set of [Grip] choices.
   /// THIS SHOULD BE REQUIRED
-  Widget gripDropdownTile() {
+  Widget titleTile() {
     return new Card(
       child: new ListTile(
-        leading: Icon(Icons.pan_tool),
+          //leading: Icon(Icons.pan_tool),
+          title: TextFormField(
+        initialValue: 'Exercise Title',
+      )),
+    );
+  }
+
+  Widget gripDropdownTile() {
+    return new Card(
+      color: Colors.blueGrey,
+      child: new ListTile(
+        leading: Icon(
+          Icons.pan_tool,
+        ),
         title: DropdownButtonHideUnderline(
           child: new DropdownButton<Grip>(
             elevation: 10,
-            hint: Text('Start by choosing a grip'),
+            hint: Text(
+              'Choose a grip',
+            ),
             value: _grip,
             onChanged: (value) {
               setState(() {
@@ -150,7 +172,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             },
             items: Grip.values.map((Grip grip) {
               return new DropdownMenuItem<Grip>(
-                child: new Text(formatGrip(grip)),
+                child: new Text(formatGrip(grip), style: TextStyle(color: Colors.black),),
                 value: grip,
               );
             }).toList(),
@@ -163,6 +185,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   /// Optional tile to enter a [depth] value.
   Widget depthTile() {
     return new Card(
+      color: Colors.blueGrey,
       child: SwitchListTile(
         key: PageStorageKey<String>('depth'),
         //TODO: gray out if not selected
@@ -180,13 +203,20 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             validator: (value) {
               return hangboardFieldValidator(_depthSelected, value);
             },
-            onSaved: (value) {//TODO: this seems wrong but i'll look at this later
+            onSaved: (value) {
+              //TODO: this seems wrong but i'll look at this later
+              //TODO: UPDATE - I think this means that I want to save measurement system separately but I'll have to look at this more closely
               _depth = value + _depthMeasurementSystem;
             },
+
+            /*
+            TODO: can change focus to next field on submit each time (nice to have)
+            https://medium.com/flutterpub/flutter-keyboard-actions-and-next-focus-field-3260dc4c694
+            onFieldSubmitted: null,
+            */
             decoration: InputDecoration(
               icon: Icon(Icons.keyboard_tab),
               labelText: 'Depth ($_depthMeasurementSystem)',
-              hintText: 'Enter the depth of the hold.',
               //helperText: 'Unit: $_depthMeasurementSystem.',
             ),
             keyboardType: TextInputType.numberWithOptions(),
@@ -199,6 +229,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   /// Optional tile to enter a [resistance] value.
   Widget resistanceTile() {
     return new Card(
+      color: Colors.blueGrey,
       child: SwitchListTile(
         key: PageStorageKey<String>('resistance'),
         selected: _resistanceSelected,
@@ -222,7 +253,6 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             decoration: InputDecoration(
               icon: Icon(Icons.fitness_center),
               labelText: 'Resistance ($_resistanceMeasurementSystem)',
-              hintText: 'Add or subtract resistance.',
               //helperText: 'Unit: $_resistanceMeasurementSystem.',
             ),
             keyboardType: TextInputType.numberWithOptions(),
@@ -236,6 +266,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   /// THIS SHOULD BE REQUIRED
   Widget hangDurationTile() {
     return new Card(
+      color: Colors.blueGrey,
       child: SwitchListTile(
         key: PageStorageKey<String>('duration'),
         onChanged: (value) {
@@ -257,7 +288,6 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             decoration: InputDecoration(
               icon: Icon(Icons.timer),
               labelText: 'Hang Duration (sec)',
-              hintText: 'How long each hang should last.',
               //helperText: 'Unit: seconds',
             ),
             keyboardType: TextInputType.numberWithOptions(),
@@ -271,6 +301,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   /// THIS SHOULD BE REQUIRED
   Widget restTimeTile() {
     return new Card(
+      color: Colors.blueGrey,
       child: SwitchListTile(
         key: PageStorageKey<String>('rest'),
         onChanged: (value) {
@@ -291,7 +322,6 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
             },
             decoration: InputDecoration(
               icon: Icon(Icons.watch_later),
-              hintText: 'Time in between hangs.',
               labelText: 'Rest Time (sec)',
               //helperText: 'Unit: seconds',
             ),
@@ -306,6 +336,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   /// THIS SHOULD BE REQUIRED
   Widget numberOfHangsTile() {
     return new Card(
+      color: Colors.blueGrey,
       child: SwitchListTile(
         key: PageStorageKey<String>('hangs'),
         selected: _repsSelected,
@@ -326,7 +357,6 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
               _reps = int.tryParse(value);
             },
             decoration: InputDecoration(
-              hintText: 'The number of hangs in a set.',
               labelText: 'Hangs',
               icon: Icon(Icons.format_list_bulleted),
             ),

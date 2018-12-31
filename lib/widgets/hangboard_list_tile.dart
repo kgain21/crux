@@ -12,7 +12,7 @@ class HangboardListTile extends StatefulWidget {
   State<HangboardListTile> createState() => _HangboardListTileState();
 }
 
-class _HangboardListTileState extends State<HangboardListTile> {
+class _HangboardListTileState extends State<HangboardListTile> with AutomaticKeepAliveClientMixin {
 
   //todo: wrap these in data class?
   String _depth;//TODO: int
@@ -36,48 +36,47 @@ class _HangboardListTileState extends State<HangboardListTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ExpansionTile(
-        key: PageStorageKey('${widget.index}'),
-        title: Text(
-          formatDepthAndGrip(_depth, _depthMeasurementSystem, _grip),
-          style: TextStyle(
-            fontSize: 20.0,
-          ),
+    super.build(context);
+    return ExpansionTile(
+      key: PageStorageKey('${widget.index}'),
+      title: Text(
+        formatDepthAndGrip(_depth, _depthMeasurementSystem, _grip),
+        style: TextStyle(
+          fontSize: 20.0,
         ),
-        initiallyExpanded: false,
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              new CheckboxListTile(
-                value: _didFinishSet,
-                onChanged: (value) {
-                  setState(() {
-                    _didFinishSet = value;
-                  });
-                },
-                title: Text(
-                  formatHangsAndResistance(_hangs, _resistance, _resistanceMeasurementSystem),
-                  style: TextStyle(fontSize: 18.0),
-                ),
-              ),
-              new Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: ConstrainedBox(
-                  key: PageStorageKey('Timer${widget.index}'),
-                  constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width / 2.0),
-                  child: TimerTextAnimator(
-                    repTime: _repTime,
-                    restTime: _restTime,
-                    hangs: int.parse(_hangs),//TODO: int
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
       ),
+      initiallyExpanded: false,
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            new CheckboxListTile(
+              value: _didFinishSet,
+              onChanged: (value) {
+                setState(() {
+                  _didFinishSet = value;
+                });
+              },
+              title: Text(
+                formatHangsAndResistance(_hangs, _resistance, _resistanceMeasurementSystem),
+                style: TextStyle(fontSize: 18.0),
+              ),
+            ),
+            new Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: ConstrainedBox(
+                key: PageStorageKey('Timer${widget.index}'),
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width / 2.0),
+                child: TimerTextAnimator(
+                  repTime: _repTime,
+                  restTime: _restTime,
+                  hangs: int.parse(_hangs),//TODO: int
+                ),
+              ),
+            ),
+          ],
+        )
+      ],
     );
   }
 
@@ -105,6 +104,8 @@ class _HangboardListTileState extends State<HangboardListTile> {
     }
   }
 
+  //TODO: should this be separated from the widget in a dao?
+  //TODO: call the getParams method on expand? might be slow
   void getParams(Map<String, dynamic> exerciseParameters) {
     getDepth(exerciseParameters);
     getDepthMeasurementSystem(exerciseParameters);
@@ -207,5 +208,14 @@ class _HangboardListTileState extends State<HangboardListTile> {
       print('Unable to find restTime: $e');
     }
   }
+
+  @override
+  void updateKeepAlive() {
+    // TODO: implement updateKeepAlive
+  }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 
 }

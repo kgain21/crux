@@ -23,42 +23,75 @@ class _SignInScreenState extends State<SignInScreen> {
         //backgroundColor: Color.fromARGB(255, 103, 126, 116),
         title: new Text(widget.title),
       ),
-      body: Container(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Center(
-              child: new RaisedButton(
-                  //color: Color.fromARGB(255, 146, 164, 172),
-                  //color: Color.fromARGB(255, 221, 219, 219),
-                  child: const Text('SIGN IN'),
-                  onPressed: () {
-                    //TODO: Find way to prevent people from clicking more than once
-                    widget.auth.signInWithGoogleEmailAndPassword().then(
-                        (FirebaseUser user) {
-                      String username = user.displayName
-                          .split(' ')[0]; //todo: unit tests around this?
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WelcomeScreen(
-                              title: widget.title, username: username),
-                        ),
-                      ); //TODO: pass username to a welcome screen? Smooth fade in with 'Welcome $User'
-                      //todo: SIGN OUT OPTION
-                    }).catchError((e) => print(
-                        'Sign in failed. Please try again.')); //TODO: make this a toast/snackbar message
-                  }),
-            ),
-            /*new FutureBuilder<String>(
-                future: _message,
-                builder: (_, AsyncSnapshot<String> snapshot) {
-                  return new Text(snapshot.data ?? '',
-                      style:
-                      const TextStyle(color: Color.fromARGB(255, 0, 155, 0)));
-                }),*/
-          ],
-        ),
+      body: Builder(
+        builder: (context) {
+          return new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              signInWidget(context),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget signInWidget(BuildContext context) {
+    return new Center(
+      child: new RaisedButton(
+        //color: Color.fromARGB(255, 146, 164, 172),
+        //color: Color.fromARGB(255, 221, 219, 219),
+        child: const Text('SIGN IN'),
+        onPressed: () {
+          //TODO: Find way to prevent people from clicking more than once
+          widget.auth
+              .signInWithGoogleEmailAndPassword()
+              .then((FirebaseUser user) {
+            String username =
+                user.displayName.split(' ')[0]; //todo: unit tests around this?
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    WelcomeScreen(title: widget.title, username: username),
+              ),
+            ); //TODO: pass username to a welcome screen? Smooth fade in with 'Welcome $User'
+          }).catchError(
+            (e) => showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    content: Text(
+                      'Sign in failed. Please try again or continue as a guest.',
+                      style: TextStyle(color: Colors.black,),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }),
+
+            /* showModalBottomSheet(
+                context: context,
+                builder: (context) => BottomSheet(
+                      onClosing: () {},
+                      builder: (context) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(child: Text('Sign in failed.', style: TextStyle(color: Colors.black),),),
+                        );
+                      },
+                    )),*/
+            /*Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    duration: const Duration(seconds: 3),
+                    content: Center(
+                      child: Text(
+                          'Sign in failed. Please try again or continue as a guest.'),
+                    ),
+                  ),
+                ),*/
+          ); //TODO: make this a toast/snackbar message
+        },
+        //TODO: make app wide button theme with more rounded corners
       ),
     );
   }

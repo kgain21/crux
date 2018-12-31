@@ -3,54 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class TimerText extends StatefulWidget {
-  final Timer timer;
-
-  @override
-  State<TimerText> createState() => new _TimerTextState();
-
-  TimerText({this.timer});
-}
-
-class _TimerTextState extends State<TimerText> {
-  Timer repaintTimer;
-
-  _TimerTextState() {
-    repaintTimer = new Timer.periodic(new Duration(milliseconds: 30), callback);
-  }
-
-  void callback(timer) {
-    if (widget.timer.isActive) setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final TextStyle timerTextStyle = const TextStyle(
-      fontSize: 60.0,
-      fontFamily: "Open Sans",
-    );
-    String formattedTime = TimerTextFormatter.format(widget.timer.tick);
-    return new Text(
-      formattedTime,
-      style: timerTextStyle,
-    );
-  }
-}
-
-class TimerTextFormatter {
-  static String format(int currentTimeMillis) {
-    int hundreds = (currentTimeMillis / 10).truncate();
-    int seconds = (hundreds / 100).truncate();
-    int minutes = (seconds / 60).truncate();
-
-    String minuteStr = (minutes % 60).toString().padLeft(2, '0');
-    String secondsStr = (seconds % 60).toString().padLeft(2, '0');
-    String hundredsStr = (hundreds % 100).toString().padLeft(2, '0');
-
-    return "$minuteStr:$secondsStr:$hundredsStr";
-  }
-}
-
 class TimerTextAnimator extends StatefulWidget {
   final int repTime;
   final int restTime;
@@ -63,73 +15,112 @@ class TimerTextAnimator extends StatefulWidget {
 }
 
 class _TimerTextAnimatorState extends State<TimerTextAnimator>
-    with TickerProviderStateMixin {
-  AnimationController controller;
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  AnimationController _controller;
   Timer timer;
+  bool _forwardAnimation;
+  int _hangs;
 
   String get timerString {
-    Duration duration = controller.duration * controller.value;
+    Duration duration;
+    if(_forwardAnimation) {
+      duration = _controller.duration * (1 - _controller.value);
+    } else {
+      duration = _controller.duration * _controller.value;
+    }
     return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
-  }
-
-  AnimationController get timerController {
-    return controller;
   }
 
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-      value: widget.repTime.toDouble(),
+    _controller = AnimationController(
+      value: 1.0,
       vsync: this,
       duration: Duration(seconds: widget.repTime),
     );
+    _forwardAnimation = false;
+    //TODO: this doesn't work bc hangs are sent in from parent widget, need to add a listener in parent for completedForwardAnimation
+    _hangs = widget.hangs;
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return GestureDetector(
       onTap: () {
-        if (controller.isAnimating) {
-          controller.stop(canceled: false);
-          print(controller.toString() + ' pause');
+        if (_controller.isAnimating) {
+          _controller.stop(canceled: false);
+          print(_controller.toString() + ' pause');
+          print(_controller.value);
         } else {
-          try {
-            controller
-                .reverse()
-                .orCancel
-                .whenComplete(() {
-              //Make sure it is finished and not just paused
-              if (controller.status == AnimationStatus.completed ||
-                  controller.status == AnimationStatus.dismissed) {
-                print(controller.toString() + ' reverse complete');
-                setState(() {
-                  //TODO: want to keep timer alive on navigating away
-                  //TODO: getting error calling setstate on disposed timer
-                  //TODO: Find out way to not dispose() timer with closing expansiontile?
-                  controller.value = widget.restTime.toDouble();
-                  controller.duration = Duration(seconds: widget.restTime);
-                });
-                print(controller.toString() + ' forward started');
-                controller
-                    .forward()
-                    .orCancel.whenComplete(() {
-                      setState(() {
-                        //TODO: Subtract 1 from hangs somehow
-                      });
-                });
-              }
-            });
-          } on TickerCanceled {
-            print('Ticker Failed');
+          if (! _forwardAnimation) {
+            try {
+              _controller.reverse().whenComplete(() {
+                if (_controller.status == AnimationStatus.dismissed) {
+                  setState(() {
+                    //TODO: want to keep timer alive on navigating away
+                    //TODO: getting error calling setstate on disposed timer
+                    //TODO: Find out way to not dispose() timer with closing expansiontile?
+                    _controller.resync(this);
+                    _controller.value = 0.0;
+                    _controller.duration = Duration(seconds: widget.restTime);
+                    _forwardAnimation = true;
+                  });
+                }
+              });
+              //TODO: I don't think these do anything - how do i test/handle these?
+            } on TickerCanceled {
+              print('TickerCanceled');
+            } on Exception {
+              print('Exception');
+            } on Error {
+              print('Error');
+            }
+          } else {
+            try {
+              _controller.forward().whenComplete(() {
+                if (_controller.status == AnimationStatus.completed) {
+                  setState(() {
+                    _controller.value = 1.0;
+                    _controller.duration = Duration(seconds: widget.repTime);
+                    _forwardAnimation = false;
+                    _hangs -= 1;
+                  });
+                }
+              });
+            } on TickerCanceled {
+              print('TickerCanceled');
+            } on Exception {
+              print('Exception');
+            } on Error {
+              print('Error');
+            }
           }
         }
       },
       onLongPress: () {
-        if (controller.value > 0.0 && controller.value < 1.0) {
-          controller
-              .reset(); //TODO: seems resetting in middle is throwing errors
-          print(controller.toString());
+        if (_controller.isAnimating) {
+          _controller.stop(canceled: false);
+          if(_controller.status == AnimationStatus.reverse) {
+            setState(() {
+              _controller.value = 1.0;
+            });
+          } else if(_controller.status == AnimationStatus.forward){
+            setState(() {
+              _controller.value = 0.0;
+            });
+          }
+        } else {
+          if(_controller.status == AnimationStatus.reverse) {
+            setState(() {
+              _controller.value = 1.0;
+            });
+          } else if(_controller.status == AnimationStatus.forward) {
+            setState(() {
+              _controller.value = 0.0;
+            });
+          }
         }
       },
       child: Column(
@@ -144,11 +135,11 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
                 children: <Widget>[
                   Positioned.fill(
                     child: AnimatedBuilder(
-                      animation: controller,
+                      animation: _controller,
                       builder: (context, child) {
                         return new CustomPaint(
                           painter: TimerPainter(
-                            animation: controller,
+                            animation: _controller,
                             backgroundColor: Colors.black,
                             color: Colors.green,
                           ),
@@ -163,7 +154,7 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         AnimatedBuilder(
-                          animation: controller,
+                          animation: _controller,
                           builder: (context, child) {
                             return new Text(
                               timerString,
@@ -187,9 +178,14 @@ class _TimerTextAnimatorState extends State<TimerTextAnimator>
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.stop();
+    _controller.dispose();
     super.dispose();
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class TimerPainter extends CustomPainter {
@@ -209,7 +205,7 @@ class TimerPainter extends CustomPainter {
 
     canvas.drawCircle(size.center(Offset.zero), size.width / 2.0, paint);
     paint.color = color;
-    double progress = (1.0 - animation.value) * 2 * math.pi;
+    double progress = (1 - animation.value) * 2 * math.pi;
     canvas.drawArc(Offset.zero & size, math.pi * 1.5, -progress, false, paint);
   }
 

@@ -24,74 +24,78 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return new Scaffold(
       appBar:
           SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
+      body: Stack(
         children: <Widget>[
-          StreamBuilder<QuerySnapshot>(
-            stream: widget.firestore.collection('/hangboard').snapshots(),
-            builder: (context, snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                case ConnectionState.none:
-                  return Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Card(
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text('Retrieving workouts...'),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              StreamBuilder<QuerySnapshot>(
+                stream: widget.firestore.collection('/hangboard').snapshots(),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.waiting:
+                    case ConnectionState.none:
+                      return Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Card(
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('Retrieving workouts...'),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ],
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                default:
-                  //TODO: make these draggable on edit
-                  return new Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snapshot.data.documents.length,
-                      itemBuilder: (context, index) {
-                        return Draggable(
-                          axis: Axis.horizontal,
-                          child: workoutTile(snapshot, index),
-                          feedback: workoutTile(snapshot, index),
-                          childWhenDragging: new Container(),
-                        );
-                      },
-                    ),
-                  );
-              }
-            },
-          ),
-          //TODO: make this an overlay? could be difficult w/ multiple sets/exercises - maybe just a new screen
-          RaisedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) {
-                  return ExerciseFormTile(
-                    formKey: new GlobalKey<FormState>(),
-                    exerciseTitle: 'exerciseTitle',
-                    workoutTitle: 'workouttitle',
-                  );
-                }),
-              );
-            },
-            child: Text('Add Workout'),
+                        ),
+                      );
+                    default:
+                      //TODO: make these draggable on edit
+                      return new Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data.documents.length,
+                          itemBuilder: (context, index) {
+                            return Draggable(
+                              axis: Axis.horizontal,
+                              child: workoutTile(snapshot, index),
+                              feedback: workoutTile(snapshot, index),
+                              childWhenDragging: new Container(),
+                            );
+                          },
+                        ),
+                      );
+                  }
+                },
+              ),
+              //TODO: make this an overlay? could be difficult w/ multiple sets/exercises - maybe just a new screen
+              RaisedButton(
+                onPressed: () {
+                  showModalBottomSheet(context: context, builder: (context) => BottomSheet(
+                    onClosing: () {},
+                    builder: (context) {
+                      return Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
+                          child: TextField(),
+                        ),
+                      );
+                    },
+                  ));
+                },
+                child: Text('Add Workout'),
+              ),
+            ],
           ),
         ],
       ),
       bottomNavigationBar: new FABBottomAppBar(
-        backgroundColor: Colors.white,
-        //Color.fromARGB(255, 229, 191, 126),
+        backgroundColor: Colors.blueGrey,
         color: Colors.black54,
         selectedColor: Colors.black,
         items: <FABBottomAppBarItem>[
@@ -99,10 +103,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             iconData: Icons.home,
             text: 'Home',
           ),
-          FABBottomAppBarItem(
+          /*FABBottomAppBarItem(
             iconData: Icons.menu,
             text: 'Menu',
-          ),
+          ),*/
         ],
         onTabSelected: (index) {
           if (index == 0) {
@@ -114,13 +118,22 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.blueGrey,
         onPressed: () {
-          null;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return ExerciseFormTile(
+                workoutTitle: 'workouttitle',
+              );
+            }),
+          );
         },
         child: Icon(Icons.edit),
-        backgroundColor: Color.fromARGB(255, 44, 62, 80),
+        //backgroundColor: Color.fromARGB(255, 44, 62, 80),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      //bottomSheet: new BottomSheet(onClosing: null, builder: null),
     );
   }
 

@@ -1,3 +1,4 @@
+/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/model/grip_enum.dart';
 import 'package:crux/widgets/exercise_form_tile.dart';
@@ -15,7 +16,8 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     with AutomaticKeepAliveClientMixin {
 
 
- /* @override
+ */
+/* @override
   void initState() {
     super.initState();
     _depthMeasurementSystem =
@@ -26,7 +28,8 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
         _sharedPreferences.then((SharedPreferences prefs) {
           return (prefs.getString('resistanceMeasurementSystem') ?? 'kilograms');
         });
-  }*/
+  }*//*
+
   String _workoutTitle;
   Grip _grip;
   int _repTime;
@@ -110,26 +113,30 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
               formKey: formKey,
               exerciseTitle: 'Exercise Details',
             ),
-            /*ExerciseFormTile(
+            */
+/*ExerciseFormTile(
               formKey: formKey,
               exerciseTitle: 'Exercise 2',
             ),
             ExerciseFormTile(
               formKey: formKey,
               exerciseTitle: 'Exercise 3',
-            ),*/
+            ),*//*
+
           ],
         ),
       ),
     );
   }
 
-  /*List<Widget> initializeFormTiles() {
+  */
+/*List<Widget> initializeFormTiles() {
     List<Widget> list = [];
     list.add(workoutTitleTile());
     list.add(expandingUnitsTile());
     return list;
-  }*/
+  }*//*
+
 
   /// Placeholder for button that will eventually be pressed to add another
   /// [exercise].
@@ -149,7 +156,8 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
   /// I could keep updating the [workout] as each [exercise] is added rather
   /// than one big bang write to the db.
   //TODO: put general message about form errors below save button
-  /*void saveHangboardForm() {
+  */
+/*void saveHangboardForm() {
     if (this.formKey.currentState.validate()) {
       this.formKey.currentState.save();
       saveHangboardWorkoutToFirebase(); //TODO: make dao here?
@@ -157,13 +165,15 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     } else {
       setState(() => _autoValidate = true);
     }
-  }*/
+  }*//*
+
 
   /// Basically gets the connection to the Firestore and writes data to it.
   /// This and some of the other methods should probably be refactored/combined
   /// in some way. Not sure if I'll need this if saving is moved to the individual
   /// tiles but I may need it for something else.
-  /*void saveHangboardWorkoutToFirebase() {
+  */
+/*void saveHangboardWorkoutToFirebase() {
     DocumentReference reference =
         Firestore.instance.document('hangboard/$_workoutTitle');
     CollectionReference collectionReference =
@@ -174,7 +184,8 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     reference.setData(data);
 
     //onTap: () => record.reference.updateData({'votes': record.votes + 1})
-  }*/
+  }*//*
+
 
 
   /// Tile that holds the title of your workout. This title is used as a reference
@@ -229,3 +240,4 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
   @override
   bool get wantKeepAlive => true;
 }
+*/

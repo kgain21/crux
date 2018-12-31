@@ -1,3 +1,4 @@
+/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/create_hangboard_workout_tab.dart';
 import 'package:crux/screens/edit_hangboard_workout_tab.dart';
@@ -42,11 +43,13 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
         title: Text('Hangboard'),
         bottom: appBarTabs(),
       ),
-      /*SharedAppBar.sharedAppBar(
+      */
+/*SharedAppBar.sharedAppBar(
             widget.title,
             widget.auth,
             this.context,
-          ),*/
+          ),*//*
+
       body: TabBarView(
         key: new PageStorageKey<String>('Hangboard'),
         controller: tabController,
@@ -116,3 +119,4 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
     super.dispose();
   }
 }
+*/

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/dashboard_screen.dart';
-import 'package:crux/screens/hangboard_workout_screen.dart';
 import 'package:crux/screens/sign_in_screen.dart';
+import 'package:crux/screens/spotify_test_screen.dart';
 import 'package:crux/screens/stopwatch_screen.dart';
 import 'package:crux/screens/workout_screen.dart';
 import 'package:crux/utils/auth.dart';
@@ -39,48 +39,72 @@ class MyApp extends StatelessWidget {
       title: title,
       theme: ThemeData(
         //primaryColor: Color.fromARGB(255, 103, 126, 116),
-        primaryColor: Color.fromARGB(255, 44, 62, 80), //midnight blue
-        backgroundColor: Colors.grey,
-        scaffoldBackgroundColor: Colors.blueGrey,
-        //This is a tannish yellow color i found for the text, not sure about it
-        /*primaryTextTheme: new TextTheme(
-            subtitle: TextStyle(
-              color: Color.fromARGB(255, 229, 191, 126),
-            ),
-            subhead: TextStyle(
-              color: Color.fromARGB(255, 229, 191, 126),
-            ),
-            caption: TextStyle(
-              color: Color.fromARGB(255, 229, 191, 126),
-            ),
-            button: TextStyle(
-              color: Color.fromARGB(255, 229, 191, 126),
-            ),
-            display1: TextStyle(
-              color: Color.fromARGB(255, 229, 191, 126),
-            ),
-            display2: TextStyle(
-              color: Color.fromARGB(255, 229, 191, 126),
-            ),
-            title: TextStyle(
-              color: Color.fromARGB(255, 229, 191, 126),
-            )),*/
+        primaryColor: Colors.blueGrey,
+        //midnight blue
+        backgroundColor: Colors.blueGrey,
+        scaffoldBackgroundColor: Color.fromARGB(255, 44, 62, 80),
+        cardColor: Color.fromARGB(255, 44, 62, 80),
+        hintColor: Colors.white,
+        textTheme: new TextTheme(
+          display4: TextStyle(
+            color: Colors.white,
+          ),
+          display3: TextStyle(
+            color: Colors.white,
+          ),
+          display2: TextStyle(
+            color: Colors.white,
+          ),
+          display1: TextStyle(
+            color: Colors.white,
+          ),
+          headline: TextStyle(
+            color: Colors.white,
+          ),
+          title: TextStyle(
+            color: Colors.white,
+          ),
+          subhead: TextStyle(
+            color: Colors.white,
+          ),
+          body1: TextStyle(
+            color: Colors.white,
+          ),
+          body2: TextStyle(
+            color: Colors.white,
+          ),
+          caption: TextStyle(
+            color: Colors.white,
+          ),
+          button: TextStyle(
+            color: Colors.white,
+          ),
+          subtitle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        primaryIconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        accentIconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
 
-        //bottomAppBarColor: Colors.grey,
-        //olor.fromARGB(255, 68, 77, 71),
-        //secondaryHeaderColor: Color.fromARGB(255, 103, 126, 116),
-        //buttonColor: Color.fromARGB(255, 146, 164, 172),
       ),
       home: new SignInScreen(title: title, auth: auth),
       routes: {
         '/dashboard_screen': (context) =>
             DashboardScreen(title: title, auth: auth),
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
-        '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
-            title: title, auth: auth, firestore: firestore),
-        '/workout_screen': (context) =>
-            WorkoutScreen(title: 'Hangboard Workouts', auth: auth, firestore: firestore),
+        /*'/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
+            title: title, auth: auth, firestore: firestore),*/
+        '/workout_screen': (context) => WorkoutScreen(
+            title: 'Hangboard Workouts', auth: auth, firestore: firestore),
         '/countdown_timer_screen': (context) => TimerTextAnimator(),
+        '/spotify_test_screen': (context) => SpotifyTestScreen(),
       },
     );
   }
