@@ -68,6 +68,7 @@ class _HangboardListTileState extends State<HangboardListTile> with AutomaticKee
                 constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width / 2.0),
                 child: TimerTextAnimator(
+                  id: widget.index.toString(),
                   repTime: _repTime,
                   restTime: _restTime,
                   hangs: int.parse(_hangs),//TODO: int

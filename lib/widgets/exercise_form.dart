@@ -4,19 +4,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class ExerciseFormTile extends StatefulWidget {
+class ExerciseForm extends StatefulWidget {
   final String workoutTitle;
 
   //TODO: how do I want to handle units here????
-  ExerciseFormTile({
+  ExerciseForm({
     this.workoutTitle,
   });
 
   @override
-  State createState() => new _ExerciseFormTileState();
+  State createState() => new _ExerciseFormState();
 }
 
-class _ExerciseFormTileState extends State<ExerciseFormTile> {
+class _ExerciseFormState extends State<ExerciseForm> {
   Grip _grip;
   int _repTime;
   int _restTime;
@@ -42,7 +42,7 @@ class _ExerciseFormTileState extends State<ExerciseFormTile> {
   void initState() {
     super.initState();
     setState(() {
-      formKey = new GlobalKey<FormState>();
+      formKey = new GlobalKey<FormState>(debugLabel: 'ExerciseForm');
       /// Not sure if i even want this functionality so i'm moving on for now,
       /// but I'm looking to pull the unit from sharedPrefs if possible, dana
       /// said it was ugly so maybe not but we'll see

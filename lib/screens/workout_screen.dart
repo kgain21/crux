@@ -3,7 +3,7 @@ import 'package:crux/screens/exercise_screen.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
-import 'package:crux/widgets/exercise_form_tile.dart';
+import 'package:crux/widgets/exercise_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -123,7 +123,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-              return ExerciseFormTile(
+              return ExerciseForm(
                 workoutTitle: 'workouttitle',
               );
             }),

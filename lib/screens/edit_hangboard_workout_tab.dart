@@ -15,11 +15,10 @@ class _EditHangboardWorkoutTabState extends State<EditHangboardWorkoutTab>
     super.build(context);
     return WillPopScope(
       onWillPop: () async {
-        return true; //todo: do i need this? might need for somehtign in the future
+        return true;
       },
       child: new Column(
         children: <Widget>[
-          //TODO: look at separated listview
           new StreamBuilder<DocumentSnapshot>(
             stream:
             Firestore.instance.document('workouts/hangboard').snapshots(),

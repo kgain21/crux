@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/dashboard_screen.dart';
+import 'package:crux/screens/hangboard_workout_screen.dart';
 import 'package:crux/screens/sign_in_screen.dart';
 import 'package:crux/screens/spotify_test_screen.dart';
 import 'package:crux/screens/stopwatch_screen.dart';
@@ -99,8 +100,8 @@ class MyApp extends StatelessWidget {
         '/dashboard_screen': (context) =>
             DashboardScreen(title: title, auth: auth),
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
-        /*'/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
-            title: title, auth: auth, firestore: firestore),*/
+        '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
+            title: title, auth: auth, firestore: firestore),
         '/workout_screen': (context) => WorkoutScreen(
             title: 'Hangboard Workouts', auth: auth, firestore: firestore),
         '/countdown_timer_screen': (context) => TimerTextAnimator(),

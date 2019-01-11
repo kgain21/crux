@@ -56,21 +56,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             ListTile(
-              title: Text('Profile'),
+              title: Text('Profile', style: TextStyle(color: Colors.black),),
             ),
             ListTile(
-              title: Text('Hangboard'),
+              title: Text('Hangboard', style: TextStyle(color: Colors.black),),
               onTap: () {
                 //Pop drawer before navigating so that it doesn't remain when returning
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/workout_screen');
+                Navigator.pushNamed(context, '/hangboard_workout_screen');
               },
             ),
             ListTile(
-              title: Text('Campus'),
+              title: Text('Spotify', style: TextStyle(color: Colors.black),),
+              onTap: () {
+                //Pop drawer before navigating so that it doesn't remain when returning
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/spotify_test_screen');
+              },
             ),
             ListTile(
-              title: Text('Progress'),
+              title: Text('Campus', style: TextStyle(color: Colors.black),),
+            ),
+            ListTile(
+              title: Text('Progress', style: TextStyle(color: Colors.black),),
             ),
           ],
         ),

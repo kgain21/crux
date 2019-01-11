@@ -24,14 +24,13 @@ class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
     super.build(context);
     return WillPopScope(
       onWillPop: () async {
-        return true; //todo: do i need this? might need for somehtign in the future
+        return true;
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: new Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            //TODO: look at separated listview
             new StreamBuilder<QuerySnapshot>(
               stream: Firestore.instance.collection('hangboard').snapshots(),
               builder: (context, snapshot) {
@@ -81,34 +80,26 @@ class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
 
   Widget exerciseListBuilder(AsyncSnapshot<QuerySnapshot> snapshot, int docIndex) {
     return new Card(
-      child: ExpansionTile(
-        key: PageStorageKey(snapshot
-            .data.documents[docIndex].documentID),
-        title: Text(snapshot
-            .data.documents[docIndex].documentID),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Flexible(
-                fit: FlexFit.loose,
-                child: ListView.builder(
-                  controller: new ScrollController(),
-                  key: PageStorageKey('ExerciseListBuilder'),
-                  itemCount: snapshot.data.documents[docIndex].data['exercises'].length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, fieldIndex) {
-                    return HangboardListTile(
-                        index: fieldIndex,
-                        exerciseParameters: Map<String, dynamic>.from(snapshot
-                        .data
-                        .documents[docIndex]
-                        .data['exercises'][fieldIndex]),
-                    );
-                  },
-                ),
-              ),
-            ],
+          Flexible(
+            fit: FlexFit.loose,
+            child: ListView.builder(
+              controller: new ScrollController(),
+              key: PageStorageKey('ExerciseListBuilder'),
+              itemCount: snapshot.data.documents[docIndex].data['exercises'].length,
+              shrinkWrap: true,
+              itemBuilder: (context, fieldIndex) {
+                return HangboardListTile(
+                    index: fieldIndex,
+                    exerciseParameters: Map<String, dynamic>.from(snapshot
+                    .data
+                    .documents[docIndex]
+                    .data['exercises'][fieldIndex]),
+                );
+              },
+            ),
           ),
         ],
       ),

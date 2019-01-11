@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
-import 'package:crux/widgets/exercise_form_tile.dart';
+import 'package:crux/widgets/exercise_form.dart';
 import 'package:crux/widgets/hangboard_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -42,6 +42,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             _overlayEntry.remove();
           });
         }
+        //TODO: Close stream? do this in workout screen?
         //this.dispose();
         return true;
         //TODO: make sure user saves set if there's any progress?
@@ -142,7 +143,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     RenderBox renderBox = context.findRenderObject();
     var size = renderBox.size;
 
-    //TODO: back navigation does not remove the overlay!!!
     return OverlayEntry(
         builder: (context) => Positioned(
               left: size.width / /*6.0*/ 100.0,
@@ -152,8 +152,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 constraints: BoxConstraints(
                   maxHeight: size.height / 2.0,
                 ),
-                child: ExerciseFormTile(
-                  //TODO: move into widget initState?
+                child: ExerciseForm(
                   workoutTitle: widget.title,
                 ),
               ),

@@ -1,3 +1,9 @@
+
+
+///
+/// *** WILL HAVE TO GET SPOTIFY PERMISSION TO MONETIZE IN THE FUTURE ***
+///
+
 import 'package:spotify/spotify_io.dart';
 
 import 'package:flutter/material.dart';
@@ -15,11 +21,12 @@ class _SpotifyTestScreenState extends State<SpotifyTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       /*appBar: null,*/
-      body: Column(
-        children: <Widget>[
-          Text('Spotify Integration!!!'),
-          //Player()
-        ],
+      body: Center(
+        child: Row(
+          children: <Widget>[
+            Text('Spotify Integration!!!'),
+          ],
+        ),
       ),
     );
   }

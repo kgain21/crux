@@ -1,11 +1,9 @@
-/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/model/grip_enum.dart';
-import 'package:crux/widgets/exercise_form_tile.dart';
+import 'package:crux/widgets/exercise_form.dart';
 import 'package:crux/widgets/shared_prefs_unit_picker_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateHangboardWorkoutTab extends StatefulWidget {
   @override
@@ -14,10 +12,7 @@ class CreateHangboardWorkoutTab extends StatefulWidget {
 
 class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
     with AutomaticKeepAliveClientMixin {
-
-
- */
-/* @override
+  /*@override
   void initState() {
     super.initState();
     _depthMeasurementSystem =
@@ -28,7 +23,7 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
         _sharedPreferences.then((SharedPreferences prefs) {
           return (prefs.getString('resistanceMeasurementSystem') ?? 'kilograms');
         });
-  }*//*
+  }*/
 
   String _workoutTitle;
   Grip _grip;
@@ -109,34 +104,27 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
           children: <Widget>[
             workoutTitleTile(),
             UnitPickerTile(title: 'Choose your units'),
-            ExerciseFormTile(
-              formKey: formKey,
-              exerciseTitle: 'Exercise Details',
+            ExerciseForm(
+              workoutTitle: 'Exercise Details',
             ),
-            */
-/*ExerciseFormTile(
-              formKey: formKey,
-              exerciseTitle: 'Exercise 2',
+            ExerciseForm(
+              workoutTitle: 'Exercise 2',
             ),
-            ExerciseFormTile(
-              formKey: formKey,
-              exerciseTitle: 'Exercise 3',
-            ),*//*
-
+            ExerciseForm(
+              workoutTitle: 'Exercise 3',
+            ),
           ],
         ),
       ),
     );
   }
 
-  */
-/*List<Widget> initializeFormTiles() {
+  List<Widget> initializeFormTiles() {
     List<Widget> list = [];
     list.add(workoutTitleTile());
-    list.add(expandingUnitsTile());
+    //list.add(expandingUnitsTile());
     return list;
-  }*//*
-
+  }
 
   /// Placeholder for button that will eventually be pressed to add another
   /// [exercise].
@@ -149,43 +137,6 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
       ),
     );
   }
-
-  /// Method called when save button is clicked on an [exercise] ExpansionTile.
-  /// This has been moved to [exercise_form_tile] so I should also move
-  /// Firebase interaction there as well. Do I want to make saving incremental?
-  /// I could keep updating the [workout] as each [exercise] is added rather
-  /// than one big bang write to the db.
-  //TODO: put general message about form errors below save button
-  */
-/*void saveHangboardForm() {
-    if (this.formKey.currentState.validate()) {
-      this.formKey.currentState.save();
-      saveHangboardWorkoutToFirebase(); //TODO: make dao here?
-      print('saved');
-    } else {
-      setState(() => _autoValidate = true);
-    }
-  }*//*
-
-
-  /// Basically gets the connection to the Firestore and writes data to it.
-  /// This and some of the other methods should probably be refactored/combined
-  /// in some way. Not sure if I'll need this if saving is moved to the individual
-  /// tiles but I may need it for something else.
-  */
-/*void saveHangboardWorkoutToFirebase() {
-    DocumentReference reference =
-        Firestore.instance.document('hangboard/$_workoutTitle');
-    CollectionReference collectionReference =
-        Firestore.instance.collection('hangboard/$_workoutTitle');
-
-    var data = createHangboardData();
-
-    reference.setData(data);
-
-    //onTap: () => record.reference.updateData({'votes': record.votes + 1})
-  }*//*
-
 
 
   /// Tile that holds the title of your workout. This title is used as a reference
@@ -216,8 +167,7 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
                 if (value.isNotEmpty)
                   //TODO: trying to only add this if title is populated so that i can pass title into formTile widget
                   //TODO: need title to give tile path to save to - maybe pass db connection? not sure just a thought
-                  formTiles.add(ExerciseFormTile(
-                    formKey: formKey,
+                  formTiles.add(ExerciseForm(
                     workoutTitle: value,
                   ));
                 formTiles.add(addExerciseTileButton());
@@ -240,4 +190,3 @@ class _CreateHangboardWorkoutTabState extends State<CreateHangboardWorkoutTab>
   @override
   bool get wantKeepAlive => true;
 }
-*/
