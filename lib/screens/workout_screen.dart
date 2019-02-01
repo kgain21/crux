@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/screens/exercise_page_view.dart';
 import 'package:crux/screens/exercise_screen.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
@@ -145,8 +146,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         onTap: () {
           Navigator.push(context, MaterialPageRoute(
             builder: (context) {
-              return new ExerciseScreen(
-                title: '${snapshot.data.documents[index].documentID} Exercises',
+              return new ExercisePageView(
+                title: '${snapshot.data.documents[index].documentID}',
                 snapshot: snapshot.data.documents[index],
                 auth: widget.auth,
               );

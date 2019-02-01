@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/dashboard_screen.dart';
+import 'package:crux/screens/exercise_page_view.dart';
 import 'package:crux/screens/hangboard_workout_screen.dart';
 import 'package:crux/screens/sign_in_screen.dart';
 import 'package:crux/screens/spotify_test_screen.dart';
@@ -9,7 +10,7 @@ import 'package:crux/screens/stopwatch_screen.dart';
 import 'package:crux/screens/workout_screen.dart';
 import 'package:crux/utils/auth.dart';
 import 'package:crux/utils/base_auth.dart';
-import 'package:crux/widgets/timer_text.dart';
+import 'package:crux/widgets/workout_timer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -104,8 +105,9 @@ class MyApp extends StatelessWidget {
             title: title, auth: auth, firestore: firestore),
         '/workout_screen': (context) => WorkoutScreen(
             title: 'Hangboard Workouts', auth: auth, firestore: firestore),
-        '/countdown_timer_screen': (context) => TimerTextAnimator(),
+        '/countdown_timer_screen': (context) => WorkoutTimer(),
         '/spotify_test_screen': (context) => SpotifyTestScreen(),
+        '/exercise_page_view': (context) => ExercisePageView(),
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/screens/create_hangboard_workout_tab.dart';
 import 'package:crux/screens/edit_hangboard_workout_tab.dart';
+import 'package:crux/screens/exercise_tab.dart';
 import 'package:crux/screens/hangboard_workout_list_tab.dart';
 import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
@@ -27,12 +28,26 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
     with TickerProviderStateMixin {
   //AsyncMemoizer _memoizer = AsyncMemoizer();
 
+
   TabController tabController;
+  int _exerciseLength;
 
   @override
   void initState() {
     super.initState();
+    //TODO: tabControllerBuilder for n number of exercises, possibly a future of length of exercise list from firebase?
+    //await getExerciseLength();
     tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+  }
+
+  //TODO: Left off here 1/15 - trying to add n number of tabs but not sure if that's possible yet
+  Future<void> getExerciseLength() async {
+
+    int exerciseLength = await widget.firestore.collection('hangboard').document('Max Hangs').snapshots().length;
+
+    setState(() {
+      _exerciseLength = exerciseLength;
+    });
   }
 
   @override
@@ -42,14 +57,58 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
         title: Text('Hangboard'),
         bottom: appBarTabs(),
       ),
-
       body: TabBarView(
         key: new PageStorageKey<String>('Hangboard'),
         controller: tabController,
         children: <Widget>[
-          EditHangboardWorkoutTab(),
+          new StreamBuilder<QuerySnapshot>(
+            stream: Firestore.instance.collection('hangboard').snapshots(),
+            builder: (context, snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                case ConnectionState.waiting:
+                  return Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Card(
+                      child: Column(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Retrieving workouts...'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                default:
+                  return ExerciseTab();
+
+
+              /*Expanded(
+                    child: ListView.builder(
+                      controller: new ScrollController(),
+                      //List of all workouts
+                      key: PageStorageKey('WorkoutListBuilder'),
+                      shrinkWrap: true,
+                      itemCount: snapshot.data.documents.length,
+                      itemBuilder: (context, docIndex) {
+                        return exerciseListBuilder(snapshot, docIndex);
+                      },
+                    ),
+                  );*/
+              }
+            },
+          ),
+
+          /*EditHangboardWorkoutTab(),
           HangboardWorkoutListTab(),
-          CreateHangboardWorkoutTab(),
+          CreateHangboardWorkoutTab(),*/
         ],
       ),
       bottomNavigationBar: FABBottomAppBar(
@@ -90,15 +149,15 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen>
     return TabBar(
       tabs: <Tab>[
         Tab(
-          icon: Icon(Icons.edit),
+          //icon: Icon(Icons.edit),
           text: 'Edit',
         ),
         Tab(
-          icon: Icon(Icons.list),
+          //icon: Icon(Icons.list),
           text: 'Workout',
         ),
         Tab(
-          icon: Icon(Icons.add),
+          //icon: Icon(Icons.add),
           text: 'Add',
         ),
       ],

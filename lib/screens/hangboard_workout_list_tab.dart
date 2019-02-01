@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/widgets/hangboard_list_tile.dart';
+import 'package:crux/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -91,7 +91,7 @@ class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
               itemCount: snapshot.data.documents[docIndex].data['exercises'].length,
               shrinkWrap: true,
               itemBuilder: (context, fieldIndex) {
-                return HangboardListTile(
+                return HangboardPage(
                     index: fieldIndex,
                     exerciseParameters: Map<String, dynamic>.from(snapshot
                     .data

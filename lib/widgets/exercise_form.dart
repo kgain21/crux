@@ -22,7 +22,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
   int _restTime;
   GlobalKey<FormState> formKey;
 
-
   //TODO: MAKE DEPTH/RES STRINGS W/ SELECTED UNITS ATTACHED
   String _resistance;
   String _depth;
@@ -41,21 +40,20 @@ class _ExerciseFormState extends State<ExerciseForm> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      formKey = new GlobalKey<FormState>(debugLabel: 'ExerciseForm');
-      /// Not sure if i even want this functionality so i'm moving on for now,
-      /// but I'm looking to pull the unit from sharedPrefs if possible, dana
-      /// said it was ugly so maybe not but we'll see
-      //https://stackoverflow.com/questions/33905268/returning-a-string-from-an-async
-      _depthMeasurementSystem = 'mm';
-      _resistanceMeasurementSystem = 'kg';
-      _depthSelected = true;
-      _repsSelected = true;
-      _resistanceSelected = true;
-      _repTimeSelected = true;
-      _restTimeSelected = true;
-      _autoValidate = false;
-    });
+    formKey = new GlobalKey<FormState>(debugLabel: 'ExerciseForm');
+
+    /// Not sure if i even want this functionality so i'm moving on for now,
+    /// but I'm looking to pull the unit from sharedPrefs if possible, dana
+    /// said it was ugly so maybe not but we'll see
+    //https://stackoverflow.com/questions/33905268/returning-a-string-from-an-async
+    _depthMeasurementSystem = 'mm';
+    _resistanceMeasurementSystem = 'kg';
+    _depthSelected = true;
+    _repsSelected = true;
+    _resistanceSelected = true;
+    _repTimeSelected = true;
+    _restTimeSelected = true;
+    _autoValidate = false;
   }
 
   @override
@@ -64,7 +62,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
       elevation: 4.0,
       child: Form(
         //key: widget.formKey,
-          /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
+        /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
           TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
           https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
           TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
@@ -153,7 +151,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
   Widget gripDropdownTile() {
     return new Card(
-      color: Colors.blueGrey,
+      //color: Colors.blueGrey,
       child: new ListTile(
         leading: Icon(
           Icons.pan_tool,
@@ -172,7 +170,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
             },
             items: Grip.values.map((Grip grip) {
               return new DropdownMenuItem<Grip>(
-                child: new Text(formatGrip(grip), style: TextStyle(color: Colors.black),),
+                child: new Text(
+                  formatGrip(grip),
+                ),
                 value: grip,
               );
             }).toList(),

@@ -3,7 +3,7 @@ import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
 import 'package:crux/widgets/exercise_form.dart';
-import 'package:crux/widgets/hangboard_list_tile.dart';
+import 'package:crux/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -62,7 +62,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 itemCount: widget.snapshot.data['exercises'].length,
                 shrinkWrap: true,
                 itemBuilder: (context, fieldIndex) {
-                  return HangboardListTile(
+                  return HangboardPage(
                     index: fieldIndex,
                     exerciseParameters: Map<String, dynamic>.from(
                         widget.snapshot.data['exercises'][fieldIndex]),
