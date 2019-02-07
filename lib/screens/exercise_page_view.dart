@@ -155,7 +155,7 @@ class _ExercisePageViewState extends State<ExercisePageView>
     if (index >= (_index - 1)) {
       return newExercisePage();
     }
-    if (index == _currentPageValue.floor()) {
+    /*if (index == _currentPageValue.floor()) {
       return Transform(
         transform: Matrix4.identity()..rotateX(_currentPageValue - index),
         child: HangboardPage(
@@ -173,7 +173,7 @@ class _ExercisePageViewState extends State<ExercisePageView>
               widget.snapshot.data['exercises'][index]),
         ),
       );
-    } else {
+    } */else {
       return HangboardPage(
         index: index,
         exerciseParameters:

@@ -327,7 +327,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
 
   //TODO: make this do more
   void handleError(Error error) {
-    print(error);
+    print('Printing from WorkoutTimer handleError: $error');
   }
 
   /// Resets the timer based on its current status. This method is passed to the

@@ -142,13 +142,11 @@ class _HangboardPageState
         switchForward: true,
         time: _restTime,
       );
-      _hangs = _hangs > 0 ? _hangs - 1 : (() {
-        _hangs = 0;
-        return AlertDialog(content: Text('Set Finished!'),);
-      });
-      //TODO: left off here 1/31
-      //todo: some kind of overlay telling you you're done
+      _hangs = _hangs > 0 ? (_hangs - 1) : 0;
+      // return AlertDialog(content: Text('Set Finished!'),);
     });
+    //TODO: left off here 1/31
+    //todo: some kind of overlay telling you you're done
   }
 
   void notifyParentForwardComplete() {

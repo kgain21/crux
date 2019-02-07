@@ -6,25 +6,24 @@ import 'package:flutter/widgets.dart';
 /// on the [hangboard] workout creator screen.
 class UnitPickerTile extends StatefulWidget {
 
+  final Function depthCallback;
+  final Function resistanceCallback;
+
+  UnitPickerTile({this.depthCallback, this.resistanceCallback});
+
   @override
   State createState() => _UnitPickerTileState();
 }
 
 class _UnitPickerTileState extends State<UnitPickerTile> {
-
-  var _unitRow;
   String _depthMeasurementSystem;
   String _resistanceMeasurementSystem;
-
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _depthMeasurementSystem = 'millimeters';
-      _resistanceMeasurementSystem = 'kilograms';
-      _unitRow = initializeUnitRow();
-    });
+    _depthMeasurementSystem = 'millimeters';
+    _resistanceMeasurementSystem = 'kilograms';
   }
 
   @override
@@ -33,11 +32,10 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
       child: Column(
         children: <Widget>[
           new ExpansionTile(
-            key: PageStorageKey<Row>(_unitRow),
             initiallyExpanded: true,
             title: new Text('Select your units'),
             children: <Widget>[
-              _unitRow,
+              unitRow(),
             ],
           ),
         ],
@@ -45,7 +43,7 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
     );
   }
 
-  Widget initializeUnitRow() {
+  Widget unitRow() {
     return new Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -72,6 +70,7 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                   setState(() {
                     _depthMeasurementSystem = value;
                   });
+                  widget.depthCallback(value);
                 },
               ),
               new RadioListTile(
@@ -87,6 +86,7 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                   setState(() {
                     _depthMeasurementSystem = value;
                   });
+                  widget.depthCallback(value);
                 },
               ),
             ],
@@ -115,6 +115,7 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                   setState(() {
                     _resistanceMeasurementSystem = value;
                   });
+                  widget.resistanceCallback(value);
                 },
               ),
               new RadioListTile(
@@ -130,6 +131,7 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                   setState(() {
                     _resistanceMeasurementSystem = value;
                   });
+                  widget.resistanceCallback(value);
                 },
               ),
             ],
