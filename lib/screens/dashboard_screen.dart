@@ -49,17 +49,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: ListView(
           children: <Widget>[
             //TODO: what do i want common across all screens?
-            DrawerHeader(
-              child: Text('Drawer Header'),
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 44, 62, 80),
+            Container(
+              color: Theme.of(context).accentColor,
+              child: DrawerHeader(
+                child: Text('Drawer Header'),
+                /*decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 44, 62, 80),
+                ),*/
               ),
             ),
             ListTile(
-              title: Text('Profile', style: TextStyle(color: Colors.black),),
+              title: Text(
+                'Profile',
+//                style: TextStyle(color: Colors.black),
+              ),
             ),
             ListTile(
-              title: Text('Hangboard', style: TextStyle(color: Colors.black),),
+              title: Text(
+                'Hangboard',
+//                style: TextStyle(color: Colors.black),
+              ),
               onTap: () {
                 //Pop drawer before navigating so that it doesn't remain when returning
                 Navigator.pop(context);
@@ -67,7 +76,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              title: Text('Spotify', style: TextStyle(color: Colors.black),),
+              title: Text(
+                'Spotify',
+//                style: TextStyle(color: Colors.black),
+              ),
               onTap: () {
                 //Pop drawer before navigating so that it doesn't remain when returning
                 Navigator.pop(context);
@@ -75,10 +87,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             ListTile(
-              title: Text('Campus', style: TextStyle(color: Colors.black),),
+              title: Text(
+                'Campus',
+//                style: TextStyle(color: Colors.black),
+              ),
             ),
             ListTile(
-              title: Text('Progress', style: TextStyle(color: Colors.black),),
+              title: Text(
+                'Progress',
+//                style: TextStyle(color: Colors.black),
+              ),
             ),
           ],
         ),
@@ -90,8 +108,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Card(
               child: Material(
-                textStyle: TextStyle(color: Colors.black),
-                color: Colors.blueGrey,
+//                textStyle: TextStyle(color: Colors.black),
+//                color: Colors.blueGrey,
                 child: new Calendar(
                   /*dayBuilder: (context, dateTime) {
                     if(dateTime.day == DateTime.now().day) {
@@ -154,7 +172,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                         ),
-                        //TODO: make text white in main theme
                         Card(
                           child: new ListTile(
                             title: new Text(
@@ -259,7 +276,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         left: size.width / 6.0,
         top: size.height / 4.0,
         child: Card(
-          color: Color.fromARGB(255, 44, 62, 80),
+//          color: Color.fromARGB(255, 44, 62, 80),
           child: Column(
             children: <Widget>[
               GestureDetector(
@@ -272,7 +289,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 '${date.toString()}',
                 //TODO: going to need to go to db to find workout assoc w/ this day
                 //TODO: if nothing there, option to create new or select from premade workouts
-                style: TextStyle(fontSize: 12.0, color: Colors.black),
+//                style: TextStyle(fontSize: 12.0, color: Colors.black),
               ),
             ],
           ),

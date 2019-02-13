@@ -22,8 +22,8 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
   @override
   void initState() {
     super.initState();
-    _depthMeasurementSystem = 'millimeters';
-    _resistanceMeasurementSystem = 'kilograms';
+    /*_depthMeasurementSystem = 'mm';
+    _resistanceMeasurementSystem = 'kg';*/
   }
 
   @override
@@ -32,6 +32,7 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
       child: Column(
         children: <Widget>[
           new ExpansionTile(
+            key: PageStorageKey('unitPickerTile'),
             initiallyExpanded: true,
             title: new Text('Select your units'),
             children: <Widget>[
@@ -59,13 +60,13 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
               ),
               new RadioListTile(
                 title: Text(
-                  'Metric (mm)',
+                  'Millimeters (mm)',
                   style: TextStyle(
                     fontSize: 14.0,
                   ),
                 ),
                 groupValue: _depthMeasurementSystem,
-                value: 'millimeters',
+                value: 'mm',
                 onChanged: (value) {
                   setState(() {
                     _depthMeasurementSystem = value;
@@ -75,13 +76,13 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
               ),
               new RadioListTile(
                 title: Text(
-                  'English (in)',
+                  'Inches (in)',
                   style: TextStyle(
                     fontSize: 14.0,
                   ),
                 ),
                 groupValue: _depthMeasurementSystem,
-                value: 'inches',
+                value: 'in',
                 onChanged: (value) {
                   setState(() {
                     _depthMeasurementSystem = value;
@@ -104,13 +105,13 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
               ),
               new RadioListTile(
                 title: Text(
-                  'Metric (kg)',
+                  'Kilograms (kg)',
                   style: TextStyle(
                     fontSize: 14.0,
                   ),
                 ),
                 groupValue: _resistanceMeasurementSystem,
-                value: 'kilograms',
+                value: 'kg',
                 onChanged: (value) {
                   setState(() {
                     _resistanceMeasurementSystem = value;
@@ -120,13 +121,13 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
               ),
               new RadioListTile(
                 title: Text(
-                  'English (lb)',
+                  'Pounds (lb)',
                   style: TextStyle(
                     fontSize: 14.0,
                   ),
                 ),
                 groupValue: _resistanceMeasurementSystem,
-                value: 'pounds',
+                value: 'lb',
                 onChanged: (value) {
                   setState(() {
                     _resistanceMeasurementSystem = value;

@@ -47,7 +47,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     } else {
       duration = _controller.duration * _controller.value;
     }
-    return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}:${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';
+    return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';
   }
 
   void setTimerRunning(bool timerRunning) async {
@@ -250,7 +250,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
             painter: TimerPainter(
               animation: _controller,
               backgroundColor: Colors.black,
-              color: Colors.green,
+              color: Theme.of(context).accentColor,
             ),
           );
         },

@@ -49,6 +49,7 @@ class DotsIndicator extends AnimatedWidget {
       width: _kDotSpacing,
       child: new Center(
         child: new Material(
+          elevation: 3.0,
           color: color,
           type: MaterialType.circle,
           child: new Container(

@@ -41,11 +41,21 @@ class MyApp extends StatelessWidget {
       title: title,
       theme: ThemeData(
         //primaryColor: Color.fromARGB(255, 103, 126, 116),
-        primaryColor: Colors.blueGrey,
+        primaryColor: Color(0xFFb0bec5),
+        primaryColorLight: Color(0xFFe2f1f8),
+        primaryColorDark: Color(0xFF808e95),
+        bottomAppBarColor: Color(0xFFe2f1f8),
+        secondaryHeaderColor: Color(0xFF009624),
+        accentColor: Color(0xFF64dd17),
+        primaryColorBrightness: Brightness.light
+        //canvasColor: Color(0xFF64dd17),
+
+
+
         //midnight blue
-        backgroundColor: Colors.blueGrey,
-        scaffoldBackgroundColor: Color.fromARGB(255, 44, 62, 80),
-        cardColor: Color.fromARGB(255, 44, 62, 80),
+        //backgroundColor: Colors.blueGrey,
+        //scaffoldBackgroundColor: Color.fromARGB(255, 44, 62, 80),
+        /*cardColor: Color.fromARGB(255, 44, 62, 80),
         hintColor: Colors.white,
         textTheme: new TextTheme(
           display4: TextStyle(
@@ -93,7 +103,7 @@ class MyApp extends StatelessWidget {
         ),
         iconTheme: IconThemeData(
           color: Colors.white,
-        ),
+        ),*/
 
       ),
       home: new SignInScreen(title: title, auth: auth),
@@ -111,4 +121,6 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+
+
 }

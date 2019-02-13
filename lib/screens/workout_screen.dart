@@ -95,19 +95,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: new FABBottomAppBar(
-        backgroundColor: Colors.blueGrey,
-        color: Colors.black54,
-        selectedColor: Colors.black,
+      /*bottomNavigationBar: new FABBottomAppBar(
+//        backgroundColor: Colors.blueGrey,
+//        color: Colors.black54,
+//        selectedColor: Colors.black,
         items: <FABBottomAppBarItem>[
           FABBottomAppBarItem(
             iconData: Icons.home,
             text: 'Home',
           ),
-          /*FABBottomAppBarItem(
+          *//*FABBottomAppBarItem(
             iconData: Icons.menu,
             text: 'Menu',
-          ),*/
+          ),*//*
         ],
         onTabSelected: (index) {
           if (index == 0) {
@@ -117,9 +117,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             return null;
           }
         },
-      ),
+      ),*/
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blueGrey,
+//        backgroundColor: Colors.blueGrey,
         onPressed: () {
           Navigator.push(
             context,
@@ -133,7 +133,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         child: Icon(Icons.edit),
         //backgroundColor: Color.fromARGB(255, 44, 62, 80),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       //bottomSheet: new BottomSheet(onClosing: null, builder: null),
     );
   }

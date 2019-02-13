@@ -46,24 +46,69 @@ class _HangboardPageState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        holdText(),
-        hangsAndResistanceCheckbox(),
-        workoutTimerContainer(),
-        switchButtonRow(),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(
+            color: Theme.of(context).primaryColorDark,
+            width: 20.0,
+          ),
+          right: BorderSide(
+            color: Theme.of(context).primaryColorDark,
+            width: 20.0,
+          ),
+          top: BorderSide(
+            color: Theme.of(context).primaryColorDark,
+            width: 20.0,
+          ),
+          bottom: BorderSide(
+            color: Theme.of(context).primaryColorDark,
+            width: 60.0,
+          ),
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(color: Colors.black54, blurRadius: 6.0),
+          ],
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          color: Theme.of(context).canvasColor,
+        ),
+        child: Column(
+          children: <Widget>[
+            holdText(),
+            hangsAndResistanceCheckbox(),
+            workoutTimerContainer(),
+            switchButtonRow(),
+          ],
+        ),
+      ),
     );
   }
 
   Widget holdText() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
-      child: Text(
-        formatDepthAndGrip(_depth, _depthMeasurementSystem, _grip),
-        style: TextStyle(
-          fontSize: 26.0,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(color: Colors.black26, blurRadius: 2.0, offset: Offset(0.0, 2.0)),
+        ],
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+        color: Theme.of(context).accentColor,
+      ),
+      child: Row(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
+            child: Text(
+              formatDepthAndGrip(_depth, _depthMeasurementSystem, _grip),
+              style: TextStyle(
+                fontSize: 26.0,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -101,11 +146,13 @@ class _HangboardPageState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new InputChip(
-            label: Text('Exercise'),
-            onPressed: () {
-              switchTimer(false, _repTime);
-            },
+          Container(
+            child: new InputChip(
+              label: Text('Exercise'),
+              onPressed: () {
+                switchTimer(false, _repTime);
+              },
+            ),
           ),
           new InputChip(
             label: Text('   Rest   '),

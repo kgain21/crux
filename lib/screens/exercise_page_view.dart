@@ -51,72 +51,77 @@ class _ExercisePageViewState extends State<ExercisePageView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Scaffold(
-      appBar: new AppBar(
-        title: Text(widget.title),
+    return Center(
+      child: Scaffold(
+        appBar: new AppBar(
+          title: Text(widget.title),
+        ),
+        body: Container(
+          color: Theme.of(context).primaryColorDark,
+          child: Stack(
+          children: <Widget>[
+            PageView.builder(
+              key: PageStorageKey('page-$_index'),
+              itemCount: _index,
+              controller: _controller,
+              itemBuilder: (context, index) {
+                //TODO: need to generalize this for other types of exercises
+                //TODO: UPDATE -- do i? this is just for hangboarding for now - come back to this
+                return animatedHangboardPage(index);
+              },
+            ),
+            dotsIndicator(),
+          ],
+            ),
+        ),
+        /*bottomNavigationBar: new FABBottomAppBar(
+//        backgroundColor: Colors.blueGrey,
+          //Color.fromARGB(255, 44, 62, 80),
+          //midnight blue// Colors.white,
+          //Color.fromARGB(255, 229, 191, 126),
+//        color: Colors.white,
+//        selectedColor: Colors.white,
+          items: <FABBottomAppBarItem>[
+            FABBottomAppBarItem(
+              iconData: Icons.home,
+              text: 'Home',
+            ),
+            *//*FABBottomAppBarItem(
+              iconData: Icons.menu,
+              text: 'Menu',
+            ),*//*
+          ],
+          onTabSelected: (index) {
+            if (index == 0) {
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/dashboard_screen'));
+            } else {
+              return null;
+            }
+          },
+        ),*/
+        /*floatingActionButton: FloatingActionButton(
+          *//*onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  //TODO: finished here - make this an edit toggle button -> new exercise button appears and dropdowns become selectable to be edited in the form
+                  return ExerciseFormTile(
+                    formKey: new GlobalKey<FormState>(),
+                    exerciseTitle: 'Needs to change',
+                    workoutTitle: widget.title,
+                  );
+                }),
+              );
+            },*//*
+          onPressed: () {
+            showOverlay(context);
+          },
+          child: Icon(Icons.edit),
+          //backgroundColor: Colors.blueGrey, //Color.fromARGB(255, 44, 62, 80),
+        ),*/
+//        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       ),
-      body: Stack(
-        children: <Widget>[
-          PageView.builder(
-            key: PageStorageKey('page-$_index'),
-            itemCount: _index,
-            controller: _controller,
-            itemBuilder: (context, index) {
-              //TODO: need to generalize this for other types of exercises
-              //TODO: UPDATE -- do i? this is just for hangboarding for now - come back to this
-              return animatedHangboardPage(index);
-            },
-          ),
-          dotsIndicator(),
-        ],
-      ),
-      bottomNavigationBar: new FABBottomAppBar(
-        backgroundColor: Colors.blueGrey,
-        //Color.fromARGB(255, 44, 62, 80),
-        //midnight blue// Colors.white,
-        //Color.fromARGB(255, 229, 191, 126),
-        color: Colors.white,
-        selectedColor: Colors.white,
-        items: <FABBottomAppBarItem>[
-          FABBottomAppBarItem(
-            iconData: Icons.home,
-            text: 'Home',
-          ),
-          /*FABBottomAppBarItem(
-            iconData: Icons.menu,
-            text: 'Menu',
-          ),*/
-        ],
-        onTabSelected: (index) {
-          if (index == 0) {
-            Navigator.popUntil(
-                context, ModalRoute.withName('/dashboard_screen'));
-          } else {
-            return null;
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        /*onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) {
-                //TODO: finished here - make this an edit toggle button -> new exercise button appears and dropdowns become selectable to be edited in the form
-                return ExerciseFormTile(
-                  formKey: new GlobalKey<FormState>(),
-                  exerciseTitle: 'Needs to change',
-                  workoutTitle: widget.title,
-                );
-              }),
-            );
-          },*/
-        onPressed: () {
-          showOverlay(context);
-        },
-        child: Icon(Icons.edit),
-        backgroundColor: Colors.blueGrey, //Color.fromARGB(255, 44, 62, 80),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 
@@ -188,10 +193,11 @@ class _ExercisePageViewState extends State<ExercisePageView>
       left: 0.0,
       right: 0.0,
       child: new Container(
-        color: Color.fromARGB(255, 44, 62, 80),
+        //color: Color.fromARGB(255, 44, 62, 80),
         padding: const EdgeInsets.all(20.0),
         child: new Center(
           child: new DotsIndicator(
+            color: Theme.of(context).primaryColor,
             controller: _controller,
             itemCount: _index,
             onPageSelected: (int page) {
