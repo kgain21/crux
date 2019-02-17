@@ -45,7 +45,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
   bool _gripSelected;
   bool _hangProtocolSelected;
-  bool _resistanceSelected;
   bool _autoValidate;
 
   @override
@@ -55,7 +54,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
     _gripSelected = false;
     _depthMeasurementSystem = 'mm';
     _resistanceMeasurementSystem = 'kg';
-    _resistanceSelected = true;
     _hangProtocolSelected = false;
     _autoValidate = false;
   }
@@ -397,15 +395,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
   Widget resistanceTile() {
     return Card(
-      child: SwitchListTile(
+      child: ListTile(
         key: PageStorageKey<String>('resistanceTile'),
-        selected: _resistanceSelected,
-        onChanged: (value) {
-          setState(() {
-            _resistanceSelected = value;
-          });
-        },
-        value: _resistanceSelected,
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
@@ -489,18 +480,12 @@ class _ExerciseFormState extends State<ExerciseForm> {
   }
 
   void saveHangboardWorkoutToFirebase() {
-//    DocumentReference reference =
-//        Firestore.instance.document('hangboard/${widget.workoutTitle}');
     CollectionReference collectionReference = Firestore.instance
         .collection('hangboard/${widget.workoutTitle}/exercises');
 
     var data = createHangboardData();
     String dataId = createDataId(data);
 
-//    var collectionSnapshot = collectionReference.snapshots();
-//    var documentSnapshot = reference.snapshots();
-
-    // collectionReference.add(data);
     //TODO: DEFINITELY NEED SOME ERROR HANDLING HERE IF SAVE FAILS
     var exerciseRef = collectionReference.document(dataId);
     exerciseRef.get().then((doc) {
@@ -557,8 +542,15 @@ class _ExerciseFormState extends State<ExerciseForm> {
     var grip = data['grip'];
     var fingerConfiguration = data['fingerConfiguration'];
 
-    return '$depth$measurement $fingerConfiguration $grip'
-        .replaceAll("  ", " ");
+    if(depth == null || depth == '') {
+      if(fingerConfiguration == null || fingerConfiguration == '') {
+        return grip;
+      } else {
+        return '$fingerConfiguration $grip';
+      }
+    } else {
+      return '$depth$measurement $fingerConfiguration $grip';
+    }
   }
 
   List<Widget> mapFingerConfigurations(Grip grip) {

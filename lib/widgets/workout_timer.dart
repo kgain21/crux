@@ -242,16 +242,25 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   /// controlled by the [_controller] and is the main visual component of the
   /// [WorkoutTimer].
   Widget circularTimer() {
-    return Positioned.fill(
+    return Positioned(
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          return new CustomPaint(
+          return CustomPaint(
             painter: TimerPainter(
               animation: _controller,
-              backgroundColor: Colors.black,
+              backgroundColor: Theme.of(context).primaryColorDark,
               color: Theme.of(context).accentColor,
             ),
+            child: //RaisedButton(onPressed: null, color: Theme.of(context).canvasColor,shape: CircleBorder(),),
+                Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).canvasColor),
+                  ),
+                ),
           );
         },
       ),
@@ -360,8 +369,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
 
   Widget loadingScreen() {
     return Column(
-      children: <Widget>[
-      ],
+      children: <Widget>[],
     );
   }
 
@@ -370,13 +378,12 @@ class _WorkoutTimerState extends State<WorkoutTimer>
 /*vvv DISPOSE METHODS vvv*/
   void setSharedPrefsBeforeDispose() {
     setForwardAnimation(_forwardAnimation);
-    setEndValue(_controller.value?? 0.0);
+    setEndValue(_controller.value ?? 0.0);
     setEndTimeMillis(DateTime.now().millisecondsSinceEpoch);
     setTime(_currentTime);
   }
 
 /*^^^ DISPOSE METHODS ^^^*/
-
 
   @override
 // TODO: implement wantKeepAlive

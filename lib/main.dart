@@ -46,7 +46,8 @@ class MyApp extends StatelessWidget {
         primaryColorDark: Color(0xFF808e95),
         bottomAppBarColor: Color(0xFFe2f1f8),
         secondaryHeaderColor: Color(0xFF009624),
-        accentColor: Color(0xFF64dd17),
+        accentColor: Color(0xFF76ff03),
+
         primaryColorBrightness: Brightness.light
         //canvasColor: Color(0xFF64dd17),
 

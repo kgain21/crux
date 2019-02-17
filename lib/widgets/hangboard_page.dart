@@ -12,19 +12,21 @@ class HangboardPage extends StatefulWidget {
   State<HangboardPage> createState() => _HangboardPageState();
 }
 
-class _HangboardPageState
-    extends State<HangboardPage> /*with AutomaticKeepAliveClientMixin*/ {
+class _HangboardPageState extends State<HangboardPage> {
   PageStorageKey timerKey;
 
-  //todo: wrap these in data class?
   int _depth;
-  int _resistance;
   String _depthMeasurementSystem;
-  String _resistanceMeasurementSystem;
+  String _fingerConfiguration;
   String _grip;
-  int _hangs;
-  int _repTime;
-  int _restTime;
+  int _hangsPerSet;
+  int _numberOfSets;
+  int _resistance;
+  String _resistanceMeasurementSystem;
+  int _timeBetweenSets;
+  int _timeOff;
+  int _timeOn;
+
   bool _didFinishSet;
   WorkoutTimer _workoutTimer;
 
@@ -35,7 +37,7 @@ class _HangboardPageState
     getParams(widget.exerciseParameters);
     _workoutTimer = WorkoutTimer(
       id: widget.index.toString(),
-      time: _repTime,
+      time: _timeOn,
       switchForward: false,
       switchTimer: false,
       //TODO: is there a better way to do this?
@@ -51,15 +53,15 @@ class _HangboardPageState
         border: Border(
           left: BorderSide(
             color: Theme.of(context).primaryColorDark,
-            width: 20.0,
+            width: 15.0,
           ),
           right: BorderSide(
             color: Theme.of(context).primaryColorDark,
-            width: 20.0,
+            width: 15.0,
           ),
           top: BorderSide(
             color: Theme.of(context).primaryColorDark,
-            width: 20.0,
+            width: 15.0,
           ),
           bottom: BorderSide(
             color: Theme.of(context).primaryColorDark,
@@ -69,13 +71,20 @@ class _HangboardPageState
       ),
       child: Container(
         decoration: BoxDecoration(
+          //border: Border.all(color: Colors.black, width: 2.0),
           boxShadow: [
-            BoxShadow(color: Colors.black54, blurRadius: 6.0),
+            BoxShadow(
+              color: Colors.black54,
+              blurRadius: 6.0,
+              offset: Offset(0.0, 2.0),
+              /*spreadRadius: 2.0,*/
+            ),
           ],
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
           color: Theme.of(context).canvasColor,
         ),
         child: Column(
+          //mainAxisAlignment: MainAxisAlignment.spaceE,
           children: <Widget>[
             holdText(),
             hangsAndResistanceCheckbox(),
@@ -90,21 +99,31 @@ class _HangboardPageState
   Widget holdText() {
     return Container(
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(color: Colors.black26, blurRadius: 2.0, offset: Offset(0.0, 2.0)),
-        ],
         borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+          topLeft: Radius.circular(10.0),
+          topRight: Radius.circular(8.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black54,
+            blurRadius: 6.0,
+            offset: Offset(0.0, 2.0),
+          ),
+        ],
         color: Theme.of(context).accentColor,
       ),
       child: Row(
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
-            child: Text(
-              formatDepthAndGrip(_depth, _depthMeasurementSystem, _grip),
-              style: TextStyle(
-                fontSize: 26.0,
+          Container(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
+              child: Text(
+                formatDepthAndGrip(_depth, _depthMeasurementSystem,
+                    _fingerConfiguration, _grip),
+                style: TextStyle(
+                  fontSize: 18.0,
+                  //fontWeight: FontWeight.bold
+                ),
               ),
             ),
           ),
@@ -114,17 +133,24 @@ class _HangboardPageState
   }
 
   Widget hangsAndResistanceCheckbox() {
-    return new CheckboxListTile(
-      value: _didFinishSet,
-      onChanged: (value) {
-        setState(() {
-          _didFinishSet = value;
-        });
-      },
-      title: Text(
-        formatHangsAndResistance(
-            _hangs, _resistance, _resistanceMeasurementSystem),
-        style: TextStyle(fontSize: 18.0),
+    return new ListTile(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Text(
+            formatHangsAndResistance(
+                _hangsPerSet, _resistance, _resistanceMeasurementSystem),
+            style: TextStyle(fontSize: 18.0),
+          ),
+          Text(
+            '|',
+            style: TextStyle(fontSize: 18.0),
+          ),
+          Text(
+            '$_numberOfSets sets',
+            style: TextStyle(fontSize: 18.0),
+          ),
+        ],
       ),
     );
   }
@@ -147,17 +173,21 @@ class _HangboardPageState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            child: new InputChip(
-              label: Text('Exercise'),
+            child: new RaisedButton(
+              elevation: 4.0,
+              child: Text('Exercise'),
               onPressed: () {
-                switchTimer(false, _repTime);
+                switchTimer(false, _timeOn);
               },
             ),
           ),
-          new InputChip(
-            label: Text('   Rest   '),
+          new RaisedButton(
+            elevation: 4.0,
+            // label: Text('   Rest   '),
+            child: Text('Rest'),
+
             onPressed: () {
-              switchTimer(true, _restTime);
+              switchTimer(true, _timeOff);
             },
           ),
         ],
@@ -187,13 +217,12 @@ class _HangboardPageState
         id: widget.index.toString(),
         switchTimer: true,
         switchForward: true,
-        time: _restTime,
+        time: _timeOff,
       );
-      _hangs = _hangs > 0 ? (_hangs - 1) : 0;
+      _hangsPerSet = _hangsPerSet > 0 ? (_hangsPerSet - 1) : 0;
       // return AlertDialog(content: Text('Set Finished!'),);
+      // start timebetweensets if applicable
     });
-    //TODO: left off here 1/31
-    //todo: some kind of overlay telling you you're done
   }
 
   void notifyParentForwardComplete() {
@@ -204,17 +233,21 @@ class _HangboardPageState
         id: widget.index.toString(),
         switchTimer: true,
         switchForward: false,
-        time: _repTime,
+        time: _timeOn,
       );
     });
   }
 
-  String formatDepthAndGrip(
-      int depth, String depthMeasurementSystem, String grip) {
+  String formatDepthAndGrip(int depth, String depthMeasurementSystem,
+      String fingerConfiguration, String grip) {
     if (depth == null || depth == 0) {
-      return grip;
+      if (fingerConfiguration == null || fingerConfiguration == '') {
+        return grip;
+      } else {
+        return '$fingerConfiguration $grip';
+      }
     } else {
-      return '$depth$depthMeasurementSystem $grip';
+      return '$depth$depthMeasurementSystem $fingerConfiguration $grip';
     }
   }
 
@@ -236,128 +269,43 @@ class _HangboardPageState
   }
 
 //TODO: should this be separated from the widget in a dao?
-//TODO: call the getParams method on expand? might be slow
   void getParams(Map<String, dynamic> exerciseParameters) {
-    setState(() {
-      _depth = getDepth(exerciseParameters);
-      _depthMeasurementSystem = getDepthMeasurementSystem(exerciseParameters);
-      _resistance = getResistance(exerciseParameters);
-      _resistanceMeasurementSystem =
-          getResistanceMeasurementSystem(exerciseParameters);
-      _grip = getGrip(exerciseParameters);
-      _repTime = getRepTime(exerciseParameters);
-      _restTime = getRestTime(exerciseParameters);
-      _hangs = getHangs(exerciseParameters);
-    });
+    _depth = getIntVal(exerciseParameters, 'depth');
+    _depthMeasurementSystem =
+        getStringVal(exerciseParameters, 'depthMeasurementSystem');
+    _fingerConfiguration =
+        getStringVal(exerciseParameters, 'fingerConfiguration');
+    _grip = getStringVal(exerciseParameters, 'grip');
+    _hangsPerSet = getIntVal(exerciseParameters, 'hangsPerSet');
+    _numberOfSets = getIntVal(exerciseParameters, 'numberOfSets');
+    _resistance = getIntVal(exerciseParameters, 'resistance');
+    _resistanceMeasurementSystem =
+        getStringVal(exerciseParameters, 'resistanceMeasurementSystem');
+    _timeBetweenSets = getIntVal(exerciseParameters, 'timeBetweenSets');
+    _timeOn = getIntVal(exerciseParameters, 'timeOn');
+    _timeOff = getIntVal(exerciseParameters, 'timeOff');
   }
 
-  int getDepth(Map<String, dynamic> exerciseParameters) {
+  int getIntVal(Map<String, dynamic> exerciseParameters, String fieldName) {
     try {
-      var depth = exerciseParameters['depth'];
-      if (depth is int) return depth;
+      var intVal = exerciseParameters[fieldName];
+      if (intVal is int) return intVal;
     } on Exception catch (e) {
-      print('Unable to find depth: $e');
+      print('Unable to find $fieldName: $e');
     }
     return 0;
   }
 
-  String getDepthMeasurementSystem(Map<String, dynamic> exerciseParameters) {
+  String getStringVal(
+      Map<String, dynamic> exerciseParameters, String fieldName) {
     try {
-      var depthMeasurementSystem = exerciseParameters['depthMeasurementSystem'];
-      if (depthMeasurementSystem is String) {
-        return depthMeasurementSystem;
+      var stringVal = exerciseParameters[fieldName];
+      if (stringVal is String) {
+        return stringVal;
       }
     } on Exception catch (e) {
-      print('Unable to find depthMeasurementSystem: $e');
+      print('Unable to find $fieldName: $e');
     }
     return '';
   }
-
-  int getResistance(Map<String, dynamic> exerciseParameters) {
-    try {
-      var resistance = exerciseParameters['resistance'];
-      if (resistance is int) {
-        return resistance;
-      }
-    } on Exception catch (e) {
-      print('Unable to find resistance: $e');
-    }
-    return 0;
-  }
-
-  String getResistanceMeasurementSystem(
-      Map<String, dynamic> exerciseParameters) {
-    try {
-      var resistanceMeasurementSystem =
-          exerciseParameters['resistanceMeasurementSystem'];
-      if (resistanceMeasurementSystem is String) {
-        return resistanceMeasurementSystem;
-      }
-    } on Exception catch (e) {
-      print('Unable to find resistanceMeasurementSystem: $e');
-    }
-    return '';
-  }
-
-//TODO: required
-  String getGrip(Map<String, dynamic> exerciseParameters) {
-    try {
-      var grip = exerciseParameters['grip'];
-      if (grip is String) {
-        return grip;
-      }
-    } on Exception catch (e) {
-      print('Unable to find grip: $e');
-    }
-    return '';
-  }
-
-//TODO: required
-  int getHangs(Map<String, dynamic> exerciseParameters) {
-    try {
-      var hangs = exerciseParameters['hangs'];
-      if (hangs is int) {
-        return hangs;
-      }
-    } on Exception catch (e) {
-      print('Unable to find hangs: $e');
-    }
-    return 0;
-  }
-
-//TODO: required
-  int getRepTime(Map<String, dynamic> exerciseParameters) {
-    try {
-      var repTime = exerciseParameters['repTime'];
-      if (repTime is int) {
-        return repTime;
-      }
-    } on Exception catch (e) {
-      print('Unable to find repTime: $e');
-    }
-    return 0;
-  }
-
-  int getRestTime(Map<String, dynamic> exerciseParameters) {
-    try {
-      var restTime = exerciseParameters['restTime'];
-      if (restTime is int) {
-        return restTime;
-      }
-    } on Exception catch (e) {
-      print('Unable to find restTime: $e');
-    }
-    return 0;
-  }
-
-/*
-  @override
-  void updateKeepAlive() {
-    // TODO: implement updateKeepAlive
-  }
-*/
-
-/*@override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;*/
 }

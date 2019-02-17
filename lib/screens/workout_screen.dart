@@ -31,7 +31,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               StreamBuilder<QuerySnapshot>(
-                stream: widget.firestore.collection('/hangboard').snapshots(),
+                stream: Firestore.instance.collection('/hangboard').snapshots(),
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
@@ -77,17 +77,20 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
               //TODO: make this an overlay? could be difficult w/ multiple sets/exercises - maybe just a new screen
               RaisedButton(
                 onPressed: () {
-                  showModalBottomSheet(context: context, builder: (context) => BottomSheet(
-                    onClosing: () {},
-                    builder: (context) {
-                      return Center(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 100.0, maxHeight: 100.0),
-                          child: TextField(),
-                        ),
-                      );
-                    },
-                  ));
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (context) => BottomSheet(
+                            onClosing: () {},
+                            builder: (context) {
+                              return Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                      maxWidth: 100.0, maxHeight: 100.0),
+                                  child: TextField(),
+                                ),
+                              );
+                            },
+                          ));
                 },
                 child: Text('Add Workout'),
               ),
@@ -104,10 +107,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             iconData: Icons.home,
             text: 'Home',
           ),
-          *//*FABBottomAppBarItem(
+          */ /*FABBottomAppBarItem(
             iconData: Icons.menu,
             text: 'Menu',
-          ),*//*
+          ),*/ /*
         ],
         onTabSelected: (index) {
           if (index == 0) {
@@ -139,16 +142,18 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   Widget workoutTile(AsyncSnapshot snapshot, int index) {
+    var workoutTitle = snapshot.data.documents[index].documentID;
     return new Card(
       child: ListTile(
-        title: Text(snapshot.data.documents[index].documentID),
+        title: Text(workoutTitle),
         trailing: Icon(Icons.menu),
         onTap: () {
           Navigator.push(context, MaterialPageRoute(
             builder: (context) {
               return new ExercisePageView(
-                title: '${snapshot.data.documents[index].documentID}',
-                snapshot: snapshot.data.documents[index],
+                title: workoutTitle,
+                collectionReference:
+                    Firestore.instance.collection('hangboard/$workoutTitle/exercises'),
                 auth: widget.auth,
               );
             },
