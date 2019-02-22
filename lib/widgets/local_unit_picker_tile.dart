@@ -5,11 +5,16 @@ import 'package:flutter/widgets.dart';
 /// This may need to be a more central user config - for now it is just used
 /// on the [hangboard] workout creator screen.
 class UnitPickerTile extends StatefulWidget {
-
   final Function depthCallback;
   final Function resistanceCallback;
+  final String initialDepthMeasurement;
+  final String initialResistanceMeasurement;
 
-  UnitPickerTile({this.depthCallback, this.resistanceCallback});
+  UnitPickerTile(
+      {this.depthCallback,
+      this.resistanceCallback,
+      this.initialDepthMeasurement,
+      this.initialResistanceMeasurement});
 
   @override
   State createState() => _UnitPickerTileState();
@@ -22,8 +27,8 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
   @override
   void initState() {
     super.initState();
-    /*_depthMeasurementSystem = 'mm';
-    _resistanceMeasurementSystem = 'kg';*/
+    _depthMeasurementSystem = widget.initialDepthMeasurement;
+    _resistanceMeasurementSystem = widget.initialResistanceMeasurement;
   }
 
   @override
@@ -45,7 +50,7 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
   }
 
   Widget unitRow() {
-    return new Row(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Flexible(

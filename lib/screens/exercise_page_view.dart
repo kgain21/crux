@@ -50,6 +50,7 @@ class _ExercisePageViewState extends State<ExercisePageView>
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
+        //backgroundColor: Theme.of(context),
         title: Text(widget.title),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -86,7 +87,7 @@ class _ExercisePageViewState extends State<ExercisePageView>
 
               return Center(
                 child: new Container(
-                  color: Theme.of(context).primaryColorDark,
+                  color: Theme.of(context).primaryColor/*Dark*/,
                   child: Stack(
                     children: <Widget>[
                       PageView.builder(
@@ -226,6 +227,7 @@ class _ExercisePageViewState extends State<ExercisePageView>
     return HangboardPage(
       index: index,
       exerciseParameters: Map<String, dynamic>.from(document.data),
+      nextPageCallback: nextPageCallback,
     );
   }
 
@@ -235,11 +237,10 @@ class _ExercisePageViewState extends State<ExercisePageView>
       left: 0.0,
       right: 0.0,
       child: new Container(
-        //color: Color.fromARGB(255, 44, 62, 80),
         padding: const EdgeInsets.all(20.0),
         child: new Center(
           child: new DotsIndicator(
-            color: Theme.of(context).primaryColor,
+            color: Theme.of(context).primaryColorLight,
             controller: _controller,
             itemCount: _index,
             onPageSelected: (int page) {
@@ -253,6 +254,10 @@ class _ExercisePageViewState extends State<ExercisePageView>
         ),
       ),
     );
+  }
+
+  void nextPageCallback() {
+    _controller.nextPage(duration: _kDuration, curve: _kCurve);
   }
 
   //TODO: Separate into show/hide?

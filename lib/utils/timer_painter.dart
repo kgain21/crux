@@ -18,11 +18,21 @@ class TimerPainter extends CustomPainter {
 
     double progress = (1 - animation.value) * 2 * math.pi;
 
-    Path path = Path()
+    Path innerPath = Path()
       ..addOval(Rect.fromCircle(
         center: size.center(Offset.zero),
-        radius: size.width / 2.0 - 2.0,
+        radius: size.width / 2.0 - 3.0,
       ));
+
+    Path outerPath = Path()
+      ..addArc(
+        Rect.fromCircle(
+          center: size.center(Offset.zero),
+          radius: (size.width/* + 12.0*/) / 2.0,
+        ),
+        -math.pi,
+        math.pi,
+      );
 
     canvas.drawCircle(
       size.center(Offset.zero),
@@ -40,11 +50,18 @@ class TimerPainter extends CustomPainter {
     );
 
     canvas.drawShadow(
-      path,
-      Colors.black87,
-      2.0,
+      innerPath,
+      Colors.black,
+      2.5,
       true,
     );
+
+//    canvas.drawShadow(
+//      outerPath,
+//      Colors.black,
+//      2.5,
+//      true,
+//    );
   }
 
   @override

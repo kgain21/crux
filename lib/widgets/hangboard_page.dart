@@ -5,8 +5,9 @@ import 'package:flutter/widgets.dart';
 class HangboardPage extends StatefulWidget {
   final int index;
   final Map<String, dynamic> exerciseParameters;
+  final VoidCallback nextPageCallback;
 
-  HangboardPage({this.index, this.exerciseParameters});
+  HangboardPage({this.index, this.exerciseParameters, this.nextPageCallback});
 
   @override
   State<HangboardPage> createState() => _HangboardPageState();
@@ -15,6 +16,7 @@ class HangboardPage extends StatefulWidget {
 class _HangboardPageState extends State<HangboardPage> {
   PageStorageKey timerKey;
 
+  String _exerciseTitle;
   int _depth;
   String _depthMeasurementSystem;
   String _fingerConfiguration;
@@ -35,8 +37,10 @@ class _HangboardPageState extends State<HangboardPage> {
     super.initState();
     _didFinishSet = false;
     getParams(widget.exerciseParameters);
+    _exerciseTitle = formatDepthAndGrip(
+        _depth, _depthMeasurementSystem, _fingerConfiguration, _grip);
     _workoutTimer = WorkoutTimer(
-      id: widget.index.toString(),
+      id: _exerciseTitle,
       time: _timeOn,
       switchForward: false,
       switchTimer: false,
@@ -49,26 +53,7 @@ class _HangboardPageState extends State<HangboardPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: Theme.of(context).primaryColorDark,
-            width: 15.0,
-          ),
-          right: BorderSide(
-            color: Theme.of(context).primaryColorDark,
-            width: 15.0,
-          ),
-          top: BorderSide(
-            color: Theme.of(context).primaryColorDark,
-            width: 15.0,
-          ),
-          bottom: BorderSide(
-            color: Theme.of(context).primaryColorDark,
-            width: 60.0,
-          ),
-        ),
-      ),
+      decoration: pageBorderDecoration(),
       child: Container(
         decoration: BoxDecoration(
           //border: Border.all(color: Colors.black, width: 2.0),
@@ -76,17 +61,17 @@ class _HangboardPageState extends State<HangboardPage> {
             BoxShadow(
               color: Colors.black54,
               blurRadius: 6.0,
-              offset: Offset(0.0, 2.0),
-              /*spreadRadius: 2.0,*/
+              spreadRadius: 1.0,
+              offset: Offset(0.0, 4.0),
             ),
           ],
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
           color: Theme.of(context).canvasColor,
         ),
         child: Column(
-          //mainAxisAlignment: MainAxisAlignment.spaceE,
+//          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            holdText(),
+            titleBox(),
             hangsAndResistanceCheckbox(),
             workoutTimerContainer(),
             switchButtonRow(),
@@ -96,20 +81,43 @@ class _HangboardPageState extends State<HangboardPage> {
     );
   }
 
-  Widget holdText() {
+  BoxDecoration pageBorderDecoration() {
+    return BoxDecoration(
+      border: Border(
+        left: BorderSide(
+          color: Theme.of(context).primaryColor /*Dark*/,
+          width: 15.0,
+        ),
+        right: BorderSide(
+          color: Theme.of(context).primaryColor /*Dark*/,
+          width: 15.0,
+        ),
+        top: BorderSide(
+          color: Theme.of(context).primaryColor /*Dark*/,
+          width: 15.0,
+        ),
+        bottom: BorderSide(
+          color: Theme.of(context).primaryColor /*Dark*/,
+          width: 60.0,
+        ),
+      ),
+    );
+  }
+
+  Widget titleBox() {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(10.0),
           topRight: Radius.circular(8.0),
         ),
-        boxShadow: [
+        /* boxShadow: [
           BoxShadow(
             color: Colors.black54,
             blurRadius: 6.0,
             offset: Offset(0.0, 2.0),
           ),
-        ],
+        ],*/
         color: Theme.of(context).accentColor,
       ),
       child: Row(
@@ -118,8 +126,7 @@ class _HangboardPageState extends State<HangboardPage> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
               child: Text(
-                formatDepthAndGrip(_depth, _depthMeasurementSystem,
-                    _fingerConfiguration, _grip),
+                _exerciseTitle,
                 style: TextStyle(
                   fontSize: 18.0,
                   //fontWeight: FontWeight.bold
@@ -140,15 +147,15 @@ class _HangboardPageState extends State<HangboardPage> {
           Text(
             formatHangsAndResistance(
                 _hangsPerSet, _resistance, _resistanceMeasurementSystem),
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 20.0),
           ),
           Text(
             '|',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 22.0),
           ),
           Text(
             '$_numberOfSets sets',
-            style: TextStyle(fontSize: 18.0),
+            style: TextStyle(fontSize: 20.0),
           ),
         ],
       ),
@@ -168,7 +175,7 @@ class _HangboardPageState extends State<HangboardPage> {
 
   Widget switchButtonRow() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(15.0, 0.0, 15.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -183,9 +190,7 @@ class _HangboardPageState extends State<HangboardPage> {
           ),
           new RaisedButton(
             elevation: 4.0,
-            // label: Text('   Rest   '),
             child: Text('Rest'),
-
             onPressed: () {
               switchTimer(true, _timeOff);
             },
@@ -201,9 +206,10 @@ class _HangboardPageState extends State<HangboardPage> {
       _workoutTimer = WorkoutTimer(
         notifyParentReverseComplete: notifyParentReverseComplete,
         notifyParentForwardComplete: notifyParentForwardComplete,
-        id: widget.index.toString(),
+        id: _exerciseTitle,
         switchTimer: true,
         switchForward: resetForward,
+        startTimer: false,
         time: time,
       );
     });
@@ -211,15 +217,41 @@ class _HangboardPageState extends State<HangboardPage> {
 
   void notifyParentReverseComplete() {
     setState(() {
-      _workoutTimer = WorkoutTimer(
-        notifyParentReverseComplete: notifyParentReverseComplete,
-        notifyParentForwardComplete: notifyParentForwardComplete,
-        id: widget.index.toString(),
-        switchTimer: true,
-        switchForward: true,
-        time: _timeOff,
-      );
       _hangsPerSet = _hangsPerSet > 0 ? (_hangsPerSet - 1) : 0;
+
+      /// Start time between sets and provide callback that decrements number of
+      /// sets as well as resets number of hangs
+      if (_hangsPerSet == 0) {
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Set Complete!'),
+//            action: SnackBarAction(
+//              label: 'Next Exercise',
+//              onPressed: widget.nextPageCallback,
+//            ),
+          ),
+        );
+        _workoutTimer = WorkoutTimer(
+          notifyParentReverseComplete: notifyParentReverseComplete,
+          notifyParentForwardComplete:
+              notifyParentForwardTimeBetweenSetsComplete,
+          id: _exerciseTitle,
+          switchTimer: true,
+          switchForward: true,
+          startTimer: true,
+          time: _timeBetweenSets,
+        );
+      } else {
+        _workoutTimer = WorkoutTimer(
+          notifyParentReverseComplete: notifyParentReverseComplete,
+          notifyParentForwardComplete: notifyParentForwardComplete,
+          id: _exerciseTitle,
+          switchTimer: true,
+          switchForward: true,
+          startTimer: true,
+          time: _timeOff,
+        );
+      }
       // return AlertDialog(content: Text('Set Finished!'),);
       // start timebetweensets if applicable
     });
@@ -230,16 +262,47 @@ class _HangboardPageState extends State<HangboardPage> {
       _workoutTimer = WorkoutTimer(
         notifyParentReverseComplete: notifyParentReverseComplete,
         notifyParentForwardComplete: notifyParentForwardComplete,
-        id: widget.index.toString(),
+        id: _exerciseTitle,
         switchTimer: true,
         switchForward: false,
+        startTimer: true,
         time: _timeOn,
       );
     });
   }
 
-  String formatDepthAndGrip(int depth, String depthMeasurementSystem,
-      String fingerConfiguration, String grip) {
+  void notifyParentForwardTimeBetweenSetsComplete() {
+    setState(() {
+      _numberOfSets = _numberOfSets > 0 ? _numberOfSets - 1 : 0;
+
+      if (_numberOfSets == 0) {
+        _workoutTimer = WorkoutTimer(
+          notifyParentReverseComplete: null,
+          notifyParentForwardComplete: null,
+          id: _exerciseTitle,
+          switchTimer: true,
+          switchForward: false,
+          startTimer: false,
+          time: 0,
+        );
+      } else {
+        _hangsPerSet = widget.exerciseParameters['hangsPerSet'];
+
+        _workoutTimer = WorkoutTimer(
+          notifyParentReverseComplete: notifyParentReverseComplete,
+          notifyParentForwardComplete: notifyParentForwardComplete,
+          id: _exerciseTitle,
+          switchTimer: true,
+          switchForward: false,
+          startTimer: true,
+          time: _timeOn,
+        );
+      }
+    });
+  }
+
+  String formatDepthAndGrip(/*int numberOfHands,*/ int depth,
+      String depthMeasurementSystem, String fingerConfiguration, String grip) {
     if (depth == null || depth == 0) {
       if (fingerConfiguration == null || fingerConfiguration == '') {
         return grip;

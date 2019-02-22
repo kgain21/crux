@@ -29,7 +29,7 @@ class DotsIndicator extends AnimatedWidget {
   final Color color;
 
   // The base size of the dots
-  static const double _kDotSize = 8.0;
+  static const double _kDotSize = 10.0;
 
   // The increase in the size of the selected dot
   static const double _kMaxZoom = 2.0;
@@ -49,7 +49,7 @@ class DotsIndicator extends AnimatedWidget {
       width: _kDotSpacing,
       child: new Center(
         child: new Material(
-          elevation: 3.0,
+          elevation: 4.0,
           color: color,
           type: MaterialType.circle,
           child: new Container(

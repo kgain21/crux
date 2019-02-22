@@ -41,15 +41,20 @@ class MyApp extends StatelessWidget {
       title: title,
       theme: ThemeData(
         //primaryColor: Color.fromARGB(255, 103, 126, 116),
-        primaryColor: Color(0xFFb0bec5),
-        primaryColorLight: Color(0xFFe2f1f8),
-        primaryColorDark: Color(0xFF808e95),
+//        primaryColor: Color(0xFFb0bec5),
+        primaryColor: Color(0xFFcfd8dc),
+//        primaryColorLight: Color(0xFFe2f1f8),
+        primaryColorLight: Color(0xFFffffff),
+//        primaryColorDark: Color(0xFF808e95),
+        primaryColorDark: Color(0xFF9ea7aa),
         bottomAppBarColor: Color(0xFFe2f1f8),
         secondaryHeaderColor: Color(0xFF009624),
-        accentColor: Color(0xFF76ff03),
+        accentColor: Color(0xAF76ff03),
 
-        primaryColorBrightness: Brightness.light
+        primaryColorBrightness: Brightness.light,
         //canvasColor: Color(0xFF64dd17),
+
+//        fontFamily:
 
 
 

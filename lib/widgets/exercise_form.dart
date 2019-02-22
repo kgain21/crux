@@ -19,20 +19,20 @@ class ExerciseForm extends StatefulWidget {
 }
 
 class _ExerciseFormState extends State<ExerciseForm> {
-
   final TextEditingController depthController = TextEditingController();
   final TextEditingController timeOnController = TextEditingController();
   final TextEditingController timeOffController = TextEditingController();
   final TextEditingController hangsPerSetController = TextEditingController();
-  final TextEditingController timeBetweenSetsController = TextEditingController();
+  final TextEditingController timeBetweenSetsController =
+      TextEditingController();
   final TextEditingController numberOfSetsController = TextEditingController();
   final TextEditingController resistanceController = TextEditingController();
 
-  final GlobalKey<FormState> formKey =
-      GlobalKey(debugLabel: 'ExerciseForm');
+  final GlobalKey<FormState> formKey = GlobalKey(debugLabel: 'ExerciseForm');
 
   String _depthMeasurementSystem;
   String _resistanceMeasurementSystem;
+  int _numberOfHands;
   Grip _grip;
   FingerConfiguration _fingerConfiguration;
   int _depth;
@@ -51,6 +51,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
   void initState() {
     super.initState();
 
+    _numberOfHands = 2;
     _gripSelected = false;
     _depthMeasurementSystem = 'mm';
     _resistanceMeasurementSystem = 'kg';
@@ -68,7 +69,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
             icon: Icon(Icons.info),
             tooltip: 'Help',
             onPressed: () {
-              //TODO: show overlay?
             },
           ),
         ],
@@ -82,32 +82,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
            */
         child: exerciseFormWidget(),
       ),
-      /*bottomNavigationBar: new FABBottomAppBar(
-        //backgroundColor: Colors.blueGrey,
-        //Color.fromARGB(255, 44, 62, 80),
-        //midnight blue// Colors.white,
-        //Color.fromARGB(255, 229, 191, 126),
-        //color: Colors.white,
-        //selectedColor: Colors.white,
-        items: <FABBottomAppBarItem>[
-          FABBottomAppBarItem(
-            iconData: Icons.home,
-            text: 'Home',
-          ),
-           FABBottomAppBarItem(
-            iconData: Icons.menu,
-            text: 'Menu',
-          ),
-        ],
-        onTabSelected: (index) {
-          if (index == 0) {
-            Navigator.popUntil(
-                context, ModalRoute.withName('/dashboard_screen'));
-          } else {
-            return null;
-          }
-        },
-      ),*/
     );
   }
 
@@ -117,7 +91,10 @@ class _ExerciseFormState extends State<ExerciseForm> {
         UnitPickerTile(
           resistanceCallback: updateResistanceMeasurement,
           depthCallback: updateDepthMeasurement,
+          initialDepthMeasurement: _depthMeasurementSystem,
+          initialResistanceMeasurement: _resistanceMeasurementSystem
         ),
+        numberOfHandsTile(),
         gripDropdownTile(),
         (_gripSelected && (_grip == Grip.POCKET || _grip == Grip.OPEN_HAND))
             ? fingerConfigurationDropdownTile(_grip)
@@ -128,10 +105,10 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     _grip != Grip.PINCH))
             ? depthTile()
             : null,
-        hangProtocolDurationTile(),
-        hangProtocolTile(),
-        _hangProtocolSelected ? hangsPerSetTile() : null,
-        _hangProtocolSelected ? timeBetweenSetsTile() : null,
+        hangDurationTile(),
+        // hangProtocolTile(),
+        hangsPerSetTile(),
+        timeBetweenSetsTile(),
         numberOfSetsTile(),
         resistanceTile(),
         saveButton()
@@ -154,6 +131,41 @@ class _ExerciseFormState extends State<ExerciseForm> {
     setState(() {
       _depthMeasurementSystem = value;
     });
+  }
+
+  Widget numberOfHandsTile() {
+    return new Card(
+      child: ListTile(
+        key: PageStorageKey('numberOfHandsTile'),
+        title: Row(
+          children: <Widget>[
+            Flexible(
+              child: RadioListTile(
+                title: Text('One hand'),
+                value: 1,
+                groupValue: _numberOfHands,
+                onChanged: (value) {
+                  setState(() {
+                    _numberOfHands = value;
+                  });
+                },
+              ),
+            ),
+            Flexible(
+              child: RadioListTile(
+                  title: Text('Two hands'),
+                  value: 2,
+                  groupValue: _numberOfHands,
+                  onChanged: (value) {
+                    setState(() {
+                      _numberOfHands = value;
+                    });
+                  }),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget gripDropdownTile() {
@@ -215,16 +227,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  /*
-  TODO: can change focus to next field on submit each time (nice to have)
-  https://medium.com/flutterpub/flutter-keyboard-actions-and-next-focus-field-3260dc4c694
-  onFieldSubmitted: null,
-  */
-
   Widget depthTile() {
     return new Card(
       child: ListTile(
-        key: PageStorageKey<String>('depth'),
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
@@ -247,55 +252,56 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget hangProtocolDurationTile() {
+  Widget hangDurationTile() {
     return Card(
-      child: Row(
-        children: <Widget>[
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
-              child: TextFormField(
-                controller: timeOnController,
-                key: PageStorageKey('timeOn'),
-                autovalidate: _autoValidate,
-                validator: (value) {
-                  return hangboardFieldValidator(value);
-                },
-                onSaved: (value) {
-                  _timeOn = int.tryParse(value);
-                },
-                decoration: InputDecoration(
-                  labelText: 'Time On (sec)',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
+        child: Row(
+          children: <Widget>[
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
+                child: TextFormField(
+                  controller: timeOnController,
+                  autovalidate: _autoValidate,
+                  validator: (value) {
+                    return hangboardFieldValidator(value);
+                  },
+                  onSaved: (value) {
+                    _timeOn = int.tryParse(value);
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Time On (sec)',
+                  ),
+                  keyboardType: TextInputType.numberWithOptions(),
                 ),
-                keyboardType: TextInputType.numberWithOptions(),
               ),
             ),
-          ),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                  left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
-              child: TextFormField(
-                controller: timeOffController,
-                key: PageStorageKey('timeOff'),
-                autovalidate: _autoValidate,
-                validator: (value) {
-                  return hangboardFieldValidator(value);
-                },
-                onSaved: (value) {
-                  setState(() {
-                    _timeOff = int.tryParse(value);
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: 'Time Off (sec)',
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
+                child: TextFormField(
+                  controller: timeOffController,
+                  autovalidate: _autoValidate,
+                  validator: (value) {
+                    return hangboardFieldValidator(value);
+                  },
+                  onSaved: (value) {
+                    setState(() {
+                      _timeOff = int.tryParse(value);
+                    });
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Time Off (sec)',
+                  ),
+                  keyboardType: TextInputType.numberWithOptions(),
                 ),
-                keyboardType: TextInputType.numberWithOptions(),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -437,7 +443,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
   /// they're almost all [int] fields. If there are other non [int] fields that
   /// I add, I could always abstract it out another level to an even more generic
   /// validation picker method.
-  //TODO: make unselected boxes grayed out (cant type in them)
   String hangboardFieldValidator(String fieldValue) {
     var intValue = int.tryParse(fieldValue);
     if (intValue == null) {
@@ -486,7 +491,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
     var data = createHangboardData();
     String dataId = createDataId(data);
 
-    //TODO: DEFINITELY NEED SOME ERROR HANDLING HERE IF SAVE FAILS
     var exerciseRef = collectionReference.document(dataId);
     exerciseRef.get().then((doc) {
       if (doc.exists) {
@@ -521,6 +525,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     Map<String, dynamic> data = {
       "resistanceMeasurementSystem": _resistanceMeasurementSystem,
       "depthMeasurementSystem": _depthMeasurementSystem,
+      "numberOfHands": _numberOfHands,
       "depth": _depth ?? '',
       "grip": formatGrip(_grip),
       "fingerConfiguration": (_fingerConfiguration != null)
@@ -542,8 +547,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     var grip = data['grip'];
     var fingerConfiguration = data['fingerConfiguration'];
 
-    if(depth == null || depth == '') {
-      if(fingerConfiguration == null || fingerConfiguration == '') {
+    if (depth == null || depth == '') {
+      if (fingerConfiguration == null || fingerConfiguration == '') {
         return grip;
       } else {
         return '$fingerConfiguration $grip';
