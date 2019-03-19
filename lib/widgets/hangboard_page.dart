@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/widgets/workout_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -6,8 +7,13 @@ class HangboardPage extends StatefulWidget {
   final int index;
   final Map<String, dynamic> exerciseParameters;
   final VoidCallback nextPageCallback;
+  final DocumentReference documentReference;
 
-  HangboardPage({this.index, this.exerciseParameters, this.nextPageCallback});
+  HangboardPage(
+      {this.index,
+      this.exerciseParameters,
+      this.nextPageCallback,
+      this.documentReference});
 
   @override
   State<HangboardPage> createState() => _HangboardPageState();
@@ -15,6 +21,7 @@ class HangboardPage extends StatefulWidget {
 
 class _HangboardPageState extends State<HangboardPage> {
   PageStorageKey timerKey;
+  bool _isEditing;
 
   String _exerciseTitle;
   int _depth;
@@ -29,12 +36,15 @@ class _HangboardPageState extends State<HangboardPage> {
   int _timeOff;
   int _timeOn;
 
+  bool _exerciseFinished;
   bool _didFinishSet;
   WorkoutTimer _workoutTimer;
 
   @override
   void initState() {
     super.initState();
+    _exerciseFinished = false;
+    _isEditing = false;
     _didFinishSet = false;
     getParams(widget.exerciseParameters);
     _exerciseTitle = formatDepthAndGrip(
@@ -54,32 +64,52 @@ class _HangboardPageState extends State<HangboardPage> {
   Widget build(BuildContext context) {
     return Container(
       decoration: pageBorderDecoration(),
-      child: Container(
-        decoration: BoxDecoration(
-          //border: Border.all(color: Colors.black, width: 2.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black54,
-              blurRadius: 6.0,
-              spreadRadius: 1.0,
-              offset: Offset(0.0, 4.0),
-            ),
-          ],
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          color: Theme.of(context).canvasColor,
-        ),
-        child: Column(
-//          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            titleBox(),
-            hangsAndResistanceCheckbox(),
-            workoutTimerContainer(),
-            switchButtonRow(),
-          ],
+      child: Center(
+        child: Container(
+          decoration: BoxDecoration(
+            //border: Border.all(color: Colors.black, width: 2.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 6.0,
+                spreadRadius: 1.0,
+                offset: Offset(0.0, 4.0),
+              ),
+            ],
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            color: Theme.of(context).canvasColor,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              //constraints.
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Stack(
+                    children: <Widget>[
+                      titleBox(),
+                      _exerciseFinished
+                          ? Banner(
+                              location: BannerLocation.topStart,
+                              message: 'Finished!',
+                            )
+                          : null,
+                    ].where(notNull).toList(),
+                  ),
+                  hangsAndResistanceRow(),
+                  workoutTimerContainer(),
+                  switchButtonRow(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
+
+  bool notNull(Object o) => o != null;
 
   BoxDecoration pageBorderDecoration() {
     return BoxDecoration(
@@ -120,42 +150,70 @@ class _HangboardPageState extends State<HangboardPage> {
         ],*/
         color: Theme.of(context).accentColor,
       ),
-      child: Row(
+      child: Column(
         children: <Widget>[
-          Container(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
-              child: Text(
-                _exerciseTitle,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  //fontWeight: FontWeight.bold
+          Row(
+            children: <Widget>[
+              Container(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
+                  child: Text(
+                    _exerciseTitle,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      //fontWeight: FontWeight.bold
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
+          /*Row(
+            children: <Widget>[
+              Container(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12.0, 0.0, 0.0, 0.0),
+                  child: Text(
+                    'Test Row',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      //fontWeight: FontWeight.bold
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),*/
         ],
       ),
     );
   }
 
-  Widget hangsAndResistanceCheckbox() {
+  Widget hangsAndResistanceRow() {
     return new ListTile(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           Text(
+            '$_hangsPerSet',
+            style: TextStyle(fontSize: 30.0),
+          ),
+          Text(
             formatHangsAndResistance(
                 _hangsPerSet, _resistance, _resistanceMeasurementSystem),
-            style: TextStyle(fontSize: 20.0),
+            style: TextStyle(fontSize: 18.0),
           ),
           Text(
             '|',
-            style: TextStyle(fontSize: 22.0),
+            style: TextStyle(fontSize: 26.0),
           ),
           Text(
-            '$_numberOfSets sets',
-            style: TextStyle(fontSize: 20.0),
+            '$_numberOfSets',
+            style: TextStyle(fontSize: 30.0),
+          ),
+          Text(
+            ' sets',
+            style: TextStyle(fontSize: 18.0),
           ),
         ],
       ),
@@ -167,7 +225,7 @@ class _HangboardPageState extends State<HangboardPage> {
       padding: const EdgeInsets.all(12.0),
       child: ConstrainedBox(
         constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 1.75),
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 1.5),
         child: _workoutTimer,
       ),
     );
@@ -179,20 +237,36 @@ class _HangboardPageState extends State<HangboardPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Container(
-            child: new RaisedButton(
-              elevation: 4.0,
-              child: Text('Exercise'),
-              onPressed: () {
-                switchTimer(false, _timeOn);
-              },
-            ),
+          IconButton(
+            //elevation: 4.0,
+            icon: Icon(Icons.skip_previous), //Text('Exercise'),
+            onPressed: () {
+              null;
+            },
           ),
-          new RaisedButton(
-            elevation: 4.0,
-            child: Text('Rest'),
+          IconButton(
+            //elevation: 4.0,
+            icon: Icon(Icons.refresh), //Text('Exercise'),
+            onPressed: () {
+              switchTimer(false, _timeOn);
+            },
+          ),
+          IconButton(
+            //elevation: 4.0,
+            icon: Icon(
+              IconData(0xe5d5,
+                  fontFamily: 'MaterialIcons', matchTextDirection: true),
+              textDirection: TextDirection.rtl,
+            ), //Text('Rest'),
             onPressed: () {
               switchTimer(true, _timeOff);
+            },
+          ),
+          IconButton(
+            //elevation: 4.0,
+            icon: Icon(Icons.skip_next),
+            onPressed: () {
+              null;
             },
           ),
         ],
@@ -224,11 +298,16 @@ class _HangboardPageState extends State<HangboardPage> {
       if (_hangsPerSet == 0) {
         Scaffold.of(context).showSnackBar(
           SnackBar(
-            content: Text('Set Complete!'),
-//            action: SnackBarAction(
-//              label: 'Next Exercise',
-//              onPressed: widget.nextPageCallback,
-//            ),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'Set Complete!',
+                  style: TextStyle(
+                      fontSize: 25.0, color: Theme.of(context).accentColor),
+                ),
+              ],
+            ),
           ),
         );
         _workoutTimer = WorkoutTimer(
@@ -276,6 +355,7 @@ class _HangboardPageState extends State<HangboardPage> {
       _numberOfSets = _numberOfSets > 0 ? _numberOfSets - 1 : 0;
 
       if (_numberOfSets == 0) {
+        _exerciseFinished = true;
         _workoutTimer = WorkoutTimer(
           notifyParentReverseComplete: null,
           notifyParentForwardComplete: null,
@@ -285,6 +365,15 @@ class _HangboardPageState extends State<HangboardPage> {
           startTimer: false,
           time: 0,
         );
+        //TODO: still want to add banner
+        Scaffold.of(context).showSnackBar(SnackBar(
+          duration: Duration(days: 1),
+          content: Row(),
+          action: SnackBarAction(
+            label: 'Next Exercise',
+            onPressed: widget.nextPageCallback,
+          ),
+        ));
       } else {
         _hangsPerSet = widget.exerciseParameters['hangsPerSet'];
 
@@ -318,15 +407,15 @@ class _HangboardPageState extends State<HangboardPage> {
       int hangs, int resistance, String resistanceMeasurementSystem) {
     if (hangs == null || hangs == 1) {
       if (resistance == null || resistance == 0) {
-        return '$hangs hang at bodyweight';
+        return ' hang at bodyweight';
       } else {
-        return '$hangs hang with $resistance$resistanceMeasurementSystem';
+        return ' hang with $resistance$resistanceMeasurementSystem';
       }
     } else {
       if (resistance == null || resistance == 0) {
-        return '$hangs hangs at bodyweight';
+        return ' hangs at bodyweight';
       } else {
-        return '$hangs hangs with $resistance$resistanceMeasurementSystem';
+        return ' hangs with $resistance$resistanceMeasurementSystem';
       }
     }
   }

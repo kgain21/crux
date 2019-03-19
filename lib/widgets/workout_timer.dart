@@ -77,7 +77,6 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     preferences.setInt('${_id}time', _currentTime);
   }
 
-
   @override
   void initState() {
     print('Timer ${widget.id} initState');
@@ -112,8 +111,10 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     print('Timer ${widget.id} dispose');
     setSharedPrefsBeforeDispose();
 
-    _controller.stop();
-    _controller.dispose();
+    if (_controller != null) {
+      _controller.stop();
+      _controller.dispose();
+    }
 
     super.dispose();
   }
@@ -152,6 +153,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
       ),
     );
   }
+
 //
 //  void checkIfPreviouslyRunning() {
 //
@@ -162,10 +164,10 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     _endTimeMillis = (preferences.getInt('${_id}endTimeMillis') ?? 0);
 
     _forwardAnimation =
-    (preferences.getBool('${_id}forwardAnimation') ?? false);
+        (preferences.getBool('${_id}forwardAnimation') ?? false);
 
     _timerPreviouslyRunning =
-    (preferences.getBool('${_id}timerPreviouslyRunning') ?? false);
+        (preferences.getBool('${_id}timerPreviouslyRunning') ?? false);
 
     /// If there is no endValue stored, check forwardAnimation and set to
     /// appropriate start value
@@ -256,8 +258,6 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     return value;
   }
 
-
-
   /// Widget that builds a circular timer using [TimerPainter]. This timer is
   /// controlled by the [_controller] and is the main visual component of the
   /// [WorkoutTimer].
@@ -302,7 +302,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
               return Text(
                 timerString,
                 style: TextStyle(
-                  fontSize: 30.0,
+                  fontSize: 40.0,
                 ),
               );
             },
@@ -323,12 +323,14 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   /// Additionally, the [SharedPreferences] get nulled out so that future timers
   /// don't try to read old values.
   void startStopTimer(AnimationController controller) {
-    if (controller.isAnimating) {
-      setTimerPreviouslyRunning(false);
-      controller.stop(canceled: false);
-    } else {
-      setTimerPreviouslyRunning(true);
-      setupControllerCallback(controller);
+    if (controller != null) {
+      if (controller.isAnimating) {
+        setTimerPreviouslyRunning(false);
+        controller.stop(canceled: false);
+      } else {
+        setTimerPreviouslyRunning(true);
+        setupControllerCallback(controller);
+      }
     }
   }
 
@@ -340,9 +342,14 @@ class _WorkoutTimerState extends State<WorkoutTimer>
           setTime(null);
           setEndValue(null);
           setEndTimeMillis(null);
-          widget.notifyParentReverseComplete();
+          if (widget.notifyParentReverseComplete != null) {
+            widget.notifyParentReverseComplete();
+          }
         }
-      }).catchError(handleError);
+      }).catchError((error) {
+        print('Timer failed animating in reverse: $error');
+        startStopTimer(_controller);
+      });
     } else {
       controller.forward().whenComplete(() {
         if (controller.status == AnimationStatus.completed) {
@@ -350,15 +357,20 @@ class _WorkoutTimerState extends State<WorkoutTimer>
           setTime(null);
           setEndValue(null);
           setEndTimeMillis(null);
-          widget.notifyParentForwardComplete();
+          if (widget.notifyParentForwardComplete != null) {
+            widget.notifyParentForwardComplete();
+          }
         }
-      }).catchError(handleError);
+      }).catchError((error) {
+        print('Timer failed animating forward: $error');
+        startStopTimer(_controller);
+      });
     }
   }
 
   //TODO: make this do more
   void handleError(Error error) {
-    print('Printing from WorkoutTimer handleError: $error');
+    startStopTimer(_controller);
   }
 
   /// Resets the timer based on its current status. This method is passed to the

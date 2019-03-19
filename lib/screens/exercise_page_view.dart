@@ -5,6 +5,12 @@ import 'package:crux/widgets/exercise_form.dart';
 import 'package:crux/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'dart:math';
+
+class ShakeCurve extends Curve {
+  @override
+  double transform(double t) => sin(t * pi * 2);
+}
 
 class ExercisePageView extends StatefulWidget {
   final String title;
@@ -18,33 +24,60 @@ class ExercisePageView extends StatefulWidget {
 }
 
 class _ExercisePageViewState extends State<ExercisePageView>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   static const _kCurve = Curves.ease;
   static const _kDuration = const Duration(milliseconds: 300);
+  static const _kViewportFraction = 0.7;
+
+  ValueNotifier<double> selectedIndex = ValueNotifier<double>(0.0);
 
   PageController _controller;
-  int _index;
+  PageController _zoomController;
+
+//  AnimationController _shakeController;
+//  Animation _shakeCurve;
+  int _pageCount;
   OverlayEntry _overlayEntry;
   bool _overlayVisible;
   double _currentPageValue;
+  bool _zoomOut;
+  bool _exerciseFinished;
+
+  /* bool _handlePageNotification(ScrollNotification notification,
+                               PageController leader, PageController follower) {
+    if (notification.depth == 0 && notification is ScrollUpdateNotification) {
+      selectedIndex.value = leader.page;
+      if (follower.page != leader.page) {
+        follower.position.jumpToWithoutSettling(leader.position.pixels /
+            _kViewportFraction); // ignore: deprecated_member_use
+      }
+      setState(() {});
+    }
+    return false;
+  }*/
 
   @override
   void initState() {
     super.initState();
     _overlayVisible = false;
     _currentPageValue = 0.0;
+    _zoomOut = false;
+//    _shakeController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
+//    _shakeCurve = CurvedAnimation(parent: _shakeController, curve: ShakeCurve());
 
     /// [_controller] is 0 indexed but snapshot is not; add 1 to snapshot
     /// index to create a [newExercisePage].
-    _index = 0;
+    _pageCount = 0;
 
     //TODO: Store last page # and reload there
+    _zoomController = new PageController(
+        viewportFraction: _kViewportFraction /*initialPage: _index - 2*/);
     _controller = new PageController(/*initialPage: _index - 2*/);
-    _controller.addListener(() {
+    /*_controller.addListener(() {
       setState(() {
         _currentPageValue = _controller.page;
       });
-    });
+    });*/
   }
 
   Widget build(BuildContext context) {
@@ -53,125 +86,104 @@ class _ExercisePageViewState extends State<ExercisePageView>
         //backgroundColor: Theme.of(context),
         title: Text(widget.title),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance
-            .collection('hangboard/${widget.title}/exercises')
-            .snapshots(),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-            case ConnectionState.none:
-            /*return Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Card(
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text('Retrieving exercises...'),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );*/
-            default:
-              //TODO: make these draggable on edit
-              int documentsLength = snapshot.data.documents.length;
-              _index = documentsLength + 1;
+      body: GestureDetector(
+        onLongPress: () {
+          setState(() {
+            _zoomOut = true;
+            print('editing');
+          });
+        },
+        onTap: () {
+          if (_zoomOut == true) {
+            setState(() {
+              _zoomOut = false;
+            });
+          }
+        },
+        child: StreamBuilder<QuerySnapshot>(
+          stream: Firestore.instance
+              .collection('hangboard/${widget.title}/exercises')
+              .snapshots(),
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+              case ConnectionState.none:
+              default:
+                int documentsLength = 0;
+                if (snapshot.data != null) {
+                  documentsLength = snapshot.data.documents.length;
+                }
+                _pageCount = documentsLength + 1;
 
-              return Center(
-                child: new Container(
-                  color: Theme.of(context).primaryColor/*Dark*/,
-                  child: Stack(
-                    children: <Widget>[
-                      PageView.builder(
-                        //key: PageStorageKey('page-$_index'),
-                        itemCount: _index,
-                        controller: _controller,
-                        itemBuilder: (context, index) {
+                return Center(
+                  child: new Container(
+                    color: Theme.of(context).primaryColor /*Dark*/,
+                    child: Stack(
+                      children: <Widget>[
+                        PageView(
+//                            itemCount: _pageCount,
+                          controller: _zoomOut ? _zoomController : _controller,
+                          children: createPageList(documentsLength, snapshot),
+//                            itemBuilder: (context, index) {
                           //TODO: need to generalize this for other types of exercises
                           //TODO: UPDATE -- do i? this is just for hangboarding for now - come back to this
 
-                          if (index == documentsLength) {
-                            return newExercisePage();
-                          } else {
-                            return animatedHangboardPage(
-                                index, snapshot.data.documents[index]);
-                          }
-                        },
-                      ),
-                      dotsIndicator(),
-                    ],
+//                            },
+                        ),
+                        dotsIndicator(),
+                      ],
+                    ),
                   ),
-                ),
-              );
-          }
-        },
+                );
+            }
+          },
+        ),
       ),
     );
   }
 
-  /*@override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Scaffold(
+  @override
+  void dispose() {
+    _controller.dispose();
+    _zoomController.dispose();
+    super.dispose();
+  }
 
-        body:
-      */ /*bottomNavigationBar: new FABBottomAppBar(
-//        backgroundColor: Colors.blueGrey,
-        //Color.fromARGB(255, 44, 62, 80),
-        //midnight blue// Colors.white,
-        //Color.fromARGB(255, 229, 191, 126),
-//        color: Colors.white,
-//        selectedColor: Colors.white,
-        items: <FABBottomAppBarItem>[
-          FABBottomAppBarItem(
-            iconData: Icons.home,
-            text: 'Home',
-          ),
-          */ /* */ /*FABBottomAppBarItem(
-            iconData: Icons.menu,
-            text: 'Menu',
-          ),*/ /* */ /*
-        ],
-        onTabSelected: (index) {
-          if (index == 0) {
-            Navigator.popUntil(
-                context, ModalRoute.withName('/dashboard_screen'));
-          } else {
-            return null;
-          }
-        },
-      ),*/ /*
-      */ /*floatingActionButton: FloatingActionButton(
-        */ /* */ /*onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) {
-                //TODO: finished here - make this an edit toggle button -> new exercise button appears and dropdowns become selectable to be edited in the form
-                return ExerciseFormTile(
-                  formKey: new GlobalKey<FormState>(),
-                  exerciseTitle: 'Needs to change',
-                  workoutTitle: widget.title,
-                );
-              }),
-            );
-          },*/ /* */ /*
-        onPressed: () {
-          showOverlay(context);
-        },
-        child: Icon(Icons.edit),
-        //backgroundColor: Colors.blueGrey, //Color.fromARGB(255, 44, 62, 80),
-      ),*/ /*
-//        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-    );
-  }*/
+  List<Widget> createPageList(int documentsLength, AsyncSnapshot snapshot) {
+    final List<Widget> pages = <Widget>[];
+    double pictureHeight = MediaQuery.of(context).size.height * 0.6;
+    double pictureWidth = MediaQuery.of(context).size.width * 0.6;
+
+    for (int i = 0; i < _pageCount; i++) {
+      Widget child;
+
+      if (i == documentsLength) {
+        child = newExercisePage();
+      } else {
+        child = animatedHangboardPage(i, snapshot.data.documents[i]);
+      }
+
+      var alignment = Alignment.center
+          .add(Alignment((selectedIndex.value - i) * _kViewportFraction, 0.0));
+      var resizeFactor =
+          (1 - (((selectedIndex.value - i).abs() * 0.3).clamp(0.0, 1.0)));
+
+      /*if (_zoomOut) {
+        pages.add(Container(
+          //alignment: alignment,
+          width: pictureWidth * resizeFactor,
+          height: pictureHeight * resizeFactor,
+          child: child,
+        ));
+      } else {*/
+      pages.add(Container(
+        child: child,
+      ));
+//      }
+    }
+
+    return pages;
+  }
 
   Widget newExercisePage() {
     return Column(
@@ -224,12 +236,39 @@ class _ExercisePageViewState extends State<ExercisePageView>
         ),
       );
     } */
-    return HangboardPage(
-      index: index,
-      exerciseParameters: Map<String, dynamic>.from(document.data),
-      nextPageCallback: nextPageCallback,
+
+    return Stack(
+      children: <Widget>[
+        HangboardPage(
+          index: index,
+          exerciseParameters: Map<String, dynamic>.from(document.data),
+          nextPageCallback: nextPageCallback,
+        ),
+        _zoomOut
+            ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    IconButton(
+                      color: Colors.black,
+                      icon: Icon(Icons.cancel),
+                      onPressed: () {
+                        //TODO: ask user for delete confirmation
+                        Firestore.instance
+                            .document(document.reference.path)
+                            .delete();
+                      },
+                    ),
+                  ],
+                ),
+              )
+            : null,
+      ].where(notNull).toList(),
     );
   }
+
+  bool notNull(Object o) => o != null;
 
   Widget dotsIndicator() {
     return new Positioned(
@@ -241,8 +280,8 @@ class _ExercisePageViewState extends State<ExercisePageView>
         child: new Center(
           child: new DotsIndicator(
             color: Theme.of(context).primaryColorLight,
-            controller: _controller,
-            itemCount: _index,
+            controller: _zoomOut ? _zoomController : _controller,
+            itemCount: _pageCount,
             onPageSelected: (int page) {
               _controller.animateToPage(
                 page,
@@ -296,7 +335,6 @@ class _ExercisePageViewState extends State<ExercisePageView>
             ));
   }
 
-  @override
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;

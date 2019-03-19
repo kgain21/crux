@@ -38,21 +38,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     case ConnectionState.none:
                       return Padding(
                         padding: const EdgeInsets.all(15.0),
-                        child: Card(
-                          child: Column(
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('Retrieving workouts...'),
+                        child: Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('Retrieving workouts...'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: CircularProgressIndicator(),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     default:
@@ -62,12 +60,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                           shrinkWrap: true,
                           itemCount: snapshot.data.documents.length,
                           itemBuilder: (context, index) {
-                            return Draggable(
-                              axis: Axis.horizontal,
-                              child: workoutTile(snapshot, index),
-                              feedback: workoutTile(snapshot, index),
-                              childWhenDragging: new Container(),
-                            );
+                            return workoutTile(snapshot, index);
                           },
                         ),
                       );
@@ -121,7 +114,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           }
         },
       ),*/
-      floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
 //        backgroundColor: Colors.blueGrey,
         onPressed: () {
           Navigator.push(
@@ -135,7 +128,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         },
         child: Icon(Icons.edit),
         //backgroundColor: Color.fromARGB(255, 44, 62, 80),
-      ),
+      ),*/
       //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       //bottomSheet: new BottomSheet(onClosing: null, builder: null),
     );
@@ -146,7 +139,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     return new Card(
       child: ListTile(
         title: Text(workoutTitle),
-        trailing: Icon(Icons.menu),
+        trailing: Icon(Icons.chevron_right),
         onTap: () {
           Navigator.push(context, MaterialPageRoute(
             builder: (context) {
