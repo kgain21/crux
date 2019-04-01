@@ -1,4 +1,4 @@
-enum Grip {
+enum Hold {
   FULL_CRIMP,
   HALF_CRIMP,
   JUGS,

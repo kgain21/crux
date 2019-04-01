@@ -2,18 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/widgets/workout_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import '../utils/string_format_utils.dart';
 
 class HangboardPage extends StatefulWidget {
   final int index;
   final Map<String, dynamic> exerciseParameters;
   final VoidCallback nextPageCallback;
   final DocumentReference documentReference;
+  final String workoutId;
 
   HangboardPage(
       {this.index,
       this.exerciseParameters,
       this.nextPageCallback,
-      this.documentReference});
+      this.documentReference,
+      this.workoutId});
 
   @override
   State<HangboardPage> createState() => _HangboardPageState();
@@ -24,10 +27,10 @@ class _HangboardPageState extends State<HangboardPage> {
   bool _isEditing;
 
   String _exerciseTitle;
-  int _depth;
+  double _depth;
   String _depthMeasurementSystem;
   String _fingerConfiguration;
-  String _grip;
+  String _hold;
   int _hangsPerSet;
   int _numberOfSets;
   int _resistance;
@@ -47,10 +50,10 @@ class _HangboardPageState extends State<HangboardPage> {
     _isEditing = false;
     _didFinishSet = false;
     getParams(widget.exerciseParameters);
-    _exerciseTitle = formatDepthAndGrip(
-        _depth, _depthMeasurementSystem, _fingerConfiguration, _grip);
+    _exerciseTitle = StringFormatUtils.formatDepthAndHold(
+        _depth, _depthMeasurementSystem, _fingerConfiguration, _hold);
     _workoutTimer = WorkoutTimer(
-      id: _exerciseTitle,
+      id: '${widget.workoutId} $_exerciseTitle',
       time: _timeOn,
       switchForward: false,
       switchTimer: false,
@@ -88,7 +91,10 @@ class _HangboardPageState extends State<HangboardPage> {
                 children: <Widget>[
                   Stack(
                     children: <Widget>[
-                      titleBox(),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxHeight: constraints.constrainHeight(50.0)),
+                        child: titleBox(),
+                      ),
                       _exerciseFinished
                           ? Banner(
                               location: BannerLocation.topStart,
@@ -97,7 +103,10 @@ class _HangboardPageState extends State<HangboardPage> {
                           : null,
                     ].where(notNull).toList(),
                   ),
-                  hangsAndResistanceRow(),
+                  ConstrainedBox(
+                    constraints: constraints,
+                    child: hangsAndResistanceRow(),
+                  ),
                   workoutTimerContainer(),
                   switchButtonRow(),
                 ],
@@ -199,7 +208,7 @@ class _HangboardPageState extends State<HangboardPage> {
             style: TextStyle(fontSize: 30.0),
           ),
           Text(
-            formatHangsAndResistance(
+            StringFormatUtils.formatHangsAndResistance(
                 _hangsPerSet, _resistance, _resistanceMeasurementSystem),
             style: TextStyle(fontSize: 18.0),
           ),
@@ -225,7 +234,7 @@ class _HangboardPageState extends State<HangboardPage> {
       padding: const EdgeInsets.all(12.0),
       child: ConstrainedBox(
         constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 1.5),
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 1.40),
         child: _workoutTimer,
       ),
     );
@@ -390,44 +399,14 @@ class _HangboardPageState extends State<HangboardPage> {
     });
   }
 
-  String formatDepthAndGrip(/*int numberOfHands,*/ int depth,
-      String depthMeasurementSystem, String fingerConfiguration, String grip) {
-    if (depth == null || depth == 0) {
-      if (fingerConfiguration == null || fingerConfiguration == '') {
-        return grip;
-      } else {
-        return '$fingerConfiguration $grip';
-      }
-    } else {
-      return '$depth$depthMeasurementSystem $fingerConfiguration $grip';
-    }
-  }
-
-  formatHangsAndResistance(
-      int hangs, int resistance, String resistanceMeasurementSystem) {
-    if (hangs == null || hangs == 1) {
-      if (resistance == null || resistance == 0) {
-        return ' hang at bodyweight';
-      } else {
-        return ' hang with $resistance$resistanceMeasurementSystem';
-      }
-    } else {
-      if (resistance == null || resistance == 0) {
-        return ' hangs at bodyweight';
-      } else {
-        return ' hangs with $resistance$resistanceMeasurementSystem';
-      }
-    }
-  }
-
 //TODO: should this be separated from the widget in a dao?
   void getParams(Map<String, dynamic> exerciseParameters) {
-    _depth = getIntVal(exerciseParameters, 'depth');
+    _depth = getDoubleVal(exerciseParameters, 'depth');
     _depthMeasurementSystem =
         getStringVal(exerciseParameters, 'depthMeasurementSystem');
     _fingerConfiguration =
         getStringVal(exerciseParameters, 'fingerConfiguration');
-    _grip = getStringVal(exerciseParameters, 'grip');
+    _hold = getStringVal(exerciseParameters, 'hold');
     _hangsPerSet = getIntVal(exerciseParameters, 'hangsPerSet');
     _numberOfSets = getIntVal(exerciseParameters, 'numberOfSets');
     _resistance = getIntVal(exerciseParameters, 'resistance');
@@ -446,6 +425,16 @@ class _HangboardPageState extends State<HangboardPage> {
       print('Unable to find $fieldName: $e');
     }
     return 0;
+  }
+
+  double getDoubleVal(Map<String, dynamic> exerciseParameters, String fieldName) {
+    try {
+      var doubleVal = exerciseParameters[fieldName];
+      if (doubleVal is double) return doubleVal;
+    } on Exception catch (e) {
+      print('Unable to find $fieldName: $e');
+    }
+    return 0.0;
   }
 
   String getStringVal(

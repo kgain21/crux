@@ -45,62 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: new Drawer(
-        child: ListView(
-          children: <Widget>[
-            //TODO: what do i want common across all screens?
-            Container(
-              color: Theme.of(context).accentColor,
-              child: DrawerHeader(
-                child: Text('Drawer Header'),
-                /*decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 44, 62, 80),
-                ),*/
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Profile',
-//                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Hangboard',
-//                style: TextStyle(color: Colors.black),
-              ),
-              onTap: () {
-                //Pop drawer before navigating so that it doesn't remain when returning
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/hangboard_workout_screen');
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Spotify',
-//                style: TextStyle(color: Colors.black),
-              ),
-              onTap: () {
-                //Pop drawer before navigating so that it doesn't remain when returning
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/spotify_test_screen');
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Campus',
-//                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Progress',
-//                style: TextStyle(color: Colors.black),
-              ),
-            ),
-          ],
-        ),
-      ),
+      drawer: dashboardDrawer(),
       appBar: SharedAppBar.sharedAppBar('Dashboard', widget.auth, context),
       body: Column(
         children: <Widget>[
@@ -108,8 +53,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Card(
               child: Material(
-//                textStyle: TextStyle(color: Colors.black),
-//                color: Colors.blueGrey,
                 child: new Calendar(
                   /*dayBuilder: (context, dateTime) {
                     if(dateTime.day == DateTime.now().day) {
@@ -255,6 +198,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget dashboardDrawer() {
+    return Drawer(
+      child: ListView(
+        children: <Widget>[
+          //TODO: what do i want common across all screens?
+          Container(
+            color: Theme.of(context).accentColor,
+            child: DrawerHeader(
+              child: Text('Drawer Header'),
+            ),
+          ),
+          ListTile(
+            title: Text(
+              'Profile',
+            ),
+          ),
+          ListTile(
+            title: Text(
+              'Hangboard',
+            ),
+            onTap: () {
+              //Pop drawer before navigating so that it doesn't remain when returning
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/hangboard_workout_screen');
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Spotify',
+            ),
+            onTap: () {
+              //Pop drawer before navigating so that it doesn't remain when returning
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/spotify_test_screen');
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Campus',
+            ),
+          ),
+          ListTile(
+            title: Text(
+              'Progress',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void handleNewDate(DateTime date) {
     //TODO: format date in overlay better
 
@@ -276,7 +270,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         left: size.width / 6.0,
         top: size.height / 4.0,
         child: Card(
-//          color: Color.fromARGB(255, 44, 62, 80),
           child: Column(
             children: <Widget>[
               GestureDetector(

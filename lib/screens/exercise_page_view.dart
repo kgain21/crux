@@ -16,11 +16,13 @@ class ExercisePageView extends StatefulWidget {
   final String title;
   final CollectionReference collectionReference;
   final BaseAuth auth;
+  final workoutId;
 
   @override
   State createState() => _ExercisePageViewState();
 
-  ExercisePageView({this.title, this.collectionReference, this.auth});
+  ExercisePageView(
+      {this.title, this.collectionReference, this.auth, this.workoutId});
 }
 
 class _ExercisePageViewState extends State<ExercisePageView>
@@ -73,11 +75,11 @@ class _ExercisePageViewState extends State<ExercisePageView>
     _zoomController = new PageController(
         viewportFraction: _kViewportFraction /*initialPage: _index - 2*/);
     _controller = new PageController(/*initialPage: _index - 2*/);
-    /*_controller.addListener(() {
+    _controller.addListener(() {
       setState(() {
         _currentPageValue = _controller.page;
       });
-    });*/
+    });
   }
 
   Widget build(BuildContext context) {
@@ -86,67 +88,70 @@ class _ExercisePageViewState extends State<ExercisePageView>
         //backgroundColor: Theme.of(context),
         title: Text(widget.title),
       ),
-      body: GestureDetector(
-        onLongPress: () {
-          setState(() {
-            _zoomOut = true;
-            print('editing');
-          });
-        },
-        onTap: () {
-          if (_zoomOut == true) {
-            setState(() {
-              _zoomOut = false;
-            });
-          }
-        },
-        child: StreamBuilder<QuerySnapshot>(
-          stream: Firestore.instance
-              .collection('hangboard/${widget.title}/exercises')
-              .snapshots(),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-              case ConnectionState.none:
-              default:
-                int documentsLength = 0;
-                if (snapshot.data != null) {
-                  documentsLength = snapshot.data.documents.length;
-                }
-                _pageCount = documentsLength + 1;
-
-                return Center(
-                  child: new Container(
-                    color: Theme.of(context).primaryColor /*Dark*/,
-                    child: Stack(
-                      children: <Widget>[
-                        PageView(
-//                            itemCount: _pageCount,
-                          controller: _zoomOut ? _zoomController : _controller,
-                          children: createPageList(documentsLength, snapshot),
-//                            itemBuilder: (context, index) {
-                          //TODO: need to generalize this for other types of exercises
-                          //TODO: UPDATE -- do i? this is just for hangboarding for now - come back to this
-
-//                            },
-                        ),
-                        dotsIndicator(),
-                      ],
-                    ),
-                  ),
-                );
-            }
-          },
-        ),
-      ),
+      body: exercisePageView(),
     );
   }
 
   @override
   void dispose() {
+
     _controller.dispose();
     _zoomController.dispose();
     super.dispose();
+  }
+
+  Widget exercisePageView() {
+    return GestureDetector(
+      onLongPress: () {
+        setState(() {
+          _zoomOut = true;
+          print('editing');
+        });
+      },
+      onTap: () {
+        if (_zoomOut == true) {
+          setState(() {
+            _zoomOut = false;
+          });
+        }
+      },
+      child: exerciseStreamBuilder(),
+    );
+  }
+
+  Widget exerciseStreamBuilder() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance
+          .collection('hangboard/${widget.title}/exercises')
+          .snapshots(),
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+          case ConnectionState.none:
+          default:
+            int documentsLength = 0;
+            if (snapshot.data != null) {
+              documentsLength = snapshot.data.documents.length;
+            }
+            _pageCount = documentsLength + 1;
+
+            return Center(
+              child: new Container(
+                color: Theme.of(context).primaryColor /*Dark*/,
+                child: Stack(
+                  children: <Widget>[
+                    PageView(
+                      controller: _zoomOut ? _zoomController : _controller,
+                      children: createPageList(documentsLength, snapshot),
+                    ),
+                    dotsIndicator(),
+                  ],
+                ),
+              ),
+            );
+        }
+      },
+    );
   }
 
   List<Widget> createPageList(int documentsLength, AsyncSnapshot snapshot) {
@@ -186,6 +191,7 @@ class _ExercisePageViewState extends State<ExercisePageView>
   }
 
   Widget newExercisePage() {
+    //todo: trying to figure out why added exercises are incorrect sometimes on navigating back
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -240,6 +246,7 @@ class _ExercisePageViewState extends State<ExercisePageView>
     return Stack(
       children: <Widget>[
         HangboardPage(
+          workoutId: widget.workoutId,
           index: index,
           exerciseParameters: Map<String, dynamic>.from(document.data),
           nextPageCallback: nextPageCallback,

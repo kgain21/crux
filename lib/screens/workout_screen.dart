@@ -58,8 +58,32 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                       return new Flexible(
                         child: ListView.builder(
                           shrinkWrap: true,
-                          itemCount: snapshot.data.documents.length,
+                          itemCount: (snapshot.data.documents.length + 1),
                           itemBuilder: (context, index) {
+                            if(index == snapshot.data.documents.length) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: RaisedButton(
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) => BottomSheet(
+                                          onClosing: () {},
+                                          builder: (context) {
+                                            return Center(
+                                              child: ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                    maxWidth: 100.0, maxHeight: 100.0),
+                                                child: TextField(),
+                                              ),
+                                            );
+                                          },
+                                        ));
+                                  },
+                                  child: Text('Add Workout'),
+                                ),
+                              );
+                            }
                             return workoutTile(snapshot, index);
                           },
                         ),
@@ -67,26 +91,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   }
                 },
               ),
-              //TODO: make this an overlay? could be difficult w/ multiple sets/exercises - maybe just a new screen
-              RaisedButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                      context: context,
-                      builder: (context) => BottomSheet(
-                            onClosing: () {},
-                            builder: (context) {
-                              return Center(
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                      maxWidth: 100.0, maxHeight: 100.0),
-                                  child: TextField(),
-                                ),
-                              );
-                            },
-                          ));
-                },
-                child: Text('Add Workout'),
-              ),
+              //TODO: make this an overlay? could be difficult w/ multiple sets/exercises - maybe just a new scree
             ],
           ),
         ],
@@ -148,6 +153,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                 collectionReference:
                     Firestore.instance.collection('hangboard/$workoutTitle/exercises'),
                 auth: widget.auth,
+                workoutId: index.toString(),
               );
             },
           ));

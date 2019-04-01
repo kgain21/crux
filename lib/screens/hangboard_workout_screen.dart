@@ -1,8 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/screens/create_hangboard_workout_tab.dart';
-import 'package:crux/screens/edit_hangboard_workout_tab.dart';
 import 'package:crux/screens/exercise_tab.dart';
-import 'package:crux/screens/hangboard_workout_list_tab.dart';
 import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
 import 'package:flutter/material.dart';

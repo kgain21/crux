@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/model/finger_configurations_enum.dart';
-import 'package:crux/model/grip_enum.dart';
-import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
+import 'package:crux/model/hold_enum.dart';
 import 'package:crux/widgets/local_unit_picker_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import '../utils/string_format_utils.dart';
 
 class ExerciseForm extends StatefulWidget {
   final String workoutTitle;
@@ -33,9 +35,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
   String _depthMeasurementSystem;
   String _resistanceMeasurementSystem;
   int _numberOfHands;
-  Grip _grip;
+  Hold _hold;
   FingerConfiguration _fingerConfiguration;
-  int _depth;
+  double _depth;
   int _timeOff;
   int _timeOn;
   int _hangsPerSet;
@@ -43,7 +45,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
   int _numberOfSets;
   int _resistance;
 
-  bool _gripSelected;
+  bool _holdSelected;
   bool _hangProtocolSelected;
   bool _autoValidate;
 
@@ -52,7 +54,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     super.initState();
 
     _numberOfHands = 2;
-    _gripSelected = false;
+    _holdSelected = false;
     _depthMeasurementSystem = 'mm';
     _resistanceMeasurementSystem = 'kg';
     _hangProtocolSelected = false;
@@ -68,41 +70,41 @@ class _ExerciseFormState extends State<ExerciseForm> {
           IconButton(
             icon: Icon(Icons.info),
             tooltip: 'Help',
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
         ],
       ),
-      body: Form(
-        key: formKey,
-        /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
-          TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
-          https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
-          TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
-           */
-        child: exerciseFormWidget(),
+      body: Builder(
+        builder: (scaffoldContext) => Form(
+              key: formKey,
+              /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
+            TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
+            https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
+            TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
+             */
+              child: exerciseFormWidget(scaffoldContext),
+            ),
       ),
     );
   }
 
-  Widget exerciseFormWidget() {
+  Widget exerciseFormWidget(BuildContext scaffoldContext) {
     return ListView(
       children: <Widget>[
         UnitPickerTile(
-          resistanceCallback: updateResistanceMeasurement,
-          depthCallback: updateDepthMeasurement,
-          initialDepthMeasurement: _depthMeasurementSystem,
-          initialResistanceMeasurement: _resistanceMeasurementSystem
-        ),
+            resistanceCallback: updateResistanceMeasurement,
+            depthCallback: updateDepthMeasurement,
+            initialDepthMeasurement: _depthMeasurementSystem,
+            initialResistanceMeasurement: _resistanceMeasurementSystem),
         numberOfHandsTile(),
-        gripDropdownTile(),
-        (_gripSelected && (_grip == Grip.POCKET || _grip == Grip.OPEN_HAND))
-            ? fingerConfigurationDropdownTile(_grip)
+        holdDropdownTile(),
+        (_holdSelected && (_hold == Hold.POCKET || _hold == Hold.OPEN_HAND))
+            ? fingerConfigurationDropdownTile(_hold)
             : null,
-        (_gripSelected &&
-                (_grip != Grip.JUGS &&
-                    _grip != Grip.SLOPER &&
-                    _grip != Grip.PINCH))
+        (_holdSelected &&
+                (_hold != Hold.JUGS &&
+                    _hold != Hold.SLOPER &&
+                    _hold != Hold.PINCH))
             ? depthTile()
             : null,
         hangDurationTile(),
@@ -111,7 +113,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
         timeBetweenSetsTile(),
         numberOfSetsTile(),
         resistanceTile(),
-        saveButton()
+        saveButton(scaffoldContext)
       ].where(notNull).toList(),
     );
   }
@@ -168,31 +170,31 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget gripDropdownTile() {
+  Widget holdDropdownTile() {
     return new Card(
       child: new ListTile(
         leading: Icon(
           Icons.pan_tool,
         ),
         title: DropdownButtonHideUnderline(
-          child: new DropdownButton<Grip>(
+          child: new DropdownButton<Hold>(
             elevation: 10,
             hint: Text(
-              'Choose a grip',
+              'Choose a hold',
             ),
-            value: _grip,
+            value: _hold,
             onChanged: (value) {
               setState(() {
-                _grip = value;
-                _gripSelected = true;
+                _hold = value;
+                _holdSelected = true;
               });
             },
-            items: Grip.values.map((Grip grip) {
-              return new DropdownMenuItem<Grip>(
+            items: Hold.values.map((Hold hold) {
+              return new DropdownMenuItem<Hold>(
                 child: new Text(
-                  formatGrip(grip),
+                  StringFormatUtils.formatHold(hold),
                 ),
-                value: grip,
+                value: hold,
               );
             }).toList(),
           ),
@@ -201,7 +203,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget fingerConfigurationDropdownTile(Grip grip) {
+  Widget fingerConfigurationDropdownTile(Hold hold) {
     return new Card(
       child: new ListTile(
         leading: Icon(
@@ -220,7 +222,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
                 _fingerConfiguration = value;
               });
             },
-            items: mapFingerConfigurations(grip),
+            items: mapFingerConfigurations(hold),
           ),
         ),
       ),
@@ -235,17 +237,15 @@ class _ExerciseFormState extends State<ExerciseForm> {
           child: new TextFormField(
             controller: depthController,
             autovalidate: _autoValidate,
-            validator: (value) {
-              return hangboardFieldValidator(value);
-            },
             onSaved: (value) {
-              _depth = int.tryParse(value);
+              _depth = double.parse(value);
             },
             decoration: InputDecoration(
               icon: Icon(Icons.keyboard_tab),
               labelText: 'Depth ($_depthMeasurementSystem)',
             ),
-            keyboardType: TextInputType.numberWithOptions(),
+            keyboardType:
+                TextInputType.numberWithOptions(signed: true, decimal: true),
           ),
         ),
       ),
@@ -409,7 +409,12 @@ class _ExerciseFormState extends State<ExerciseForm> {
             controller: resistanceController,
             autovalidate: _autoValidate,
             validator: (value) {
-              return hangboardFieldValidator(value);
+              var intValue = int.tryParse(value);
+              if (intValue == null) {
+                return 'Please enter a number.';
+              }
+              if (intValue.isNaN) return 'Please enter a real number.';
+              return null;
             },
             onSaved: (value) {
               _resistance = int.tryParse(value);
@@ -426,15 +431,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget saveButton() {
+  Widget saveButton(BuildContext scaffoldContext) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: RaisedButton(
         onPressed: () {
-          saveTileFields();
+          saveTileFields(scaffoldContext);
         },
         child: Text('Save Set'),
-        //TODO: make add another set button appear when this is saved, this doesn't appear until all fields entered
       ),
     );
   }
@@ -453,38 +457,17 @@ class _ExerciseFormState extends State<ExerciseForm> {
     return null;
   }
 
-  /// Formatter for the different [Grips] I have available. This basically just
-  /// takes the enum form and makes it a better looking String for the dropdown.
-  String formatGrip(Grip grip) {
-    var gripArray = grip.toString().substring(5).split('_');
-    String formattedGrip = '';
-    for (int i = 0; i < gripArray.length; i++) {
-      formattedGrip = formattedGrip +
-          '${gripArray[i].substring(0, 1).toUpperCase()}${gripArray[i].substring(1).toLowerCase()}';
-      if (!(i == gripArray.length - 1)) {
-        formattedGrip += ' ';
-      }
+  //TODO: put general message about form errors below save button
+  void saveTileFields(BuildContext scaffoldContext) {
+    if (formKey.currentState.validate()) {
+      formKey.currentState.save();
+      saveHangboardWorkoutToFirebase(scaffoldContext); //TODO: make dao here?
+    } else {
+      setState(() => _autoValidate = true);
     }
-    return formattedGrip;
   }
 
-  /// Formatter for the different [FingerConfiguration]s I have available. This basically just
-  /// takes the enum form and makes it a better looking String for the dropdown.
-  String formatFingerConfiguration(FingerConfiguration fingerConfiguration) {
-    var fingerConfigurationArray =
-        fingerConfiguration.toString().substring(20).split('_');
-    String formattedConfiguration = '';
-    for (int i = 0; i < fingerConfigurationArray.length; i++) {
-      formattedConfiguration = formattedConfiguration +
-          '${fingerConfigurationArray[i].substring(0, 1).toUpperCase()}${fingerConfigurationArray[i].substring(1).toLowerCase()}';
-      if (!(i == fingerConfigurationArray.length - 1)) {
-        formattedConfiguration += '-';
-      }
-    }
-    return formattedConfiguration;
-  }
-
-  void saveHangboardWorkoutToFirebase() {
+  void saveHangboardWorkoutToFirebase(BuildContext scaffoldContext) {
     CollectionReference collectionReference = Firestore.instance
         .collection('hangboard/${widget.workoutTitle}/exercises');
 
@@ -494,32 +477,20 @@ class _ExerciseFormState extends State<ExerciseForm> {
     var exerciseRef = collectionReference.document(dataId);
     exerciseRef.get().then((doc) {
       if (doc.exists) {
-        print('$doc exists, would you like to update it?');
+        _exerciseExistsAlert(scaffoldContext, exerciseRef, data);
       } else {
         exerciseRef.setData(data);
+        exerciseSavedSnackbar(scaffoldContext);
       }
     });
 
-    //reference.updateData({exercises: firebase.firestore.FieldValue.arrayUnion(data)});
-    // reference.updateData(data);
-  }
-
-  //TODO: put general message about form errors below save button
-  void saveTileFields() {
-    if (formKey.currentState.validate()) {
-      formKey.currentState.save();
-      saveHangboardWorkoutToFirebase(); //TODO: make dao here?
-      print('saved');
-    } else {
-      setState(() => _autoValidate = true);
-    }
   }
 
   /// This method currently packages the data to be sent to the Firestore.
   /// Not sure if I need this or want to make a separate object (probably should
   /// do that anyway) to send the data instead. I could also make the [exercises]
   /// field a member var of this tab, and then each [exercise] could add it's own
-  /// state info like [_depth] and [_grip] to the global [exercises].
+  /// state info like [_depth] and [_hold] to the global [exercises].
   /// //TODO: Make sure these defaults are ok
   Map createHangboardData() {
     Map<String, dynamic> data = {
@@ -527,9 +498,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
       "depthMeasurementSystem": _depthMeasurementSystem,
       "numberOfHands": _numberOfHands,
       "depth": _depth ?? '',
-      "grip": formatGrip(_grip),
+      "hold": StringFormatUtils.formatHold(_hold),
       "fingerConfiguration": (_fingerConfiguration != null)
-          ? formatFingerConfiguration(_fingerConfiguration)
+          ? StringFormatUtils.formatFingerConfiguration(_fingerConfiguration)
           : '',
       "resistance": _resistance ?? '',
       "timeOn": _timeOn,
@@ -544,39 +515,39 @@ class _ExerciseFormState extends State<ExerciseForm> {
   String createDataId(Map data) {
     var depth = data['depth'];
     var measurement = data['depthMeasurementSystem'];
-    var grip = data['grip'];
+    var hold = data['hold'];
     var fingerConfiguration = data['fingerConfiguration'];
 
     if (depth == null || depth == '') {
       if (fingerConfiguration == null || fingerConfiguration == '') {
-        return grip;
+        return hold;
       } else {
-        return '$fingerConfiguration $grip';
+        return '$fingerConfiguration $hold';
       }
     } else {
-      return '$depth$measurement $fingerConfiguration $grip';
+      return '$depth$measurement $fingerConfiguration $hold';
     }
   }
 
-  List<Widget> mapFingerConfigurations(Grip grip) {
-    if (grip == Grip.POCKET) {
+  List<Widget> mapFingerConfigurations(Hold hold) {
+    if (hold == Hold.POCKET) {
       return FingerConfiguration.values
           .sublist(0, 6)
           .map((FingerConfiguration fingerConfiguration) {
         return new DropdownMenuItem<FingerConfiguration>(
           child: new Text(
-            formatFingerConfiguration(fingerConfiguration),
+            StringFormatUtils.formatFingerConfiguration(fingerConfiguration),
           ),
           value: fingerConfiguration,
         );
       }).toList();
-    } else if (grip == Grip.OPEN_HAND) {
+    } else if (hold == Hold.OPEN_HAND) {
       return FingerConfiguration.values
           .sublist(4)
           .map((FingerConfiguration fingerConfiguration) {
         return new DropdownMenuItem<FingerConfiguration>(
           child: new Text(
-            formatFingerConfiguration(fingerConfiguration),
+            StringFormatUtils.formatFingerConfiguration(fingerConfiguration),
           ),
           value: fingerConfiguration,
         );
@@ -586,12 +557,157 @@ class _ExerciseFormState extends State<ExerciseForm> {
           .map((FingerConfiguration fingerConfiguration) {
         return new DropdownMenuItem<FingerConfiguration>(
           child: new Text(
-            formatFingerConfiguration(fingerConfiguration),
+            StringFormatUtils.formatFingerConfiguration(fingerConfiguration),
           ),
           value: fingerConfiguration,
         );
       }).toList();
     }
+  }
+
+  Future<void> _exerciseExistsAlert(BuildContext scaffoldContext,
+      DocumentReference exerciseRef, Map data) async {
+    String exercise = StringFormatUtils.formatDepthAndHold(
+        _depth,
+        _depthMeasurementSystem,
+        StringFormatUtils.formatFingerConfiguration(_fingerConfiguration),
+        StringFormatUtils.formatHold(_hold));
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Exercise already exists'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(color: Colors.black, fontSize: 16.0),
+                    children: [
+                      TextSpan(
+                          text: 'You already have an exercise created for '),
+                      TextSpan(
+                        text: '$exercise.\n\n',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                          text: 'Would you like to replace it with this one?'),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            Row(
+              children: <Widget>[
+                FlatButton(
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                FlatButton(
+                    child: Text('Replace'),
+                    onPressed: () {
+                      exerciseRef.setData(data);
+                      exerciseSavedSnackbar(scaffoldContext);
+                      Navigator.of(context).pop();
+                    }),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void exerciseSavedSnackbar(BuildContext scaffoldContext) {
+    Scaffold.of(scaffoldContext).showSnackBar(
+      SnackBar(
+        duration: Duration(days: 1),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Exercise Saved!',
+                      style:
+                          TextStyle(color: Theme.of(scaffoldContext).accentColor),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    FlatButton(
+                      child: Row(
+                        children: <Widget>[
+                          Text('Back'),
+                        ],
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    FlatButton(
+                      child: Row(
+                        children: <Widget>[
+                          Text('Continue Editing'),
+                        ],
+                      ),
+                      onPressed: () {
+                        Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+                      },
+                    ),
+                    FlatButton(
+                      child: Row(
+                        children: <Widget>[
+                          Text('Reset'),
+                        ],
+                      ),
+                      onPressed: () {
+                        formKey.currentState.reset();
+                        clearFields();
+                        Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void clearFields() {
+    setState(() {
+      timeOffController.clear();
+      hangsPerSetController.clear();
+      timeBetweenSetsController.clear();
+      numberOfSetsController.clear();
+      resistanceController.clear();
+      timeOnController.clear();
+      _numberOfHands = 2;
+      _holdSelected = false;
+      //TODO: don't think nulls work here
+      _fingerConfiguration = null;
+      _hold = null;
+      _depthMeasurementSystem = 'mm';
+      _resistanceMeasurementSystem = 'kg';
+      _hangProtocolSelected = false;
+      _autoValidate = false;
+    });
   }
 
 //TODO: Figure out how to use date w/ firestore -- crashes app with this shit:
@@ -606,7 +722,3 @@ class _ExerciseFormState extends State<ExerciseForm> {
     Map<String, Object> exercise = new LinkedHashMap();
     exercise.putIfAbsent('depth', _depth);*/
 }
-/*
-Just keeping these around in case i ever want to use them
-icon: Icon(Icons.trending_up),
-                        icon: Icon(Icons.import_export),*/

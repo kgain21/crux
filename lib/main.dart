@@ -49,67 +49,12 @@ class MyApp extends StatelessWidget {
         primaryColorDark: Color(0xFF9ea7aa),
         bottomAppBarColor: Color(0xFFe2f1f8),
         secondaryHeaderColor: Color(0xFF009624),
-        accentColor: Color(0xAF76ff03),
+//        accentColor: Color(0xAF76ff03),
+        accentColor: Color(0xFF64dd17),
 
         primaryColorBrightness: Brightness.light,
         //canvasColor: Color(0xFF64dd17),
 
-//        fontFamily:
-
-
-
-        //midnight blue
-        //backgroundColor: Colors.blueGrey,
-        //scaffoldBackgroundColor: Color.fromARGB(255, 44, 62, 80),
-        /*cardColor: Color.fromARGB(255, 44, 62, 80),
-        hintColor: Colors.white,
-        textTheme: new TextTheme(
-          display4: TextStyle(
-            color: Colors.white,
-          ),
-          display3: TextStyle(
-            color: Colors.white,
-          ),
-          display2: TextStyle(
-            color: Colors.white,
-          ),
-          display1: TextStyle(
-            color: Colors.white,
-          ),
-          headline: TextStyle(
-            color: Colors.white,
-          ),
-          title: TextStyle(
-            color: Colors.white,
-          ),
-          subhead: TextStyle(
-            color: Colors.white,
-          ),
-          body1: TextStyle(
-            color: Colors.white,
-          ),
-          body2: TextStyle(
-            color: Colors.white,
-          ),
-          caption: TextStyle(
-            color: Colors.white,
-          ),
-          button: TextStyle(
-            color: Colors.white,
-          ),
-          subtitle: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        primaryIconTheme: IconThemeData(
-          color: Colors.white,
-        ),
-        accentIconTheme: IconThemeData(
-          color: Colors.white,
-        ),
-        iconTheme: IconThemeData(
-          color: Colors.white,
-        ),*/
 
       ),
       home: new SignInScreen(title: title, auth: auth),
