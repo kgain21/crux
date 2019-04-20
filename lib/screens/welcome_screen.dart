@@ -19,10 +19,10 @@ class WelcomeScreen extends StatelessWidget {
           Center(
             child: Container(
               decoration: new BoxDecoration(
-                //color: Color.fromARGB(255, 127, 140, 141),
                 image: new DecorationImage(
                   image: new AssetImage(
-                      'assets/images/rock-climbing-indoor-2.jpg'),
+                    'assets/images/rock-climbing-indoor-2.jpg',
+                  ),
                   fit: BoxFit.scaleDown,
                 ),
               ),

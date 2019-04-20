@@ -10,8 +10,7 @@ class HangboardWorkoutListTab extends StatefulWidget {
 
 class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-
- /* ScrollController _workoutListScrollController;
+  /* ScrollController _workoutListScrollController;
 
   @override
   void initState() {
@@ -78,7 +77,8 @@ class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
     );
   }
 
-  Widget exerciseListBuilder(AsyncSnapshot<QuerySnapshot> snapshot, int docIndex) {
+  Widget exerciseListBuilder(
+      AsyncSnapshot<QuerySnapshot> snapshot, int docIndex) {
     return new Card(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -88,15 +88,14 @@ class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
             child: ListView.builder(
               controller: new ScrollController(),
               key: PageStorageKey('ExerciseListBuilder'),
-              itemCount: snapshot.data.documents[docIndex].data['exercises'].length,
+              itemCount:
+                  snapshot.data.documents[docIndex].data['exercises'].length,
               shrinkWrap: true,
               itemBuilder: (context, fieldIndex) {
                 return HangboardPage(
-                    index: fieldIndex,
-                    exerciseParameters: Map<String, dynamic>.from(snapshot
-                    .data
-                    .documents[docIndex]
-                    .data['exercises'][fieldIndex]),
+                  index: fieldIndex,
+                  exerciseParameters: Map<String, dynamic>.from(snapshot
+                      .data.documents[docIndex].data['exercises'][fieldIndex]),
                 );
               },
             ),
@@ -110,6 +109,7 @@ class _HangboardWorkoutListTabState extends State<HangboardWorkoutListTab>
   void dispose() {
     super.dispose();
   }
+
   // TODO: implement wantKeepAlive
   @override
   bool get wantKeepAlive => true;

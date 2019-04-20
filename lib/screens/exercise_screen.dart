@@ -73,7 +73,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           ],
         ),
         bottomNavigationBar: new FABBottomAppBar(
-          backgroundColor: Colors.blueGrey,//Color.fromARGB(255, 44, 62, 80),
+          backgroundColor: Colors.blueGrey,
+          //Color.fromARGB(255, 44, 62, 80),
           //midnight blue// Colors.white,
           //Color.fromARGB(255, 229, 191, 126),
           color: Colors.white,
@@ -115,13 +116,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             showOverlay(context);
           },
           child: Icon(Icons.edit),
-          backgroundColor: Colors.blueGrey,//Color.fromARGB(255, 44, 62, 80),
+          backgroundColor: Colors.blueGrey, //Color.fromARGB(255, 44, 62, 80),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       ),
     );
   }
-
 
   //TODO: Separate into show/hide?
   void showOverlay(BuildContext context) {

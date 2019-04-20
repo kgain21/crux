@@ -58,6 +58,12 @@ flutter:
 
   assets:
     - assets/images/rock-climbing-indoor-2.jpg
+    - assets/images/hangboard-01.jpg
+    - assets/images/campus-board-01.jpg
+    - assets/images/campus-board-02.jpg
+    - assets/images/campus-board-03.jpg
+    - assets/images/stretching-01.jpg
+    - assets/images/weightlifting-01.jpg
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg

@@ -1,36 +1,43 @@
+import 'package:crux/screens/calendar_screen.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_calendar/flutter_calendar.dart';
 
 class DashboardScreen extends StatefulWidget {
   final String title;
   final BaseAuth auth;
+  final String username;
 
-  DashboardScreen({Key key, this.title, this.auth}) : super(key: key);
+  DashboardScreen({Key key, this.title, this.auth, this.username}) : super(key: key);
 
   @override
   _DashboardScreenState createState() => new _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final Map<String, String> screenMap = {
-    'Profile': null,
-    'Hangboard': '/hangboard_workout_screen',
-    'Campus Board': null,
-    /*'/campus_workout_screen',*/
-    'ARC Training': null /*'/arc_training_workout_screen'*/,
-    '4 x 4s': null,
-    'Stopwatch': '/stopwatch_screen',
-    'Workouts': '/workout_screen',
-    'Test2': null,
-    'Test3': null,
+  //todo: this map should be passed in given the day ->
+  final Map<String, List<String>> screenMap = {
+//    'Profile': null,
+    'Warmup': ['/warmup_screen', 'assets/images/stretching-01.jpg'],
+    'Hangboard': [
+      '/hangboard_workout_screen',
+      'assets/images/hangboard-01.jpg'
+    ],
+    'Campus': ['/campus_screen', 'assets/images/campus-board-03.jpg'],
+    'Weight Lifting': [
+      '/weight_lifting_screen',
+      'assets/images/weightlifting-01.jpg'
+    ],
+//    'ARC Training': null /*'/arc_training_workout_screen'*/,
+//    '4 x 4s': null,
+//    'Stopwatch': ['/stopwatch_screen', ''],
+//    'Workouts': ['/workout_screen',''],
+//    'Test2': null,
+//    'Test3': null,
   };
 
   List<String> screenMapKeys;
-  OverlayEntry _overlayEntry;
-  bool _overlayVisible;
 
   //FocusNode _focusNode;
 
@@ -38,7 +45,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     screenMapKeys = screenMap.keys.toList();
-    _overlayVisible = false;
     //_focusNode = new FocusNode();
   }
 
@@ -47,153 +53,97 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       drawer: dashboardDrawer(),
       appBar: SharedAppBar.sharedAppBar('Dashboard', widget.auth, context),
-      body: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Material(
-                child: new Calendar(
-                  /*dayBuilder: (context, dateTime) {
-                    if(dateTime.day == DateTime.now().day) {
-                      calendarTile(true);//TODO: need to put this in it's own widget to have selected property
-                    }
-                    return Material(
-                      child: InkWell(
-                        onTap: () {
+      body: workoutListView(),
+//      bottomNavigationBar: NewBottomNavBar(),
+    );
 
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                            border: Border.all(color: Colors.black38)
-                          ),
-                          child: new Text(dateTime.day.toString()),
-                        ),
-                      ),
-                    );
-                  },*/
-                  isExpandable: true,
-                  onSelectedRangeChange: (range) =>
-                      print("Range is ${range.item1}, ${range.item2}"),
-                  onDateSelected: (date) {
-                    /* FocusScope.of(context).requestFocus(_focusNode);
-                    _focusNode.addListener(() {
-                      if(!_focusNode.hasFocus)
-                        this._overlayEntry.remove();
-                    });*/
-                    handleNewDate(date);
-                  },
-                ),
+    //TODO: play with this at some point
+    // https://www.youtube.com/watch?v=ORiTTaVY6mM&index=12&list=PLOU2XLYxmsIL0pH0zWe_ZOHgGhZ7UasUE
+  }
+
+  Widget workoutListView() {
+    return ListView(
+      children: <Widget>[
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Text(
+                'Title Filler',
+                style: TextStyle(fontSize: 25.0),
               ),
             ),
-          ),
-          Text(
-            'Today\'s workout:',
-            style: TextStyle(fontSize: 20.0),
-          ),
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CustomScrollView(
-                shrinkWrap: true,
-                controller: new ScrollController(),
-                slivers: <Widget>[
-                  SliverList(
-                    delegate: new SliverChildListDelegate(
-                      [
-                        Card(
-                          child: new ListTile(
-                            title: new TextFormField(
-                              keyboardType: TextInputType.numberWithOptions(),
-                              decoration: InputDecoration(
-                                icon: Icon(
-                                  Icons.timer,
-                                ),
-                                hintText: 'Start Time',
-                              ),
-                            ),
-                          ),
-                        ),
-                        Card(
-                          child: new ListTile(
-                            title: new Text(
-                              'Limit Boulder',
-                            ),
-                            trailing: new Icon(Icons.chevron_right),
-                          ),
-                        ),
-                        Card(
-                          child: new ListTile(
-                            title: new Text(
-                              'Hangboard',
-                            ),
-                            trailing: new Icon(Icons.chevron_right),
-                            onTap: () =>
-                                Navigator.pushNamed(context, '/workout_screen'),
-                          ),
-                        ),
-                        Card(
-                          child: new ListTile(
-                            title: new Text(
-                              'Abs',
-                            ),
-                            trailing: new Icon(Icons.chevron_right),
-                          ),
-                        ),
-                        Card(
-                          child: new ListTile(
-                            title: new Text('Weight Lifting'),
-                            trailing: new Icon(Icons.chevron_right),
-                          ),
-                        ),
-                        Card(
-                          child: new ListTile(
-                            title: new Text('Stretching'),
-                            trailing: new Icon(Icons.chevron_right),
-                          ),
-                        ),
-                      ],
+            CalendarScreen(),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Text(
+                'Today\'s workout:',
+                style: TextStyle(fontSize: 20.0),
+              ),
+            ),
+            todaysWorkoutRow(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget todaysWorkoutRow() {
+    return Padding(
+      padding:
+          const EdgeInsets.only(left: 10.0, top: 8.0, right: 0.0, bottom: 8.0),
+      child: Container(
+        constraints: BoxConstraints(
+          minWidth: MediaQuery.of(context).size.width,
+          maxWidth: MediaQuery.of(context).size.width,
+          minHeight: MediaQuery.of(context).size.height / 6.0,
+          maxHeight: MediaQuery.of(context).size.height / 5.0,
+        ),
+        child: ListView.builder(
+          itemCount: screenMap.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                    context, screenMap.values.elementAt(index)[0]);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  alignment: Alignment.bottomLeft,
+                  decoration: new BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        blurRadius: 4.0,
+                      )
+                    ],
+                    image: new DecorationImage(
+                      fit: BoxFit.fill,
+                      image: new AssetImage(
+                        screenMap.values.elementAt(index)[1],
+                      ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          /*Flexible(
-            child: CustomScrollView(
-              shrinkWrap: true,
-              controller: new ScrollController(),
-              slivers: <Widget>[
-                SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                  constraints: BoxConstraints(
+                    minWidth: MediaQuery.of(context).size.width / 2.0,
+                    maxWidth: MediaQuery.of(context).size.width / 2.0,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      return GestureDetector(
-                        child: Card(
-                          elevation: 5.0,
-                          child: Container(
-                            alignment: Alignment.center,
-                            child: Text('${screenMapKeys[index]}'),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.pushNamed(
-                              context, screenMap[screenMapKeys[index]]);
-                        },
-                      );
-                    },
-                    childCount: screenMapKeys.length,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      screenMapKeys[index],
+                    ),
                   ),
                 ),
-                //TODO: play with this at some point
-                // https://www.youtube.com/watch?v=ORiTTaVY6mM&index=12&list=PLOU2XLYxmsIL0pH0zWe_ZOHgGhZ7UasUE
-              ],
-            ),
-          )*/
-        ],
+              ),
+            );
+          },
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+        ),
       ),
     );
   }
@@ -247,48 +197,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
-  }
-
-  void handleNewDate(DateTime date) {
-    //TODO: format date in overlay better
-
-    //TODO: Link workouts here (look at #3 in link below)
-    //https://pub.dartlang.org/packages/flutter_calendar#-readme-tab-
-    print("handleNewDate $date");
-    this._overlayEntry = createOverlayEntry(date);
-    Overlay.of(context).insert(_overlayEntry);
-  }
-
-  OverlayEntry createOverlayEntry(DateTime date) {
-    RenderBox renderBox = context.findRenderObject();
-    var size = renderBox.size;
-
-    return OverlayEntry(builder: (context) {
-      return Positioned(
-        width: size.width / 1.5,
-        height: size.height / 3.0,
-        left: size.width / 6.0,
-        top: size.height / 4.0,
-        child: Card(
-          child: Column(
-            children: <Widget>[
-              GestureDetector(
-                onTap: () => _overlayEntry.remove(),
-                child: Icon(
-                  Icons.cancel,
-                ),
-              ),
-              Text(
-                '${date.toString()}',
-                //TODO: going to need to go to db to find workout assoc w/ this day
-                //TODO: if nothing there, option to create new or select from premade workouts
-//                style: TextStyle(fontSize: 12.0, color: Colors.black),
-              ),
-            ],
-          ),
-        ),
-      );
-    });
   }
 
   _DashboardScreenState();

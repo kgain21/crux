@@ -10,8 +10,6 @@ class ExerciseTab extends StatefulWidget {
 
 class _ExerciseTabState extends State<ExerciseTab>
     with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
-
-
   @override
   void initState() {
     super.initState();
@@ -28,15 +26,14 @@ class _ExerciseTabState extends State<ExerciseTab>
         padding: const EdgeInsets.all(8.0),
         child: new Column(
           mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-
-          ],
+          children: <Widget>[],
         ),
       ),
     );
   }
 
-  Widget exerciseListBuilder(AsyncSnapshot<QuerySnapshot> snapshot, int docIndex) {
+  Widget exerciseListBuilder(
+      AsyncSnapshot<QuerySnapshot> snapshot, int docIndex) {
     return new Card(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -46,15 +43,14 @@ class _ExerciseTabState extends State<ExerciseTab>
             child: ListView.builder(
               controller: new ScrollController(),
               key: PageStorageKey('ExerciseListBuilder'),
-              itemCount: snapshot.data.documents[docIndex].data['exercises'].length,
+              itemCount:
+                  snapshot.data.documents[docIndex].data['exercises'].length,
               shrinkWrap: true,
               itemBuilder: (context, fieldIndex) {
                 return HangboardPage(
-                    index: fieldIndex,
-                    exerciseParameters: Map<String, dynamic>.from(snapshot
-                    .data
-                    .documents[docIndex]
-                    .data['exercises'][fieldIndex]),
+                  index: fieldIndex,
+                  exerciseParameters: Map<String, dynamic>.from(snapshot
+                      .data.documents[docIndex].data['exercises'][fieldIndex]),
                 );
               },
             ),
@@ -68,6 +64,7 @@ class _ExerciseTabState extends State<ExerciseTab>
   void dispose() {
     super.dispose();
   }
+
   // TODO: implement wantKeepAlive
   @override
   bool get wantKeepAlive => true;

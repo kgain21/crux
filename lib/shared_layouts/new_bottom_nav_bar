@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+class NewBottomNavBar extends StatefulWidget {
+  @override
+  State createState() => _NewBottomNavBarState();
+}
+
+class _NewBottomNavBarState extends State<NewBottomNavBar> {
+  int _currentIndex;
+  var navBarRoutes;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = 0;
+    navBarRoutes = [
+      '/dashboard_screen',
+      'progress_screen',
+      '/calendar_screen',
+      '/timer_screen'
+    ];
+  }
+
+  @override
+  Widget build(context) {
+    return BottomNavigationBar(
+      elevation: 8.0,
+      currentIndex: _currentIndex,
+      onTap: (index) {
+        setState(() {
+          _currentIndex = index;
+          Navigator.pushNamed(context, navBarRoutes[index]);
+        });
+      },
+      type: BottomNavigationBarType.shifting,
+      items: <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: new Icon(
+            Icons.home,
+            color: Theme.of(context).accentColor,
+          ),
+          title: new Text(
+            'Home',
+            style: TextStyle(color: Theme.of(context).accentColor),
+          ),
+        ),
+        BottomNavigationBarItem(
+          icon:
+              new Icon(Icons.show_chart, color: Theme.of(context).accentColor),
+          title: new Text(
+            'Progress',
+            style: TextStyle(color: Theme.of(context).accentColor),
+          ),
+        ),
+        BottomNavigationBarItem(
+          icon:
+              new Icon(Icons.date_range, color: Theme.of(context).accentColor),
+          title: new Text(
+            'Calendar',
+            style: TextStyle(color: Theme.of(context).accentColor),
+          ),
+        ),
+        BottomNavigationBarItem(
+          icon: new Icon(Icons.timer, color: Theme.of(context).accentColor),
+          title: new Text(
+            'Timer',
+            style: TextStyle(color: Theme.of(context).accentColor),
+          ),
+        ),
+      ],
+    );
+  }
+}

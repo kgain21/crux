@@ -1,25 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/screens/exercise_page_view.dart';
-import 'package:crux/screens/exercise_screen.dart';
+import 'package:crux/screens/hangboard/exercise_page_view.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
-import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
-import 'package:crux/widgets/exercise_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class WorkoutScreen extends StatefulWidget {
+class HangboardWorkoutScreen extends StatefulWidget {
   final String title;
   final BaseAuth auth;
   final Firestore firestore;
 
   @override
-  State<StatefulWidget> createState() => new _WorkoutScreenState();
+  State<StatefulWidget> createState() => new _HangboardWorkoutScreenState();
 
-  WorkoutScreen({this.title, this.auth, this.firestore});
+  HangboardWorkoutScreen({this.title, this.auth, this.firestore});
 }
 
-class _WorkoutScreenState extends State<WorkoutScreen> {
+class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -30,6 +27,15 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                //TODO: standardize title font sizes
+                child: Text(
+                  'Your Hangboard Workouts:',
+                  style: TextStyle(fontSize: 20.0),
+                  textAlign: TextAlign.start,
+                ),
+              ),
               StreamBuilder<QuerySnapshot>(
                 stream: Firestore.instance.collection('/hangboard').snapshots(),
                 builder: (context, snapshot) {
@@ -60,7 +66,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                           shrinkWrap: true,
                           itemCount: (snapshot.data.documents.length + 1),
                           itemBuilder: (context, index) {
-                            if(index == snapshot.data.documents.length) {
+                            if (index == snapshot.data.documents.length) {
                               return Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: RaisedButton(
@@ -68,17 +74,18 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                                     showModalBottomSheet(
                                         context: context,
                                         builder: (context) => BottomSheet(
-                                          onClosing: () {},
-                                          builder: (context) {
-                                            return Center(
-                                              child: ConstrainedBox(
-                                                constraints: BoxConstraints(
-                                                    maxWidth: 100.0, maxHeight: 100.0),
-                                                child: TextField(),
-                                              ),
-                                            );
-                                          },
-                                        ));
+                                              onClosing: () {},
+                                              builder: (context) {
+                                                return Center(
+                                                  child: ConstrainedBox(
+                                                    constraints: BoxConstraints(
+                                                        maxWidth: 100.0,
+                                                        maxHeight: 100.0),
+                                                    child: TextField(),
+                                                  ),
+                                                );
+                                              },
+                                            ));
                                   },
                                   child: Text('Add Workout'),
                                 ),
@@ -150,8 +157,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             builder: (context) {
               return new ExercisePageView(
                 title: workoutTitle,
-                collectionReference:
-                    Firestore.instance.collection('hangboard/$workoutTitle/exercises'),
+                collectionReference: Firestore.instance
+                    .collection('hangboard/$workoutTitle/exercises'),
                 auth: widget.auth,
                 workoutId: index.toString(),
               );

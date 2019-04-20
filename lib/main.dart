@@ -1,17 +1,18 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/screens/calendar_screen.dart';
 import 'package:crux/screens/dashboard_screen.dart';
-import 'package:crux/screens/exercise_page_view.dart';
-import 'package:crux/screens/hangboard_workout_screen.dart';
+import 'package:crux/screens/hangboard/exercise_page_view.dart';
+import 'package:crux/screens/hangboard/hangboard_workout_screen.dart';
 import 'package:crux/screens/sign_in_screen.dart';
 import 'package:crux/screens/spotify_test_screen.dart';
 import 'package:crux/screens/stopwatch_screen.dart';
-import 'package:crux/screens/workout_screen.dart';
 import 'package:crux/utils/auth.dart';
 import 'package:crux/utils/base_auth.dart';
 import 'package:crux/widgets/workout_timer.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
@@ -51,11 +52,19 @@ class MyApp extends StatelessWidget {
         secondaryHeaderColor: Color(0xFF009624),
 //        accentColor: Color(0xAF76ff03),
         accentColor: Color(0xFF64dd17),
+        bottomAppBarTheme: BottomAppBarTheme(
+          color: Color(0xFFcfd8dc),
+        ),
 
         primaryColorBrightness: Brightness.light,
         //canvasColor: Color(0xFF64dd17),
 
 
+        textTheme: TextTheme(
+          headline: TextStyle(
+            fontSize: 30.0
+          ),
+        ),
       ),
       home: new SignInScreen(title: title, auth: auth),
       routes: {
@@ -64,14 +73,16 @@ class MyApp extends StatelessWidget {
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
         '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
             title: title, auth: auth, firestore: firestore),
-        '/workout_screen': (context) => WorkoutScreen(
-            title: 'Hangboard Workouts', auth: auth, firestore: firestore),
         '/countdown_timer_screen': (context) => WorkoutTimer(),
         '/spotify_test_screen': (context) => SpotifyTestScreen(),
         '/exercise_page_view': (context) => ExercisePageView(),
+        '/calendar_screen': (context) => CalendarScreen(auth: auth),
       },
+
+      debugShowCheckedModeBanner: true,
+      debugShowMaterialGrid: false,
+      checkerboardOffscreenLayers: false,
+
     );
   }
-
-
 }

@@ -7,6 +7,7 @@ import 'package:crux/widgets/local_unit_picker_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
 import '../utils/string_format_utils.dart';
 
 class ExerciseForm extends StatefulWidget {
@@ -483,7 +484,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
         exerciseSavedSnackbar(scaffoldContext);
       }
     });
-
   }
 
   /// This method currently packages the data to be sent to the Firestore.
@@ -642,8 +642,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
                   children: <Widget>[
                     Text(
                       'Exercise Saved!',
-                      style:
-                          TextStyle(color: Theme.of(scaffoldContext).accentColor),
+                      style: TextStyle(
+                          color: Theme.of(scaffoldContext).accentColor),
                     ),
                   ],
                 ),

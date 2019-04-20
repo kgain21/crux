@@ -1,3 +1,4 @@
+import 'package:crux/screens/dashboard_screen.dart';
 import 'package:crux/screens/welcome_screen.dart';
 import 'package:crux/utils/base_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,44 +19,117 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        //TODO: different appbar here?
-        //backgroundColor: Color.fromARGB(255, 103, 126, 116),
+      /*appBar: new AppBar(
         title: new Text(widget.title),
-      ),
-      body: Builder(
-        builder: (context) {
-          return new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              signInWidget(context),
-            ],
-          );
-        },
-      ),
+      ),*/
+      body: signInWidget(context),
     );
   }
 
   Widget signInWidget(BuildContext context) {
-    return new Center(
-      child: new RaisedButton(
-        //color: Color.fromARGB(255, 146, 164, 172),
-        //color: Color.fromARGB(255, 221, 219, 219),
-        child: const Text('SIGN IN'),
+    return Builder(
+      builder: (context) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Text(
+                'Welcome to Crux',
+                style: TextStyle(
+                    fontSize: Theme.of(context).textTheme.headline.fontSize),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: Container(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height / 3.0,
+                  maxHeight: MediaQuery.of(context).size.height / 2.25,
+//                  minWidth: MediaQuery.of(context).size.width / 2.0,
+                  maxWidth: MediaQuery.of(context).size.width,
+//                  maxWidth: MediaQuery.of(context).size.width / 1.0,
+                ),
+                decoration: new BoxDecoration(
+//                  borderRadius: BorderRadius.circular(20.0),
+                  image: new DecorationImage(
+                    image: new AssetImage(
+                      'assets/images/rock-climbing-indoor-2.jpg',
+                    ),
+                    fit: BoxFit.scaleDown,
+                  ),
+                ),
+              ),
+            ),
+            buttonGroup(),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buttonGroup() {
+    return Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            signInButton(),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              guestButton(),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget signInButton() {
+    return Container(
+      constraints:
+          BoxConstraints(minWidth: MediaQuery.of(context).size.width * 0.65),
+      child: RaisedButton(
+        shape: new RoundedRectangleBorder(
+          borderRadius: new BorderRadius.circular(30.0),
+        ),
+        color: Theme.of(context).accentColor,
+        child: const Text('Sign in'),
+        elevation: 4.0,
         onPressed: () {
-          //TODO: Find way to prevent people from clicking more than once
           widget.auth
               .signInWithGoogleEmailAndPassword()
               .then((FirebaseUser user) {
-            String username =
-                user.displayName.split(' ')[0]; //todo: unit tests around this?
+            String username = user.displayName.split(' ')[0];
+            /*showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    content: Text(
+                      'Welcome $username',
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                });*/
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    WelcomeScreen(title: widget.title, username: username),
+                builder: (context) => DashboardScreen(
+                      title: widget.title,
+                      username: username,
+                    ),
               ),
-            ); //TODO: pass username to a welcome screen? Smooth fade in with 'Welcome $User'
+            ); //TODO: Smooth fade in with 'Welcome $User'
           }).catchError(
             (e) => showDialog(
                 context: context,
@@ -63,35 +137,38 @@ class _SignInScreenState extends State<SignInScreen> {
                   return AlertDialog(
                     content: Text(
                       'Sign in failed. Please try again or continue as a guest.',
-                      style: TextStyle(color: Colors.black,),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   );
                 }),
-
-            /* showModalBottomSheet(
-                context: context,
-                builder: (context) => BottomSheet(
-                      onClosing: () {},
-                      builder: (context) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(child: Text('Sign in failed.', style: TextStyle(color: Colors.black),),),
-                        );
-                      },
-                    )),*/
-            /*Scaffold.of(context).showSnackBar(
-                  SnackBar(
-                    duration: const Duration(seconds: 3),
-                    content: Center(
-                      child: Text(
-                          'Sign in failed. Please try again or continue as a guest.'),
-                    ),
-                  ),
-                ),*/
-          ); //TODO: make this a toast/snackbar message
+          );
         },
-        //TODO: make app wide button theme with more rounded corners
+      ),
+    );
+  }
+
+  Widget guestButton() {
+    return Container(
+      constraints:
+          BoxConstraints(minWidth: MediaQuery.of(context).size.width * 0.65),
+      child: FlatButton(
+        color: Theme.of(context).buttonColor,
+        shape: new RoundedRectangleBorder(
+          borderRadius: new BorderRadius.circular(30.0),
+        ),
+        child: const Text('Continue as a guest'),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  DashboardScreen(title: widget.title, username: ''),
+            ),
+          ); //TODO: Smooth fade in with 'Welcome $User'
+        },
       ),
     );
   }

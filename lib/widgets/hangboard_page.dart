@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/widgets/workout_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
 import '../utils/string_format_utils.dart';
 
 class HangboardPage extends StatefulWidget {
@@ -92,7 +93,8 @@ class _HangboardPageState extends State<HangboardPage> {
                   Stack(
                     children: <Widget>[
                       ConstrainedBox(
-                        constraints: BoxConstraints(maxHeight: constraints.constrainHeight(50.0)),
+                        constraints: BoxConstraints(
+                            maxHeight: constraints.constrainHeight(50.0)),
                         child: titleBox(),
                       ),
                       _exerciseFinished
@@ -427,7 +429,8 @@ class _HangboardPageState extends State<HangboardPage> {
     return 0;
   }
 
-  double getDoubleVal(Map<String, dynamic> exerciseParameters, String fieldName) {
+  double getDoubleVal(
+      Map<String, dynamic> exerciseParameters, String fieldName) {
     try {
       var doubleVal = exerciseParameters[fieldName];
       if (doubleVal is double) return doubleVal;

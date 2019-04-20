@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/utils/base_auth.dart';
 import 'package:crux/widgets/dots_indicator.dart';
@@ -5,7 +7,6 @@ import 'package:crux/widgets/exercise_form.dart';
 import 'package:crux/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'dart:math';
 
 class ShakeCurve extends Curve {
   @override
@@ -94,7 +95,6 @@ class _ExercisePageViewState extends State<ExercisePageView>
 
   @override
   void dispose() {
-
     _controller.dispose();
     _zoomController.dispose();
     super.dispose();
