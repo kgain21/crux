@@ -28,11 +28,10 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                //TODO: standardize title font sizes
+                padding: const EdgeInsets.only(top: 16.0),
                 child: Text(
                   'Your Hangboard Workouts:',
-                  style: TextStyle(fontSize: 20.0),
+                  style: Theme.of(context).textTheme.title,
                   textAlign: TextAlign.start,
                 ),
               ),
@@ -43,12 +42,12 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
                     case ConnectionState.waiting:
                     case ConnectionState.none:
                       return Padding(
-                        padding: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text('Retrieving workouts...'),
+                              child: const Text('Retrieving workouts...'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -60,112 +59,139 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
                         ),
                       );
                     default:
-                      //TODO: make these draggable on edit
-                      return new Flexible(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: (snapshot.data.documents.length + 1),
-                          itemBuilder: (context, index) {
-                            if (index == snapshot.data.documents.length) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: RaisedButton(
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                        context: context,
-                                        builder: (context) => BottomSheet(
-                                              onClosing: () {},
-                                              builder: (context) {
-                                                return Center(
-                                                  child: ConstrainedBox(
-                                                    constraints: BoxConstraints(
-                                                        maxWidth: 100.0,
-                                                        maxHeight: 100.0),
-                                                    child: TextField(),
-                                                  ),
-                                                );
-                                              },
-                                            ));
-                                  },
-                                  child: Text('Add Workout'),
-                                ),
-                              );
-                            }
-                            return workoutTile(snapshot, index);
-                          },
+                      return Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: (snapshot.data.documents.length + 1),
+                            itemBuilder: (context, index) {
+                              if (index == snapshot.data.documents.length) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: RaisedButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          builder: (context) => BottomSheet(
+                                                onClosing: () {},
+                                                builder: (context) {
+                                                  return Center(
+                                                    child: ConstrainedBox(
+                                                      constraints:
+                                                          BoxConstraints(
+                                                              maxWidth: 100.0,
+                                                              maxHeight: 100.0),
+                                                      child: TextField(),
+                                                    ),
+                                                  );
+                                                },
+                                              ));
+                                    },
+                                    child: const Text('Add Workout'),
+                                  ),
+                                );
+                              }
+                              return HangboardWorkoutTile(
+                                  snapshot: snapshot,
+                                  index: index,
+                                  auth: widget.auth);
+                            },
+                          ),
                         ),
                       );
                   }
                 },
               ),
-              //TODO: make this an overlay? could be difficult w/ multiple sets/exercises - maybe just a new scree
             ],
           ),
         ],
       ),
-      /*bottomNavigationBar: new FABBottomAppBar(
-//        backgroundColor: Colors.blueGrey,
-//        color: Colors.black54,
-//        selectedColor: Colors.black,
-        items: <FABBottomAppBarItem>[
-          FABBottomAppBarItem(
-            iconData: Icons.home,
-            text: 'Home',
-          ),
-          */ /*FABBottomAppBarItem(
-            iconData: Icons.menu,
-            text: 'Menu',
-          ),*/ /*
-        ],
-        onTabSelected: (index) {
-          if (index == 0) {
-            Navigator.popUntil(
-                context, ModalRoute.withName('/dashboard_screen'));
-          } else {
-            return null;
-          }
-        },
-      ),*/
-      /*floatingActionButton: FloatingActionButton(
-//        backgroundColor: Colors.blueGrey,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return ExerciseForm(
-                workoutTitle: 'workouttitle',
-              );
-            }),
-          );
-        },
-        child: Icon(Icons.edit),
-        //backgroundColor: Color.fromARGB(255, 44, 62, 80),
-      ),*/
-      //floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      //bottomSheet: new BottomSheet(onClosing: null, builder: null),
     );
+  }
+}
+
+class HangboardWorkoutTile extends StatefulWidget {
+  final BaseAuth auth;
+  final AsyncSnapshot snapshot;
+  final int index;
+
+  HangboardWorkoutTile({this.snapshot, this.index, this.auth}) : super();
+
+  @override
+  State<StatefulWidget> createState() => _HangboardWorkoutTileState();
+}
+
+class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
+  final Icon _arrowIcon = Icon(Icons.chevron_right);
+  bool _isEditing;
+
+  @override
+  void initState() {
+    super.initState();
+    _isEditing = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return workoutTile(widget.snapshot, widget.index);
   }
 
   Widget workoutTile(AsyncSnapshot snapshot, int index) {
     var workoutTitle = snapshot.data.documents[index].documentID;
-    return new Card(
+    return Card(
       child: ListTile(
         title: Text(workoutTitle),
-        trailing: Icon(Icons.chevron_right),
+        trailing: !_isEditing ? _arrowIcon : interactiveCloseIcon(),
+        onLongPress: () {
+          setState(() {
+            _isEditing = true;
+          });
+        },
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) {
-              return new ExercisePageView(
-                title: workoutTitle,
-                collectionReference: Firestore.instance
-                    .collection('hangboard/$workoutTitle/exercises'),
-                auth: widget.auth,
-                workoutId: index.toString(),
-              );
-            },
-          ));
+          if (_isEditing) {
+            setState(() {
+              _isEditing = false;
+            });
+          } else {
+            Navigator.push(context, MaterialPageRoute(
+              builder: (context) {
+                return ExercisePageView(
+                  title: workoutTitle,
+                  collectionReference: Firestore.instance
+                      .collection('hangboard/$workoutTitle/exercises'),
+                  auth: widget.auth,
+                  workoutId: index.toString(),
+                );
+              },
+            ));
+          }
         },
       ),
+    );
+  }
+
+  Widget interactiveCloseIcon() {
+    return GestureDetector(
+      child: Icon(Icons.close),
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                content: Text(
+                  'Workout deleted!',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            });
+        setState(() {
+          _isEditing = false;
+        });
+      },
     );
   }
 }

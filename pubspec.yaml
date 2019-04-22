@@ -61,7 +61,7 @@ flutter:
     - assets/images/hangboard-01.jpg
     - assets/images/campus-board-01.jpg
     - assets/images/campus-board-02.jpg
-    - assets/images/campus-board-03.jpg
+    - assets/images/campus-board-01.jpg
     - assets/images/stretching-01.jpg
     - assets/images/weightlifting-01.jpg
   # To add assets to your application, add an assets section, like this:
@@ -94,3 +94,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
+
+#  ****IMPORTANT****
+#  INDENT FAMILY TWICE FOR CUSTOM FONTS TO WORK
+
+  fonts:
+      - family: Metropolis
+        fonts:
+          - asset: assets/fonts/metropolis/Metropolis-Regular.otf
+
+      - family: OpenSans
+        fonts:
+          - asset: assets/fonts/open_sans/OpenSans-Regular.ttf

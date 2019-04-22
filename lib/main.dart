@@ -59,11 +59,17 @@ class MyApp extends StatelessWidget {
         primaryColorBrightness: Brightness.light,
         //canvasColor: Color(0xFF64dd17),
 
+//        fontFamily: 'OpenSans',
+        fontFamily: 'Metropolis',
 
         textTheme: TextTheme(
           headline: TextStyle(
+//            fontFamily: 'OpenSans',
             fontSize: 30.0
           ),
+          title: TextStyle(
+            fontSize: 24.0
+          )
         ),
       ),
       home: new SignInScreen(title: title, auth: auth),

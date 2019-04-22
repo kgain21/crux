@@ -82,6 +82,9 @@ class StringFormatUtils {
     if (decimal == 0.375) return '3/8';
     if (decimal == 0.25) return '1/4';
     if (decimal == 0.125) return '1/8';
+    var decimalString = decimal.toString().split('.');
+    if (decimalString[1] == '0')
+      return int.tryParse(decimalString[0]).toString();
     return decimal.toString();
   }
 }

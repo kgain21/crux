@@ -49,7 +49,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     } else {
       duration = _controller.duration * _controller.value;
     }
-    return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';
+    return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+    /*.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';*/
   }
 
   void setTimerPreviouslyRunning(bool timerRunning) async {
@@ -269,7 +270,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
           return CustomPaint(
             painter: TimerPainter(
               animation: _controller,
-              backgroundColor: Theme.of(context).primaryColor /*Dark*/,
+              backgroundColor: Theme.of(context).primaryColor,
               color: Theme.of(context).accentColor,
             ),
             child: Padding(

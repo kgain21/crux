@@ -24,7 +24,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       '/hangboard_workout_screen',
       'assets/images/hangboard-01.jpg'
     ],
-    'Campus': ['/campus_screen', 'assets/images/campus-board-03.jpg'],
+    'Campus': ['/campus_screen', 'assets/images/campus-board-01.jpg'],
     'Weight Lifting': [
       '/weight_lifting_screen',
       'assets/images/weightlifting-01.jpg'
