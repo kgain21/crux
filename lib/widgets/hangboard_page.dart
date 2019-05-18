@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/widgets/exercise_tile.dart';
 import 'package:crux/widgets/workout_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -10,14 +11,14 @@ class HangboardPage extends StatefulWidget {
   final Map<String, dynamic> exerciseParameters;
   final VoidCallback nextPageCallback;
   final DocumentReference documentReference;
-  final String workoutId;
+  final String workoutTitle;
 
   HangboardPage(
       {this.index,
       this.exerciseParameters,
       this.nextPageCallback,
       this.documentReference,
-      this.workoutId});
+        this.workoutTitle});
 
   @override
   State<HangboardPage> createState() => _HangboardPageState();
@@ -39,6 +40,9 @@ class _HangboardPageState extends State<HangboardPage> {
   int _timeBetweenSets;
   int _timeOff;
   int _timeOn;
+  int _originalNumberOfSets;
+  int _originalNumberOfHangs;
+  int _numberOfHands;
 
   bool _exerciseFinished;
   bool _didFinishSet;
@@ -50,11 +54,13 @@ class _HangboardPageState extends State<HangboardPage> {
     _exerciseFinished = false;
     _isEditing = false;
     _didFinishSet = false;
+    _originalNumberOfSets = widget.exerciseParameters['numberOfSets'];
+    _originalNumberOfHangs = widget.exerciseParameters['hangsPerSet'];
     getParams(widget.exerciseParameters);
     _exerciseTitle = StringFormatUtils.formatDepthAndHold(
         _depth, _depthMeasurementSystem, _fingerConfiguration, _hold);
     _workoutTimer = WorkoutTimer(
-      id: '${widget.workoutId} $_exerciseTitle',
+      id: '${widget.workoutTitle} $_exerciseTitle',
       time: _timeOn,
       switchForward: false,
       switchTimer: false,
@@ -67,220 +73,315 @@ class _HangboardPageState extends State<HangboardPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: pageBorderDecoration(),
-      child: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            //border: Border.all(color: Colors.black, width: 2.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black54,
-                blurRadius: 6.0,
-                spreadRadius: 1.0,
-                offset: Offset(0.0, 4.0),
-              ),
-            ],
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            color: Theme.of(context).canvasColor,
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              //constraints.
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Stack(
-                    children: <Widget>[
-                      ConstrainedBox(
-                        constraints: BoxConstraints(
-                            maxHeight: constraints.constrainHeight(50.0)),
-                        child: titleBox(),
-                      ),
-                      _exerciseFinished
-                          ? Banner(
-                              location: BannerLocation.topStart,
-                              message: 'Finished!',
-                            )
-                          : null,
-                    ].where(notNull).toList(),
-                  ),
-                  ConstrainedBox(
-                    constraints: constraints,
-                    child: hangsAndResistanceRow(),
-                  ),
-                  workoutTimerContainer(),
-                  switchButtonRow(),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool notNull(Object o) => o != null;
-
-  BoxDecoration pageBorderDecoration() {
-    return BoxDecoration(
-      border: Border(
-        left: BorderSide(
-          color: Theme.of(context).primaryColor /*Dark*/,
-          width: 15.0,
-        ),
-        right: BorderSide(
-          color: Theme.of(context).primaryColor /*Dark*/,
-          width: 15.0,
-        ),
-        top: BorderSide(
-          color: Theme.of(context).primaryColor /*Dark*/,
-          width: 15.0,
-        ),
-        bottom: BorderSide(
-          color: Theme.of(context).primaryColor /*Dark*/,
-          width: 60.0,
-        ),
-      ),
-    );
-  }
-
-  Widget titleBox() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10.0),
-          topRight: Radius.circular(8.0),
-        ),
-        /* boxShadow: [
-          BoxShadow(
-            color: Colors.black54,
-            blurRadius: 6.0,
-            offset: Offset(0.0, 2.0),
-          ),
-        ],*/
-        color: Theme.of(context).accentColor,
-      ),
-      child: Column(
+      child: ListView(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Container(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
-                  child: Text(
-                    _exerciseTitle,
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      //fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          titleTile(),
+          workoutTimerTile(),
+          IntrinsicHeight(
+            child: Row(
+              children: <Widget>[
+                hangsAndResistanceTile(),
+                setsTile(),
+              ],
+            ),
           ),
-          /*Row(
+          /*Stack(
             children: <Widget>[
-              Container(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12.0, 0.0, 0.0, 0.0),
-                  child: Text(
-                    'Test Row',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      //fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ),
-              ),
-            ],
+              _exerciseFinished
+                  ? Banner(
+                      location: BannerLocation.topStart,
+                      message: 'Finished!',
+                    )
+                  : null,
+            ].where(notNull).toList(),
           ),*/
+          notesTile(),
         ],
       ),
     );
   }
 
-  Widget hangsAndResistanceRow() {
-    return new ListTile(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          Text(
-            '$_hangsPerSet',
-            style: TextStyle(fontSize: 30.0),
+//  bool notNull(Object o) => o != null;
+
+  Widget titleTile() {
+    return ExerciseTile(
+      tileColor: Theme
+          .of(context)
+          .accentColor,
+      child: Container(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
+          child: Column(
+            children: <Widget>[
+              Text(
+                '$_numberOfHands Handed $_exerciseTitle',
+                softWrap: true,
+                style: TextStyle(
+                  fontSize: 20.0,
+                ),
+              ),
+            ],
           ),
-          Text(
-            StringFormatUtils.formatHangsAndResistance(
-                _hangsPerSet, _resistance, _resistanceMeasurementSystem),
-            style: TextStyle(fontSize: 18.0),
-          ),
-          Text(
-            '|',
-            style: TextStyle(fontSize: 26.0),
-          ),
-          Text(
-            '$_numberOfSets',
-            style: TextStyle(fontSize: 30.0),
-          ),
-          Text(
-            ' sets',
-            style: TextStyle(fontSize: 18.0),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget workoutTimerContainer() {
-    return new Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: ConstrainedBox(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 1.40),
-        child: _workoutTimer,
+  Widget hangsAndResistanceTile() {
+    return Container(
+      constraints:
+      BoxConstraints(maxWidth: MediaQuery
+          .of(context)
+          .size
+          .width / 2.0),
+      child: ExerciseTile(
+        edgeInsets: const EdgeInsets.only(left: 8.0, top: 8.0, right: 4.0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  _hangsPerSet < _originalNumberOfHangs
+                      ? IconButton(
+                      icon: Icon(Icons.arrow_drop_up),
+                      onPressed: () {
+                        if(_hangsPerSet != _originalNumberOfHangs) {
+                          setState(() {
+                            _hangsPerSet++;
+                          });
+                          //TODO: stop timer
+                        }
+                      })
+                      : IconButton(
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_up,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
+                    ),
+                  ),
+                  Text(
+                    '$_hangsPerSet',
+                    style: TextStyle(fontSize: 30.0),
+                  ),
+                  _hangsPerSet > 0
+                      ? IconButton(
+                    icon: Icon(Icons.arrow_drop_down),
+                    onPressed: () {
+                      if(_hangsPerSet != 0) {
+                        setState(() {
+                          _hangsPerSet--;
+                        });
+                        //TODO: stop timer
+                      }
+                    },
+                  )
+                      : IconButton(
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      StringFormatUtils.formatHangsAndResistance(_hangsPerSet,
+                          _resistance, _resistanceMeasurementSystem),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget switchButtonRow() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(25.0, 0.0, 25.0, 0.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          IconButton(
-            //elevation: 4.0,
-            icon: Icon(Icons.skip_previous), //Text('Exercise'),
-            onPressed: () {
-              null;
-            },
+  Widget setsTile() {
+    return Container(
+      constraints:
+      BoxConstraints(maxWidth: MediaQuery
+          .of(context)
+          .size
+          .width / 2.0),
+      child: ExerciseTile(
+        edgeInsets: const EdgeInsets.only(left: 4.0, top: 8.0, right: 8.0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  _numberOfSets < _originalNumberOfSets
+                      ? IconButton(
+                    icon: Icon(Icons.arrow_drop_up),
+                    onPressed: () {
+                      if(_numberOfSets != _originalNumberOfSets) {
+                        setState(() {
+                          _numberOfSets++;
+                        });
+                        //TODO: stop timer
+                      }
+                    },
+                  )
+                      : IconButton(
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_up,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
+                    ),
+                  ),
+                  Text(
+                    '$_numberOfSets',
+                    style: TextStyle(fontSize: 30.0),
+                  ),
+                  _numberOfSets > 0
+                      ? IconButton(
+                    icon: Icon(Icons.arrow_drop_down),
+                    onPressed: () {
+                      if(_numberOfSets != 0) {
+                        setState(() {
+                          _numberOfSets--;
+                          //TODO: stop timer
+                        });
+                      }
+                    },
+                  )
+                      : IconButton(
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      _numberOfSets == 1 ? ' set' : ' sets',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          IconButton(
-            //elevation: 4.0,
-            icon: Icon(Icons.refresh), //Text('Exercise'),
-            onPressed: () {
-              switchTimer(false, _timeOn);
-            },
-          ),
-          IconButton(
-            //elevation: 4.0,
-            icon: Icon(
-              IconData(0xe5d5,
-                  fontFamily: 'MaterialIcons', matchTextDirection: true),
-              textDirection: TextDirection.rtl,
-            ), //Text('Rest'),
-            onPressed: () {
-              switchTimer(true, _timeOff);
-            },
-          ),
-          IconButton(
-            //elevation: 4.0,
-            icon: Icon(Icons.skip_next),
-            onPressed: () {
-              null;
-            },
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget workoutTimerTile() {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery
+            .of(context)
+            .size
+            .width / 1.2,
+      ),
+      child: ExerciseTile(
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: 0.0,
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 1.4,
+                    ),
+                    child: _workoutTimer,
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.refresh),
+                      onPressed: () {
+                        switchTimer(false, _timeOn);
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        IconData(
+                          0xe5d5,
+                          fontFamily: 'MaterialIcons',
+                          matchTextDirection: true,
+                        ),
+                        textDirection: TextDirection.rtl,
+                      ),
+                      onPressed: () {
+                        switchTimer(true, _timeOff);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget notesTile() {
+    return ExerciseTile(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Notes: ',
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                fontSize: 18.0,
+              ),
+            ),
+            TextField(),
+          ],
+        ),
       ),
     );
   }
@@ -417,6 +518,7 @@ class _HangboardPageState extends State<HangboardPage> {
     _timeBetweenSets = getIntVal(exerciseParameters, 'timeBetweenSets');
     _timeOn = getIntVal(exerciseParameters, 'timeOn');
     _timeOff = getIntVal(exerciseParameters, 'timeOff');
+    _numberOfHands = getIntVal(exerciseParameters, 'numberOfHands');
   }
 
   int getIntVal(Map<String, dynamic> exerciseParameters, String fieldName) {

@@ -16,7 +16,7 @@ class TimerPainter extends CustomPainter {
     /// Properties of the progress indicating arc
     Paint line = Paint()
       ..color = backgroundColor
-      ..strokeWidth = 12.0
+      ..strokeWidth = 20.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
@@ -31,9 +31,27 @@ class TimerPainter extends CustomPainter {
       line,
     );
 
+    /// Draws a faint outline around the inside of the timer
+    line.color = Colors.black12;
+    line.strokeWidth = 2.0;
+    canvas.drawCircle(
+      size.center(Offset.zero),
+      size.width / 2.0 - 10.0,
+      line,
+    );
+
+    /// Draws a faint outline around the outside of the timer
+    line.strokeWidth = 2.0;
+    canvas.drawCircle(
+      size.center(Offset.zero),
+      size.width / 2.0 + 10.0,
+      line,
+    );
+
     /// Changes the color to the progress color and draws the progress
     /// indicating arc over the background circle
     line.color = color;
+    line.strokeWidth = 20.0;
     canvas.drawArc(
       Offset.zero & size,
       math.pi * 1.5,
@@ -51,74 +69,10 @@ class TimerPainter extends CustomPainter {
 
     canvas.drawShadow(
       innerShadow,
-      Colors.black,
-      2.5,
+      Colors.black87,
+      2.0,
       true,
     );
-
-    Offset midPoint = Offset(size.width / 2.0, 0.0);
-    //Offset leftMidPoint = Offset((math.sqrt(2)/2) *  , dy)
-    Offset leftEndPoint = Offset(0.0, size.height / 2.0);
-    Offset rightEndPoint = Offset(size.width, size.height / 2.0);
-
-    /// Sets the shadow of the progress indicating circle by adding an arc
-    Path outerShadow = Path()
-      ..moveTo(0.0, size.height / 2.0)
-      ..addArc(
-        Rect.fromCircle(
-          center: size.center(Offset.zero),
-          radius: (size.width / 2.0) + 6.0,
-        ),
-        -math.pi,
-        0.0,
-      );
-    /*..arcTo(
-        Rect.fromCircle(
-          center: size.center(Offset.zero),
-          radius: (size.width / 2.0) + 6.0,
-        ),
-        0.0, //-math.pi,
-        -math.pi,
-        true,
-      );*/
-
-    /*outerShadow.quadraticBezierTo(
-      midPoint.dx,
-      midPoint.dy,
-      leftEndPoint.dx,
-      leftEndPoint.dy,
-    );*/
-
-    /*..quadraticBezierTo(
-        -(size.width),
-        (size.center(Offset.zero).dy),
-        (math.pi / 2.0) * (size.center(Offset.zero).dx),
-        -(math.pi / 2.0) * (size.width),
-      )*/
-
-    Offset center = Offset(size.width / 2.0, .7 * size.height);
-
-    Path clipShadow = Path()
-      ..addArc(
-          Rect.fromCircle(
-            center: center,
-            radius: size.width / 2.0 + 3.0,
-          ),
-          0.0,
-          -math.pi);
-
-    /* canvas.drawShadow(
-      outerShadow,
-      Colors.black,
-      2.5,
-      true,
-    );
-    canvas.clipPath(clipShadow);*/
-    Paint shadowLine = Paint()..color = backgroundColor;
-
-    canvas.drawPath(outerShadow, shadowLine);
-
-//    canvas.drawPath(clipper.getClip(size), Shadow(blurRadius: 5.0).toPaint());
   }
 
   @override
@@ -127,15 +81,4 @@ class TimerPainter extends CustomPainter {
         color != old.color ||
         backgroundColor != old.backgroundColor;
   }
-}
-
-class InnerShadow extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    // TODO: implement getClip
-    return null;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

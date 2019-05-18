@@ -1,19 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/screens/hangboard/exercise_page_view.dart';
 import 'package:crux/shared_layouts/app_bar.dart';
 import 'package:crux/utils/base_auth.dart';
+import 'package:crux/widgets/hangboard_workout_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HangboardWorkoutScreen extends StatefulWidget {
   final String title;
   final BaseAuth auth;
   final Firestore firestore;
+  final SharedPreferences sharedPreferences;
 
   @override
   State<StatefulWidget> createState() => new _HangboardWorkoutScreenState();
 
-  HangboardWorkoutScreen({this.title, this.auth, this.firestore});
+  HangboardWorkoutScreen(
+      {this.title, this.auth, this.firestore, this.sharedPreferences});
 }
 
 class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
@@ -37,7 +40,7 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
               ),
               StreamBuilder<QuerySnapshot>(
                 stream: Firestore.instance.collection('/hangboard').snapshots(),
-                builder: (context, snapshot) {
+                builder: (scaffoldContext, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
                     case ConnectionState.none:
@@ -67,35 +70,12 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
                             itemCount: (snapshot.data.documents.length + 1),
                             itemBuilder: (context, index) {
                               if (index == snapshot.data.documents.length) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RaisedButton(
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                          context: context,
-                                          builder: (context) => BottomSheet(
-                                                onClosing: () {},
-                                                builder: (context) {
-                                                  return Center(
-                                                    child: ConstrainedBox(
-                                                      constraints:
-                                                          BoxConstraints(
-                                                              maxWidth: 100.0,
-                                                              maxHeight: 100.0),
-                                                      child: TextField(),
-                                                    ),
-                                                  );
-                                                },
-                                              ));
-                                    },
-                                    child: const Text('Add Workout'),
-                                  ),
-                                );
+                                return addWorkoutButton(scaffoldContext);
                               }
                               return HangboardWorkoutTile(
-                                  snapshot: snapshot,
-                                  index: index,
-                                  auth: widget.auth);
+                                snapshot: snapshot,
+                                index: index,
+                              );
                             },
                           ),
                         ),
@@ -109,89 +89,152 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
       ),
     );
   }
-}
 
-class HangboardWorkoutTile extends StatefulWidget {
-  final BaseAuth auth;
-  final AsyncSnapshot snapshot;
-  final int index;
+  void saveWorkoutToFirebase(String workoutTitle,
+                             BuildContext scaffoldContext) {
+    CollectionReference collectionReference =
+    Firestore.instance.collection('hangboard');
 
-  HangboardWorkoutTile({this.snapshot, this.index, this.auth}) : super();
-
-  @override
-  State<StatefulWidget> createState() => _HangboardWorkoutTileState();
-}
-
-class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
-  final Icon _arrowIcon = Icon(Icons.chevron_right);
-  bool _isEditing;
-
-  @override
-  void initState() {
-    super.initState();
-    _isEditing = false;
+    var workoutRef = collectionReference.document(workoutTitle);
+    workoutRef.get().then((doc) {
+      if(doc.exists) {
+        _exerciseExistsAlert(scaffoldContext, workoutTitle);
+      } else {
+        workoutRef.setData(Map());
+        exerciseSavedSnackbar(scaffoldContext);
+      }
+    });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return workoutTile(widget.snapshot, widget.index);
+  Future<void> _exerciseExistsAlert(BuildContext scaffoldContext,
+                                    String workoutTitle) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Workout already exists'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(color: Colors.black, fontSize: 16.0),
+                    children: [
+                      TextSpan(
+                          text: 'You already have a workout created called '),
+                      TextSpan(
+                        text: '$workoutTitle.\n\n',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: 'Please enter a different name.'),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            Row(
+              children: <Widget>[
+                FlatButton(
+                  child: Text(
+                    'Ok',
+                    style: TextStyle(color: Theme
+                        .of(context)
+                        .accentColor),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  Widget workoutTile(AsyncSnapshot snapshot, int index) {
-    var workoutTitle = snapshot.data.documents[index].documentID;
-    return Card(
-      child: ListTile(
-        title: Text(workoutTitle),
-        trailing: !_isEditing ? _arrowIcon : interactiveCloseIcon(),
-        onLongPress: () {
-          setState(() {
-            _isEditing = true;
-          });
-        },
-        onTap: () {
-          if (_isEditing) {
-            setState(() {
-              _isEditing = false;
-            });
-          } else {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) {
-                return ExercisePageView(
-                  title: workoutTitle,
-                  collectionReference: Firestore.instance
-                      .collection('hangboard/$workoutTitle/exercises'),
-                  auth: widget.auth,
-                  workoutId: index.toString(),
-                );
-              },
-            ));
-          }
-        },
+  void exerciseSavedSnackbar(BuildContext scaffoldContext) {
+    Scaffold.of(scaffoldContext).showSnackBar(
+      SnackBar(
+        duration: Duration(seconds: 3),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Workout Saved!',
+                      style: TextStyle(
+                          color: Theme
+                              .of(scaffoldContext)
+                              .accentColor),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget interactiveCloseIcon() {
-    return GestureDetector(
-      child: Icon(Icons.close),
-      onTap: () {
-        showDialog(
+  Widget addWorkoutButton(BuildContext scaffoldContext) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: RaisedButton(
+        onPressed: () {
+          showDialog(
             context: context,
             builder: (context) {
+              TextEditingController controller = new TextEditingController();
               return AlertDialog(
-                content: Text(
-                  'Workout deleted!',
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.center,
+                title: Text('Enter workout name: '),
+                content: TextField(
+                  controller: controller,
                 ),
+                actions: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      FlatButton(
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      FlatButton(
+                        child: Text(
+                          'Ok',
+                          style:
+                          TextStyle(color: Theme
+                              .of(context)
+                              .accentColor),
+                        ),
+                        onPressed: () {
+                          saveWorkoutToFirebase(
+                              controller.text, scaffoldContext);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               );
-            });
-        setState(() {
-          _isEditing = false;
-        });
-      },
+            },
+          );
+        },
+        child: const Text('Add Workout'),
+      ),
     );
   }
 }

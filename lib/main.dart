@@ -14,6 +14,7 @@ import 'package:crux/widgets/workout_timer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   final FirebaseApp app = await FirebaseApp.configure(
@@ -24,17 +25,22 @@ Future<void> main() async {
       projectID: 'crux-439d7',
     ),
   );
+
   final Firestore firestore = Firestore(app: app);
 
-  runApp(MyApp(firestore: firestore));
+  final SharedPreferences sharedPreferences =
+  await SharedPreferences.getInstance();
+
+  runApp(MyApp(firestore: firestore, sharedPreferences: sharedPreferences));
 }
 
 class MyApp extends StatelessWidget {
   final String title = 'Crux';
   final BaseAuth auth = new Auth();
   final Firestore firestore;
+  final SharedPreferences sharedPreferences;
 
-  MyApp({this.firestore});
+  MyApp({this.firestore, this.sharedPreferences});
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +69,10 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Metropolis',
 
         textTheme: TextTheme(
-          headline: TextStyle(
+            headline: TextStyle(
 //            fontFamily: 'OpenSans',
-            fontSize: 30.0
-          ),
-          title: TextStyle(
-            fontSize: 24.0
-          )
-        ),
+                fontSize: 30.0),
+            title: TextStyle(fontSize: 24.0)),
       ),
       home: new SignInScreen(title: title, auth: auth),
       routes: {
@@ -78,17 +80,18 @@ class MyApp extends StatelessWidget {
             DashboardScreen(title: title, auth: auth),
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
         '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
-            title: title, auth: auth, firestore: firestore),
+            title: title,
+            auth: auth,
+            firestore: firestore,
+            sharedPreferences: sharedPreferences),
         '/countdown_timer_screen': (context) => WorkoutTimer(),
         '/spotify_test_screen': (context) => SpotifyTestScreen(),
         '/exercise_page_view': (context) => ExercisePageView(),
         '/calendar_screen': (context) => CalendarScreen(auth: auth),
       },
-
       debugShowCheckedModeBanner: true,
       debugShowMaterialGrid: false,
       checkerboardOffscreenLayers: false,
-
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/utils/base_auth.dart';
 import 'package:crux/widgets/dots_indicator.dart';
 import 'package:crux/widgets/exercise_form.dart';
 import 'package:crux/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShakeCurve extends Curve {
   @override
@@ -16,18 +16,17 @@ class ShakeCurve extends Curve {
 class ExercisePageView extends StatefulWidget {
   final String title;
   final CollectionReference collectionReference;
-  final BaseAuth auth;
+
+//  final BaseAuth auth;
   final workoutId;
 
   @override
   State createState() => _ExercisePageViewState();
 
-  ExercisePageView(
-      {this.title, this.collectionReference, this.auth, this.workoutId});
+  ExercisePageView({this.title, this.collectionReference, this.workoutId});
 }
 
-class _ExercisePageViewState extends State<ExercisePageView>
-    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
+class _ExercisePageViewState extends State<ExercisePageView> {
   static const _kCurve = Curves.ease;
   static const _kDuration = const Duration(milliseconds: 300);
   static const _kViewportFraction = 0.7;
@@ -83,11 +82,45 @@ class _ExercisePageViewState extends State<ExercisePageView>
     });
   }
 
+  @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        //backgroundColor: Theme.of(context),
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 8.0,
         title: Text(widget.title),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              //TODO: switch statement for more menuButtons
+              if(value == 'reset') {
+                SharedPreferences.getInstance().then((preferences) {
+//                  preferences.clear();
+
+                  preferences.remove(widget.title);
+                  //todo = > get prefs for exercise titles in this workout and clear only those
+                });
+              } else {
+                SharedPreferences.getInstance().then((preferences) {
+                  print(preferences.getKeys());
+                });
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<String>>[
+                new PopupMenuItem(
+                  child: new Text('Reset Workout'),
+                  value: 'reset',
+                ),
+                new PopupMenuItem(
+                  child: new Text('Settings'),
+                  value: 'test2',
+                ),
+              ];
+            },
+          )
+        ],
+        //TODO: Add action menu that allows you to reset all exercises (clear sharedPrefs)
+        //TODO: SHould sharedPrefs be extracted to one common class that all pages go through? (Yes)
       ),
       body: exercisePageView(),
     );
@@ -137,7 +170,10 @@ class _ExercisePageViewState extends State<ExercisePageView>
 
             return Center(
               child: new Container(
-                color: Theme.of(context).primaryColor /*Dark*/,
+                color: Theme
+                    .of(context)
+                    .canvasColor,
+                /*Dark*/
                 child: Stack(
                   children: <Widget>[
                     PageView(
@@ -223,30 +259,33 @@ class _ExercisePageViewState extends State<ExercisePageView>
   Widget animatedHangboardPage(int index, DocumentSnapshot document) {
     /// Last page should always be a [newExercisePage]; this index will always
     /// be greater than the current exercises list so this must be checked first
-    /*if (index == _currentPageValue.floor()) {
+    if(index == _currentPageValue.floor()) {
       return Transform(
         transform: Matrix4.identity()..rotateX(_currentPageValue - index),
         child: HangboardPage(
+          workoutTitle: widget.title,
           index: index,
-          exerciseParameters: Map<String, dynamic>.from(
-              widget.snapshot.data['exercises'][index]),
+          exerciseParameters: Map<String, dynamic>.from(document.data),
+          nextPageCallback: nextPageCallback,
         ),
       );
     } else if (index == _currentPageValue.floor() + 1) {
       return Transform(
-        transform: Matrix4.identity()..rotateX(_currentPageValue - index),
+        transform: Matrix4.identity()
+          ..rotateY(_currentPageValue - index),
         child: HangboardPage(
+          workoutTitle: widget.title,
           index: index,
-          exerciseParameters: Map<String, dynamic>.from(
-              widget.snapshot.data['exercises'][index]),
+          exerciseParameters: Map<String, dynamic>.from(document.data),
+          nextPageCallback: nextPageCallback,
         ),
       );
-    } */
+    }
 
     return Stack(
       children: <Widget>[
         HangboardPage(
-          workoutId: widget.workoutId,
+          workoutTitle: widget.title,
           index: index,
           exerciseParameters: Map<String, dynamic>.from(document.data),
           nextPageCallback: nextPageCallback,
@@ -305,44 +344,4 @@ class _ExercisePageViewState extends State<ExercisePageView>
   void nextPageCallback() {
     _controller.nextPage(duration: _kDuration, curve: _kCurve);
   }
-
-  //TODO: Separate into show/hide?
-  void showOverlay(BuildContext context) {
-    if (!_overlayVisible) {
-      setState(() {
-        _overlayVisible = true;
-        this._overlayEntry = this._createOverlayEntry(context);
-        Overlay.of(context).insert(this._overlayEntry);
-      });
-    } else {
-      setState(() {
-        _overlayEntry.remove();
-        _overlayVisible = false;
-      });
-    }
-  }
-
-  OverlayEntry _createOverlayEntry(BuildContext context) {
-    RenderBox renderBox = context.findRenderObject();
-    var size = renderBox.size;
-
-    return OverlayEntry(
-        builder: (context) => Positioned(
-              left: size.width / /*6.0*/ 100.0,
-              top: size.height / 3.0,
-              width: size.width /* / 1.2*/,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: size.height / 2.0,
-                ),
-                child: ExerciseForm(
-                  workoutTitle: widget.title,
-                ),
-              ),
-            ));
-  }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }

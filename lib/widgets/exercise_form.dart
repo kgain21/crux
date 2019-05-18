@@ -492,6 +492,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
   /// field a member var of this tab, and then each [exercise] could add it's own
   /// state info like [_depth] and [_hold] to the global [exercises].
   /// //TODO: Make sure these defaults are ok
+  /// //TODO: Make object that gets serialized to be sent to FireBase
   Map createHangboardData() {
     Map<String, dynamic> data = {
       "resistanceMeasurementSystem": _resistanceMeasurementSystem,
@@ -512,6 +513,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     return data;
   }
 
+  //TODO: This needs to have more to it - 1/2 hands, etc.
   String createDataId(Map data) {
     var depth = data['depth'];
     var measurement = data['depthMeasurementSystem'];

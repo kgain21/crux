@@ -40,7 +40,7 @@ class _SignInScreenState extends State<SignInScreen> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 15.0/*, top: 15.0*/),
+          padding: const EdgeInsets.only(bottom: 15.0 /*, top: 15.0*/),
           child: Text(
             'Welcome to Crux',
             style: TextStyle(
@@ -109,7 +109,7 @@ class _SignInScreenState extends State<SignInScreen> {
           widget.auth
               .signInWithGoogleEmailAndPassword()
               .then((FirebaseUser user) {
-            String username = user.displayName.split(' ')[0];
+            String username = user.displayName /*.split(' ')[0]*/;
             /*showDialog(
                 context: context,
                 builder: (context) {
@@ -167,7 +167,7 @@ class _SignInScreenState extends State<SignInScreen> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  DashboardScreen(title: widget.title, username: ''),
+                  DashboardScreen(title: widget.title, username: null),
             ),
           ); //TODO: Smooth fade in with 'Welcome $User'
         },

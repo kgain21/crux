@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:crux/utils/timer_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -36,8 +34,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   String _id;
   double _endValue;
   int _currentTime;
-  Future<SharedPreferences> _sharedPreferences =
-      SharedPreferences.getInstance();
+
+  SharedPreferences _sharedPreferences;
 
   String get timerString {
     Duration duration;
@@ -53,29 +51,24 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     /*.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';*/
   }
 
-  void setTimerPreviouslyRunning(bool timerRunning) async {
-    final SharedPreferences preferences = await _sharedPreferences;
-    preferences.setBool('${_id}timerPreviouslyRunning', timerRunning);
+  void setTimerPreviouslyRunning(bool timerRunning) {
+    _sharedPreferences.setBool('$_id TimerPreviouslyRunning', timerRunning);
   }
 
-  void setForwardAnimation(bool forwardAnimation) async {
-    final SharedPreferences preferences = await _sharedPreferences;
-    preferences.setBool('${_id}forwardAnimation', forwardAnimation);
+  void setForwardAnimation(bool forwardAnimation) {
+    _sharedPreferences.setBool('$_id ForwardAnimation', forwardAnimation);
   }
 
-  void setEndTimeMillis(int endTimeMillis) async {
-    final SharedPreferences preferences = await _sharedPreferences;
-    preferences.setInt('${_id}endTimeMillis', endTimeMillis);
+  void setEndTimeMillis(int endTimeMillis) {
+    _sharedPreferences.setInt('$_id EndTimeMillis', endTimeMillis);
   }
 
-  void setEndValue(double endValue) async {
-    final SharedPreferences preferences = await _sharedPreferences;
-    preferences.setDouble('${_id}endValue', endValue);
+  void setEndValue(double endValue) {
+    _sharedPreferences.setDouble('$_id EndValue', endValue);
   }
 
-  void setTime(int seconds) async {
-    final SharedPreferences preferences = await _sharedPreferences;
-    preferences.setInt('${_id}time', _currentTime);
+  void setTime(int seconds) {
+    _sharedPreferences.setInt('$_id CurrentTime', _currentTime);
   }
 
   @override
@@ -85,6 +78,10 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     _controller = new AnimationController(
         vsync: this, value: 1.0, duration: Duration(seconds: widget.time));
     _id = widget.id;
+
+    //TODO: Dependency injection template for future refactoring
+//    (context.inheritFromWidgetOfExactType(MyApp) as MyApp).sharedPreferences;
+//    _sharedPreferences = SharedPreferences.getInstance();
   }
 
   @override
@@ -99,9 +96,10 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     super.build(context);
     return FutureBuilder(
       future: SharedPreferences.getInstance(),
-      builder: (context, sharedPrefs) {
-        return sharedPrefs.hasData
-            ? workoutTimer(sharedPrefs.data)
+      builder: (context, sharedPreferences) {
+        _sharedPreferences = sharedPreferences.data;
+        return sharedPreferences.hasData
+            ? workoutTimer(sharedPreferences.data)
             : loadingScreen();
       },
     );
@@ -162,24 +160,23 @@ class _WorkoutTimerState extends State<WorkoutTimer>
 
   /// Get all sharedPrefs at once during build
   void getSharedPrefs(SharedPreferences preferences) {
-    _endTimeMillis = (preferences.getInt('${_id}endTimeMillis') ?? 0);
+    _endTimeMillis = (preferences.getInt('$_id EndTimeMillis') ?? 0);
 
-    _forwardAnimation =
-        (preferences.getBool('${_id}forwardAnimation') ?? false);
+    _forwardAnimation = (preferences.getBool('$_id ForwardAnimation') ?? false);
 
     _timerPreviouslyRunning =
-        (preferences.getBool('${_id}timerPreviouslyRunning') ?? false);
+    (preferences.getBool('$_id TimerPreviouslyRunning') ?? false);
 
     /// If there is no endValue stored, check forwardAnimation and set to
     /// appropriate start value
-    _endValue = (preferences.getDouble('${_id}endValue') ??
+    _endValue = (preferences.getDouble('$_id EndValue') ??
         (_forwardAnimation ? 0.0 : 1.0));
 
     /// This is for reloading an already running timer.
     /// The assumption is that if there is a value here the timer was left in a
     /// running state and needs to use this value.
     /// Otherwise, rebuild the timer with whatever new time came in.
-    _currentTime = (preferences.getInt('${_id}time')) ?? widget.time;
+    _currentTime = (preferences.getInt('$_id Time')) ?? widget.time;
   }
 
   double getValueIfTimerPreviouslyRunning() {
@@ -270,7 +267,9 @@ class _WorkoutTimerState extends State<WorkoutTimer>
           return CustomPaint(
             painter: TimerPainter(
               animation: _controller,
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Theme
+                  .of(context)
+                  .canvasColor,
               color: Theme.of(context).accentColor,
             ),
             child: Padding(
@@ -278,7 +277,9 @@ class _WorkoutTimerState extends State<WorkoutTimer>
               child: Container(
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Theme.of(context).canvasColor),
+                    color: Theme
+                        .of(context)
+                        .primaryColorLight),
               ),
             ),
           );
@@ -288,7 +289,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   }
 
   /// Widget that builds the [timerString] for the [WorkoutTimer].
-  /// The string is displayed in Minutes:Seconds:Milliseconds and is controlled
+  /// The string is displayed in Minutes:Seconds and is controlled
   /// by [_controller].
   Widget timerText() {
     return Align(
@@ -303,7 +304,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
               return Text(
                 timerString,
                 style: TextStyle(
-                  fontSize: 40.0,
+                  fontSize: 50.0,
                 ),
               );
             },
@@ -335,6 +336,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     }
   }
 
+  //TODO: keeps throwing onPressed!=null error********
   void setupControllerCallback(AnimationController controller) {
     if (!_forwardAnimation) {
       controller.reverse().whenComplete(() {

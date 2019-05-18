@@ -9,7 +9,8 @@ class DashboardScreen extends StatefulWidget {
   final BaseAuth auth;
   final String username;
 
-  DashboardScreen({Key key, this.title, this.auth, this.username}) : super(key: key);
+  DashboardScreen({Key key, this.title, this.auth, this.username})
+      : super(key: key);
 
   @override
   _DashboardScreenState createState() => new _DashboardScreenState();
@@ -38,6 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   };
 
   List<String> screenMapKeys;
+  String _username;
 
   //FocusNode _focusNode;
 
@@ -45,6 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     screenMapKeys = screenMap.keys.toList();
+    _username = widget.username ?? 'Guest';
     //_focusNode = new FocusNode();
   }
 
@@ -156,7 +159,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             color: Theme.of(context).accentColor,
             child: DrawerHeader(
-              child: Text('Drawer Header'),
+              child: Text('$_username'),
             ),
           ),
           ListTile(
