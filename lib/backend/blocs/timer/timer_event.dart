@@ -1,4 +1,5 @@
-import 'package:crux/widgets/workout_timer.dart';
+//import 'package:crux/presentation//widgets/workout_timer.dart';
+import 'package:crux/backend/models/timer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -13,55 +14,55 @@ class LoadTimer extends TimerEvent {
 }
 
 class AddTimer extends TimerEvent {
-  final WorkoutTimer workoutTimer;
+  final Timer timer;
 
-  AddTimer(this.workoutTimer) : super([workoutTimer]);
+  AddTimer(this.timer) : super([timer]);
 
   @override
-  String toString() => 'AddTimer { workoutTimer: $workoutTimer }';
+  String toString() => 'AddTimer { timer: $timer }';
 }
 
 class UpdateTimer extends TimerEvent {
-  final WorkoutTimer workoutTimer;
+  final Timer timer;
 
-  UpdateTimer(this.workoutTimer) : super([workoutTimer]);
+  UpdateTimer(this.timer) : super([timer]);
 
   @override
-  String toString() => 'UpdateTimer { workoutTimer: $workoutTimer }';
+  String toString() => 'UpdateTimer { timer: $timer }';
 }
 
 class DeleteTimer extends TimerEvent {
-  final WorkoutTimer workoutTimer;
+  final Timer timer;
 
-  DeleteTimer(this.workoutTimer) : super([workoutTimer]);
+  DeleteTimer(this.timer) : super([timer]);
 
   @override
-  String toString() => 'DeleteTimer { workoutTimer: $workoutTimer }';
+  String toString() => 'DeleteTimer { timer: $timer }';
 }
 
 class TimerComplete extends TimerEvent {
-  final WorkoutTimer workoutTimer;
+  final Timer timer;
 
-  TimerComplete(this.workoutTimer) : super([workoutTimer]);
+  TimerComplete(this.timer) : super([timer]);
 
   @override
-  String toString() => 'TimerComplete { workoutTimer: $workoutTimer }';
+  String toString() => 'TimerComplete { timer: $timer }';
 }
 
 class TimerDispose extends TimerEvent {
-  final WorkoutTimer workoutTimer;
+  final Timer timer;
 
-  TimerDispose(this.workoutTimer) : super([workoutTimer]);
+  TimerDispose(this.timer) : super([timer]);
 
   @override
-  String toString() => 'TimerDispose { workoutTimer: $workoutTimer }';
+  String toString() => 'TimerDispose { timer: $timer }';
 }
 
 class ClearTimerPreferences extends TimerEvent {
-  final WorkoutTimer workoutTimer;
+  final Timer timer;
 
-  ClearTimerPreferences(this.workoutTimer) : super([workoutTimer]);
+  ClearTimerPreferences(this.timer) : super([timer]);
 
   @override
-  String toString() => 'ClearTimerPreferences { workoutTimer: $workoutTimer }';
+  String toString() => 'ClearTimerPreferences { timer: $timer }';
 }

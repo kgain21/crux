@@ -1,14 +1,16 @@
 import 'package:bloc/bloc.dart';
-import 'package:crux/blocs/timer/timer_state.dart';
-import 'package:crux/blocs/timer/timer_event.dart';
-import 'package:crux/services/preferences.dart';
+import 'package:crux/backend/blocs/timer/timer_state.dart';
+import 'package:crux/backend/blocs/timer/timer_event.dart';
+import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
+import 'package:crux/backend/services/preferences.dart';
 import 'package:meta/meta.dart';
 
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   final Preferences preferences;
+  final FirestoreHangboardWorkoutsRepository firestore;
 
-  TimerBloc({@required this.preferences});
+  TimerBloc({@required this.preferences, @required this.firestore});
 
   @override
   TimerState get initialState => TimerLoading();
@@ -34,7 +36,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   Stream<TimerState> _mapLoadTimerToState() {
     try {
-      final savedTimerState = await this.preferences.
+      final savedTimerState = await this.firestore.
       yield TimerLoaded
     }
     catch

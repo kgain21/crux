@@ -1,4 +1,4 @@
-import 'package:crux/services/preferences.dart';
+//import 'package:crux/services/preferences.dart';
 import 'package:crux/utils/timer_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

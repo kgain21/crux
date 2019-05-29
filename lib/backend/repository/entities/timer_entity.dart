@@ -1,12 +1,15 @@
+import 'package:crux/backend/models/timer_direction.dart';
+
 class TimerEntity {
-  final bool complete;
   final String id;
-  final String note;
-  final String task;
+  final int timerDuration;
+  final TimerDirection timerDirection;
 
-  TimerEntity(this.task, this.id, this.note, this.complete);
+  TimerEntity(this.id,
+              this.timerDuration,
+              this.timerDirection,);
 
-  @override
+  /*@override
   int get hashCode =>
       complete.hashCode ^ task.hashCode ^ note.hashCode ^ id.hashCode;
 
@@ -18,28 +21,26 @@ class TimerEntity {
           complete == other.complete &&
           task == other.task &&
           note == other.note &&
-          id == other.id;
+          id == other.id;*/
 
   Map<String, Object> toJson() {
     return {
-      "complete": complete,
-      "task": task,
-      "note": note,
+      "timerDuration": timerDuration,
       "id": id,
+      "timerDirection": timerDirection,
     };
   }
 
   @override
   String toString() {
-    return 'TimerEntity{complete: $complete, task: $task, note: $note, id: $id}';
+    return 'TimerEntity { id: $id, timerDuration: $timerDuration, timerDirection: $timerDirection,}';
   }
 
   static TimerEntity fromJson(Map<String, Object> json) {
     return TimerEntity(
-      json["task"] as String,
       json["id"] as String,
-      json["note"] as String,
-      json["complete"] as bool,
+      json["timerDuration"] as int,
+      json["timerDirection"] as TimerDirection,
     );
   }
 }

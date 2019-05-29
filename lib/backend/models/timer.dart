@@ -1,4 +1,5 @@
-import 'package:crux/model/timer_direction.dart';
+import 'package:crux/backend/models/timer_direction.dart';
+import 'package:crux/backend/repository/entities/timer_entity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -13,41 +14,38 @@ class Timer extends Equatable {
   //TODO: Don't think I want to import these - look like UI packages
   // final VoidCallback notifyParentReverseComplete;
   //final VoidCallback notifyParentForwardComplete;
-  //TODO: Don't think I want to import these - look like UI packages
+  //TODO: figure out what to do with them / if i need them anymore
 
 //  final bool startTimer;
 //  final bool preferencesClearedFlag;
 
-  Timer(this.timerDuration,
-      {this.complete = false, String note = '', String id})
-      : this.note = note ?? '',
-        this.id = id ?? Uuid().generateV4(),
-        super([complete, id, note, task]);
+  Timer(this.id,
+        this.timerDuration,
+        this.timerDirection,);
 
-  Timer copyWith({bool complete, String id, String note, String task}) {
+  /*Timer copyWith(
+      {int timerDuration, String id, TimerDirection timerDirection}) {
     return Timer(
-      task ?? this.task,
-      complete: complete ?? this.complete,
+      timerDuration: timerDuration ?? this.timerDuration,
       id: id ?? this.id,
-      note: note ?? this.note,
+      timerDirection: timerDirection ?? this.timerDirection,
     );
-  }
+  }*/
 
   @override
   String toString() {
-    return 'Todo { complete: $complete, task: $task, note: $note, id: $id }';
+    return 'Timer { id: $id, timerDuration: $timerDuration, timerDirection: $timerDirection,}';
   }
 
   TimerEntity toEntity() {
-    return TimerEntity(task, id, note, complete);
+    return TimerEntity(id, timerDuration, timerDirection);
   }
 
   static Timer fromEntity(TimerEntity entity) {
     return Timer(
-      entity.task,
-      complete: entity.complete ?? false,
-      note: entity.note,
-      id: entity.id ?? Uuid().generateV4(),
+      entity.id,
+      entity.timerDuration,
+      entity.timerDirection,
     );
   }
 }
