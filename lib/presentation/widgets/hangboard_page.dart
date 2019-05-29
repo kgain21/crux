@@ -67,6 +67,7 @@ class _HangboardPageState extends State<HangboardPage> {
       //TODO: is there a better way to do this?
       notifyParentReverseComplete: notifyParentReverseComplete,
       notifyParentForwardComplete: notifyParentForwardComplete,
+      preferencesClearedFlag: widget.preferencesClearedFlag,
     );
   }
 

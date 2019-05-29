@@ -1,3 +1,4 @@
+import 'package:crux/services/preferences.dart';
 import 'package:crux/utils/timer_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -11,15 +12,16 @@ class WorkoutTimer extends StatefulWidget {
   final VoidCallback notifyParentReverseComplete;
   final VoidCallback notifyParentForwardComplete;
   final bool startTimer;
+  final bool preferencesClearedFlag;
 
-  WorkoutTimer(
-      {this.switchForward,
-      this.switchTimer,
-      this.time,
-      this.id,
-      this.notifyParentForwardComplete,
-      this.notifyParentReverseComplete,
-      this.startTimer});
+  WorkoutTimer({this.switchForward,
+                 this.switchTimer,
+                 this.time,
+                 this.id,
+                 this.notifyParentForwardComplete,
+                 this.notifyParentReverseComplete,
+                 this.startTimer,
+                 this.preferencesClearedFlag});
 
   @override
   State createState() => _WorkoutTimerState();
@@ -28,14 +30,15 @@ class WorkoutTimer extends StatefulWidget {
 class _WorkoutTimerState extends State<WorkoutTimer>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   AnimationController _controller;
-  bool _forwardAnimation;
+
+  /*bool _forwardAnimation;
   int _endTimeMillis;
   bool _timerPreviouslyRunning;
   String _id;
   double _endValue;
-  int _currentTime;
+  int _currentTime;*/
 
-  SharedPreferences _sharedPreferences;
+  //Preferences _preferences;
 
   String get timerString {
     Duration duration;
@@ -51,34 +54,16 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     /*.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';*/
   }
 
-  void setTimerPreviouslyRunning(bool timerRunning) {
-    _sharedPreferences.setBool('$_id TimerPreviouslyRunning', timerRunning);
-  }
-
-  void setForwardAnimation(bool forwardAnimation) {
-    _sharedPreferences.setBool('$_id ForwardAnimation', forwardAnimation);
-  }
-
-  void setEndTimeMillis(int endTimeMillis) {
-    _sharedPreferences.setInt('$_id EndTimeMillis', endTimeMillis);
-  }
-
-  void setEndValue(double endValue) {
-    _sharedPreferences.setDouble('$_id EndValue', endValue);
-  }
-
-  void setTime(int seconds) {
-    _sharedPreferences.setInt('$_id CurrentTime', _currentTime);
-  }
 
   @override
   void initState() {
     print('Timer ${widget.id} initState');
     super.initState();
-    _controller = new AnimationController(
+    _controller = AnimationController(
         vsync: this, value: 1.0, duration: Duration(seconds: widget.time));
     _id = widget.id;
-
+    //TODO: Put this in Main?
+    _preferences = Preferences();
     //TODO: Dependency injection template for future refactoring
 //    (context.inheritFromWidgetOfExactType(MyApp) as MyApp).sharedPreferences;
 //    _sharedPreferences = SharedPreferences.getInstance();
@@ -94,8 +79,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   Widget build(BuildContext context) {
     print('Timer ${widget.id} build');
     super.build(context);
-    return FutureBuilder(
-      future: SharedPreferences.getInstance(),
+    return StreamBuilder(
+      stream: Preferences.sharedPreferences,
       builder: (context, sharedPreferences) {
         _sharedPreferences = sharedPreferences.data;
         return sharedPreferences.hasData
@@ -105,31 +90,19 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     );
   }
 
-  @override
-  void dispose() {
-    print('Timer ${widget.id} dispose');
-    setSharedPrefsBeforeDispose();
-
-    if (_controller != null) {
-      _controller.stop();
-      _controller.dispose();
-    }
-
-    super.dispose();
-  }
-
-  /*vvv INITSTATE METHODS vvv*/
-//  Started waiting for sharedPrefs to come back in build so everything that was
-//  here went to the build methods
-  /*^^^ INITSTATE METHODS ^^^*/
-
-  /*vvv BUILD METHODS vvv*/
-
   Widget workoutTimer(SharedPreferences preferences) {
+    ///retrieve prefs from device or set defaults if not present
     getSharedPrefs(preferences);
+
+    /// Gets the difference in time if timer was left running
+    /// Gets 0.0 or 1.0 if time was exceeded in either direction
+    /// Get value of animation if stopped
     double value = getValueIfTimerPreviouslyRunning();
+
+    /// Resets value to 0.0 or 1.0 if one of the switch timer buttons was pressed
     value = checkIfResetTimer(value);
 
+    /// Creates controller with appropriate animation value determined above
     setupController(value);
 
     // checkIfPreviouslyRunning();
@@ -153,12 +126,96 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     );
   }
 
-//
-//  void checkIfPreviouslyRunning() {
-//
-//  }
+  /// Widget that builds a circular timer using [TimerPainter]. This timer is
+  /// controlled by the [_controller] and is the main visual component of the
+  /// [WorkoutTimer].
+  Widget circularTimer() {
+    return Positioned(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return CustomPaint(
+            painter: TimerPainter(
+              animation: _controller,
+              backgroundColor: Theme
+                  .of(context)
+                  .canvasColor,
+              color: Theme
+                  .of(context)
+                  .accentColor,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Container(
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme
+                        .of(context)
+                        .primaryColorLight),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-  /// Get all sharedPrefs at once during build
+  /// Widget that builds the [timerString] for the [WorkoutTimer].
+  /// The string is displayed in Minutes:Seconds and is controlled
+  /// by [_controller].
+  Widget timerText() {
+    return Align(
+      alignment: FractionalOffset.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Text(
+                timerString,
+                style: TextStyle(
+                  fontSize: 50.0,
+                ),
+              );
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget loadingScreen() {
+    return Column(
+      children: <Widget>[
+        /*Empty to help avoid any flickering from quick loads*/
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    print('Timer ${widget.id} dispose');
+    setSharedPrefsBeforeDispose();
+
+    if (_controller != null) {
+      _controller.stop();
+      _controller.dispose();
+    }
+
+    super.dispose();
+  }
+
+  /*vvv INITSTATE METHODS vvv*/
+//  Started waiting for sharedPrefs to come back in build so everything that was
+//  here went to the build methods
+  /*^^^ INITSTATE METHODS ^^^*/
+
+  /*vvv BUILD METHODS vvv*/
+
+
+  /*/// Get all sharedPrefs at once during build
   void getSharedPrefs(SharedPreferences preferences) {
     _endTimeMillis = (preferences.getInt('$_id EndTimeMillis') ?? 0);
 
@@ -177,7 +234,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     /// running state and needs to use this value.
     /// Otherwise, rebuild the timer with whatever new time came in.
     _currentTime = (preferences.getInt('$_id Time')) ?? widget.time;
-  }
+  }*/
 
   double getValueIfTimerPreviouslyRunning() {
     if (_timerPreviouslyRunning) {
@@ -256,63 +313,6 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     return value;
   }
 
-  /// Widget that builds a circular timer using [TimerPainter]. This timer is
-  /// controlled by the [_controller] and is the main visual component of the
-  /// [WorkoutTimer].
-  Widget circularTimer() {
-    return Positioned(
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return CustomPaint(
-            painter: TimerPainter(
-              animation: _controller,
-              backgroundColor: Theme
-                  .of(context)
-                  .canvasColor,
-              color: Theme.of(context).accentColor,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Container(
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme
-                        .of(context)
-                        .primaryColorLight),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  /// Widget that builds the [timerString] for the [WorkoutTimer].
-  /// The string is displayed in Minutes:Seconds and is controlled
-  /// by [_controller].
-  Widget timerText() {
-    return Align(
-      alignment: FractionalOffset.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Text(
-                timerString,
-                style: TextStyle(
-                  fontSize: 50.0,
-                ),
-              );
-            },
-          )
-        ],
-      ),
-    );
-  }
 
   /// Controls starting or stopping the [_controller] and determines which
   /// way it should animate using the boolean [_forwardAnimation], where true is
@@ -336,12 +336,11 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     }
   }
 
-  //TODO: keeps throwing onPressed!=null error********
   void setupControllerCallback(AnimationController controller) {
     if (!_forwardAnimation) {
       controller.reverse().whenComplete(() {
         if (controller.status == AnimationStatus.dismissed) {
-          setTimerPreviouslyRunning(true);
+          _preferences.setTimerPreviouslyRunning(true);
           setTime(null);
           setEndValue(null);
           setEndTimeMillis(null);
@@ -404,13 +403,6 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     }
   }
 
-  Widget loadingScreen() {
-    return Column(
-      children: <Widget>[
-        /*Empty to help avoid any flickering from quick loads*/
-      ],
-    );
-  }
 
 /*^^^ BUILD METHODS ^^^*/
 

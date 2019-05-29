@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/screens/hangboard/exercise_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,9 +38,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
   Widget workoutTile(AsyncSnapshot snapshot, int index) {
     var workoutTitle = snapshot.data.documents[index].documentID;
 
-    createSharedPrefsKey(workoutTitle);
-
-    return Card(
+    return ExerciseTile(
       child: ListTile(
         title: Text(workoutTitle),
         trailing: !_isEditing ? _arrowIcon : interactiveCloseIcon(workoutTitle),
@@ -62,10 +59,6 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                   title: workoutTitle,
                   collectionReference: Firestore.instance
                       .collection('hangboard/$workoutTitle/exercises'),
-//                  sharedPreferences:MyApp.of(context).sharedPreferences,
-
-                  //TODO: probably only want to give auth to important pages, don't need the option to sign out everywhere
-//                  auth: widget.auth,
                   workoutId: index.toString(),
                 );
               },
@@ -74,15 +67,6 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
         },
       ),
     );
-  }
-
-  /// Inserts workout title and empty list to hold all child exercises into
-  /// sharedPrefs if it isn't already there.
-  void createSharedPrefsKey(String workoutTitle) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    List<String> exerciseList = sharedPreferences.getStringList(workoutTitle);
-    if (exerciseList == null || exerciseList.length == 0)
-      sharedPreferences.setStringList(workoutTitle, []);
   }
 
   Widget interactiveCloseIcon(var workoutTitle) {

@@ -1,4 +1,4 @@
-import 'package:crux/utils/base_auth.dart';
+import 'package:crux/services/base_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_calendar/flutter_calendar.dart';

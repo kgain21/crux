@@ -8,8 +8,9 @@ import 'package:crux/screens/hangboard/hangboard_workout_screen.dart';
 import 'package:crux/screens/sign_in_screen.dart';
 import 'package:crux/screens/spotify_test_screen.dart';
 import 'package:crux/screens/stopwatch_screen.dart';
-import 'package:crux/utils/auth.dart';
-import 'package:crux/utils/base_auth.dart';
+import 'package:crux/services/auth.dart';
+import 'package:crux/services/base_auth.dart';
+import 'package:crux/services/preferences.dart';
 import 'package:crux/widgets/workout_timer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,6 +18,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
+  /// Global vars
+  final BaseAuth auth = new Auth();
+  final String title = 'Crux';
+  Preferences.sharedPreferences = await SharedPreferences.getInstance();
+
+  /// Firebase setup
   final FirebaseApp app = await FirebaseApp.configure(
     name: 'Crux',
     options: const FirebaseOptions(
@@ -28,19 +35,15 @@ Future<void> main() async {
 
   final Firestore firestore = Firestore(app: app);
 
-  final SharedPreferences sharedPreferences =
-  await SharedPreferences.getInstance();
-
-  runApp(MyApp(firestore: firestore, sharedPreferences: sharedPreferences));
+  runApp(MyApp(firestore: firestore, auth: auth, title: title));
 }
 
 class MyApp extends StatelessWidget {
-  final String title = 'Crux';
-  final BaseAuth auth = new Auth();
   final Firestore firestore;
-  final SharedPreferences sharedPreferences;
+  final BaseAuth auth;
+  final String title;
 
-  MyApp({this.firestore, this.sharedPreferences});
+  MyApp({this.firestore, this.auth, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +85,7 @@ class MyApp extends StatelessWidget {
         '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
             title: title,
             auth: auth,
-            firestore: firestore,
-            sharedPreferences: sharedPreferences),
+            firestore: firestore),
         '/countdown_timer_screen': (context) => WorkoutTimer(),
         '/spotify_test_screen': (context) => SpotifyTestScreen(),
         '/exercise_page_view': (context) => ExercisePageView(),

@@ -44,6 +44,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   double _currentPageValue;
   bool _zoomOut;
   bool _exerciseFinished;
+  bool _preferencesClearedFlag;
 
   /* bool _handlePageNotification(ScrollNotification notification,
                                PageController leader, PageController follower) {
@@ -64,6 +65,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     _overlayVisible = false;
     _currentPageValue = 0.0;
     _zoomOut = false;
+    _preferencesClearedFlag = false;
 //    _shakeController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
 //    _shakeCurve = CurvedAnimation(parent: _shakeController, curve: ShakeCurve());
 
@@ -92,16 +94,26 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           PopupMenuButton<String>(
             onSelected: (value) {
               //TODO: switch statement for more menuButtons
-              if(value == 'reset') {
+              if(value == 'reset workout') {
                 SharedPreferences.getInstance().then((preferences) {
-//                  preferences.clear();
-
-                  preferences.remove(widget.title);
-                  //todo = > get prefs for exercise titles in this workout and clear only those
+                  preferences.getKeys().forEach((key) {
+                    if(key.contains(widget.title))
+                      preferences.remove(key);
+                  });
+                  setState(() {
+                    _preferencesClearedFlag = !_preferencesClearedFlag;
+                  });
+                });
+              } else if(value == 'clear sharedPreferences') {
+                SharedPreferences.getInstance().then((preferences) {
+                  preferences.clear();
                 });
               } else {
                 SharedPreferences.getInstance().then((preferences) {
-                  print(preferences.getKeys());
+                  print('----------------------------------------------------');
+                  preferences.getKeys().forEach(
+                          (key) => print('$key: ${preferences.get(key)}\n'));
+                  print('----------------------------------------------------');
                 });
               }
             },
@@ -109,11 +121,15 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               return <PopupMenuItem<String>>[
                 new PopupMenuItem(
                   child: new Text('Reset Workout'),
-                  value: 'reset',
+                  value: 'reset workout',
                 ),
                 new PopupMenuItem(
-                  child: new Text('Settings'),
-                  value: 'test2',
+                  child: new Text('Clear SharedPreferences'),
+                  value: 'clear sharedPreferences',
+                ),
+                new PopupMenuItem(
+                  child: new Text('Print SharedPreferences'),
+                  value: 'print sharedPreferences',
                 ),
               ];
             },
