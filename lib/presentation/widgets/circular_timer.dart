@@ -1,34 +1,19 @@
+import 'package:crux/backend/blocs/timer/timer_bloc.dart';
+import 'package:crux/backend/blocs/timer/timer_state.dart';
+import 'package:crux/backend/models/timer/timer.dart';
+import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/utils/timer_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class WorkoutTimer extends StatefulWidget {
-  final int time;
-  final String id;
-  final bool switchForward;
-  final bool switchTimer;
-  final VoidCallback notifyParentReverseComplete;
-  final VoidCallback notifyParentForwardComplete;
-  final bool startTimer;
-  final bool preferencesClearedFlag;
+class CircularTimer extends StatelessWidget {
+  final Timer timer;
+  final AnimationController controller;
 
-  WorkoutTimer({this.switchForward,
-                 this.switchTimer,
-                 this.time,
-                 this.id,
-                 this.notifyParentForwardComplete,
-                 this.notifyParentReverseComplete,
-                 this.startTimer,
-                 this.preferencesClearedFlag});
+  CircularTimer({this.timer, this.controller});
 
-  @override
-  State createState() => _WorkoutTimerState();
-}
-
-class _WorkoutTimerState extends State<WorkoutTimer>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  AnimationController _controller;
 
   /*bool _forwardAnimation;
   int _endTimeMillis;
@@ -41,20 +26,22 @@ class _WorkoutTimerState extends State<WorkoutTimer>
 
   String get timerString {
     Duration duration;
-    bool forwardAnimation = widget.switchTimer
+    //TODO: FIGURE OUT HOW TO IMPLEMENT SWITCHES DISPATCHING SWITCHEVENT TO TIMER
+    /*bool forwardAnimation = widget.switchTimer
         ? widget.switchForward
-        : (_forwardAnimation ?? false);
-    if (forwardAnimation) {
-      duration = _controller.duration * (1 - _controller.value);
+        : (_forwardAnimation ?? false);*/
+    if(timer.direction == TimerDirection.COUNTERCLOCKWISE) {
+      duration = controller.duration * (1 - controller.value);
     } else {
-      duration = _controller.duration * _controller.value;
+      duration = controller.duration * controller.value;
     }
-    return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
-    /*.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';*/
+    return '${duration.inMinutes}:${(duration.inSeconds % 60)
+        .toString()
+        .padLeft(2, '0')}';
   }
 
 
-  @override
+  /*@override
   void initState() {
     print('Timer ${widget.id} initState');
     super.initState();
@@ -66,19 +53,24 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     //TODO: Dependency injection template for future refactoring
 //    (context.inheritFromWidgetOfExactType(MyApp) as MyApp).sharedPreferences;
 //    _sharedPreferences = SharedPreferences.getInstance();
-  }
+  }*/
 
-  @override
+  /*@override
   void didChangeDependencies() {
     print('Timer ${widget.id} didChangeDependencies');
     super.didChangeDependencies();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
-    print('Timer ${widget.id} build');
-    super.build(context);
-    return StreamBuilder(
+    print('Timer ${timer.storageKey} build');
+    final TimerBloc timerBloc = BlocProvider.of<TimerBloc>(context);
+    return BlocBuilder(
+      bloc: timerBloc,
+      builder: (BuildContext context, TimerState state) {
+        return
+      },
+
       stream: Preferences.sharedPreferences,
       builder: (context, sharedPreferences) {
         _sharedPreferences = sharedPreferences.data;
@@ -90,8 +82,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   }
 
   Widget workoutTimer(SharedPreferences preferences) {
-    ///retrieve prefs from device or set defaults if not present
-    getSharedPrefs(preferences);
+    /*///retrieve prefs from device or set defaults if not present
+    getSharedPrefs(preferences);*/
 
     /// Gets the difference in time if timer was left running
     /// Gets 0.0 or 1.0 if time was exceeded in either direction
@@ -108,10 +100,10 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     // checkIfShouldStart();
     return GestureDetector(
       onTap: () {
-        startStopTimer(_controller);
+        startStopTimer(controller);
       },
       onLongPress: () {
-        resetTimer(_controller);
+        resetTimer(controller);
       },
       child: AspectRatio(
         aspectRatio: 1.0,
@@ -131,11 +123,11 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   Widget circularTimer() {
     return Positioned(
       child: AnimatedBuilder(
-        animation: _controller,
+        animation: controller,
         builder: (context, child) {
           return CustomPaint(
             painter: TimerPainter(
-              animation: _controller,
+              animation: controller,
               backgroundColor: Theme
                   .of(context)
                   .canvasColor,
@@ -147,10 +139,11 @@ class _WorkoutTimerState extends State<WorkoutTimer>
               padding: const EdgeInsets.all(6.0),
               child: Container(
                 decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme
-                        .of(context)
-                        .primaryColorLight),
+                  shape: BoxShape.circle,
+                  color: Theme
+                      .of(context)
+                      .primaryColorLight,
+                ),
               ),
             ),
           );
@@ -170,7 +163,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           AnimatedBuilder(
-            animation: _controller,
+            animation: controller,
             builder: (context, child) {
               return Text(
                 timerString,
@@ -193,18 +186,18 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     );
   }
 
-  @override
+  /*@override
   void dispose() {
     print('Timer ${widget.id} dispose');
     setSharedPrefsBeforeDispose();
 
-    if (_controller != null) {
+    if(_controller != null) {
       _controller.stop();
       _controller.dispose();
     }
 
     super.dispose();
-  }
+  }*/
 
   /*vvv INITSTATE METHODS vvv*/
 //  Started waiting for sharedPrefs to come back in build so everything that was
@@ -236,7 +229,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   }*/
 
   double getValueIfTimerPreviouslyRunning() {
-    if (_timerPreviouslyRunning) {
+    if(_timerPreviouslyRunning) {
       return valueDifference();
     } else {
       return _endValue;
@@ -247,7 +240,9 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   /// current system time and divides that by the starting duration to get the
   /// new value accounting for elapsed time.
   double valueDifference() {
-    int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
+    int currentTimeMillis = DateTime
+        .now()
+        .millisecondsSinceEpoch;
     int elapsedDuration = currentTimeMillis - _endTimeMillis;
     double endDuration = _endValue * (_currentTime * 1000.0);
     double value;
@@ -256,12 +251,12 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     /// return 0.0 as the value (can't have a negative value).
     /// Else if difference is greater than 1, return 1.
     /// Finally, return calculated value if neither of the above are true.
-    if (_forwardAnimation) {
+    if(_forwardAnimation) {
       value = (endDuration + elapsedDuration) / (_currentTime * 1000.0);
-      if (value <= 0.0) return 0.0;
+      if(value <= 0.0) return 0.0;
     } else {
       value = (endDuration - elapsedDuration) / (_currentTime * 1000.0);
-      if (value >= 1) return 1.0;
+      if(value >= 1) return 1.0;
     }
     return value;
   }
@@ -276,7 +271,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
 
     _controller.value = value;
     _controller.duration = Duration(seconds: _currentTime);
-    if (_timerPreviouslyRunning) {
+    if(_timerPreviouslyRunning) {
       setupControllerCallback(_controller);
     }
   }
@@ -294,9 +289,9 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   /// may also pass in the [startTimer] flag. This signals that the timer should
   /// start up immediately to keep the workout going smoothly.
   double checkIfResetTimer(double value) {
-    if (widget.switchTimer) {
+    if(widget.switchTimer) {
 //      double value;
-      if (widget.switchForward) {
+      if(widget.switchForward) {
         value = 0.0;
       } else {
         value = 1.0;
@@ -324,8 +319,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   /// Additionally, the [SharedPreferences] get nulled out so that future timers
   /// don't try to read old values.
   void startStopTimer(AnimationController controller) {
-    if (controller != null) {
-      if (controller.isAnimating) {
+    if(controller != null) {
+      if(controller.isAnimating) {
         setTimerPreviouslyRunning(false);
         controller.stop(canceled: false);
       } else {
@@ -336,14 +331,14 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   }
 
   void setupControllerCallback(AnimationController controller) {
-    if (!_forwardAnimation) {
+    if(!_forwardAnimation) {
       controller.reverse().whenComplete(() {
-        if (controller.status == AnimationStatus.dismissed) {
+        if(controller.status == AnimationStatus.dismissed) {
           _preferences.setTimerPreviouslyRunning(true);
           setTime(null);
           setEndValue(null);
           setEndTimeMillis(null);
-          if (widget.notifyParentReverseComplete != null) {
+          if(widget.notifyParentReverseComplete != null) {
             widget.notifyParentReverseComplete();
           }
         }
@@ -353,12 +348,12 @@ class _WorkoutTimerState extends State<WorkoutTimer>
       });
     } else {
       controller.forward().whenComplete(() {
-        if (controller.status == AnimationStatus.completed) {
+        if(controller.status == AnimationStatus.completed) {
           setTimerPreviouslyRunning(true);
           setTime(null);
           setEndValue(null);
           setEndTimeMillis(null);
-          if (widget.notifyParentForwardComplete != null) {
+          if(widget.notifyParentForwardComplete != null) {
             widget.notifyParentForwardComplete();
           }
         }
@@ -378,23 +373,23 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   /// onLongPress event of the circular timer.
   void resetTimer(AnimationController controller) {
     setTimerPreviouslyRunning(false);
-    if (controller.isAnimating) {
+    if(controller.isAnimating) {
       controller.stop(canceled: false);
-      if (controller.status == AnimationStatus.reverse) {
+      if(controller.status == AnimationStatus.reverse) {
         setState(() {
           controller.value = 1.0;
         });
-      } else if (controller.status == AnimationStatus.forward) {
+      } else if(controller.status == AnimationStatus.forward) {
         setState(() {
           controller.value = 0.0;
         });
       }
     } else {
-      if (controller.status == AnimationStatus.reverse) {
+      if(controller.status == AnimationStatus.reverse) {
         setState(() {
           controller.value = 1.0;
         });
-      } else if (controller.status == AnimationStatus.forward) {
+      } else if(controller.status == AnimationStatus.forward) {
         setState(() {
           controller.value = 0.0;
         });
@@ -409,7 +404,9 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   void setSharedPrefsBeforeDispose() {
     setForwardAnimation(_forwardAnimation);
     setEndValue(_controller.value ?? 0.0);
-    setEndTimeMillis(DateTime.now().millisecondsSinceEpoch);
+    setEndTimeMillis(DateTime
+        .now()
+        .millisecondsSinceEpoch);
     setTime(_currentTime);
   }
 

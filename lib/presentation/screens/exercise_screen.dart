@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/services/base_auth.dart';
-import 'package:crux/shared_layouts/app_bar.dart';
-import 'package:crux/shared_layouts/fab_bottom_app_bar.dart';
-import 'package:crux/widgets/exercise_form.dart';
-import 'package:crux/widgets/hangboard_page.dart';
+import 'package:crux/backend/services/base_auth.dart';
+import 'package:crux/presentation/shared_layouts/app_bar.dart';
+import 'package:crux/presentation/shared_layouts/fab_bottom_app_bar.dart';
+import 'package:crux/presentation/widgets/exercise_form.dart';
+import 'package:crux/presentation/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 

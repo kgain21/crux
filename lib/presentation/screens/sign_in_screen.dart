@@ -1,5 +1,5 @@
-import 'package:crux/screens/dashboard_screen.dart';
-import 'package:crux/services/base_auth.dart';
+import 'package:crux/backend/services/base_auth.dart';
+import 'package:crux/presentation/screens/dashboard_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

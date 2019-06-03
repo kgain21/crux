@@ -1,1 +1,0 @@
-enum TimerDirection { forward, backward }

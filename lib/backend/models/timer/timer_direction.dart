@@ -1,0 +1,1 @@
+enum TimerDirection { CLOCKWISE, COUNTERCLOCKWISE }

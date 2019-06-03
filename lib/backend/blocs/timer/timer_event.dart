@@ -1,5 +1,4 @@
-//import 'package:crux/presentation//widgets/workout_timer.dart';
-import 'package:crux/backend/models/timer.dart';
+import 'package:crux/backend/models/timer/timer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -9,35 +8,30 @@ abstract class TimerEvent extends Equatable {
 }
 
 class LoadTimer extends TimerEvent {
+  final storageKey;
+
+  LoadTimer(this.storageKey) : super([storageKey]);
+
   @override
-  String toString() => 'LoadTimer';
+  String toString() => 'LoadTimer { storageKey: $storageKey }';
 }
 
-class AddTimer extends TimerEvent {
+class StartTimer extends TimerEvent {
   final Timer timer;
 
-  AddTimer(this.timer) : super([timer]);
+  StartTimer(this.timer) : super([timer]);
 
   @override
-  String toString() => 'AddTimer { timer: $timer }';
+  String toString() => 'StartTimer { timer: $timer }';
 }
 
-class UpdateTimer extends TimerEvent {
+class PauseTimer extends TimerEvent {
   final Timer timer;
 
-  UpdateTimer(this.timer) : super([timer]);
+  PauseTimer(this.timer) : super([timer]);
 
   @override
-  String toString() => 'UpdateTimer { timer: $timer }';
-}
-
-class DeleteTimer extends TimerEvent {
-  final Timer timer;
-
-  DeleteTimer(this.timer) : super([timer]);
-
-  @override
-  String toString() => 'DeleteTimer { timer: $timer }';
+  String toString() => 'PauseTimer { timer: $timer }';
 }
 
 class TimerComplete extends TimerEvent {

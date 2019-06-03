@@ -1,10 +1,11 @@
-import 'package:crux/model/finger_configurations_enum.dart';
-import 'package:crux/model/hold_enum.dart';
+import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
+import 'package:crux/backend/models/hangboard/hold_enum.dart';
 
 
 // TODO: Recommended to not use static method only classes --
 // https://dart.dev/guides/language/effective-dart/design#avoid-defining-a-class-that-contains-only-static-members
 // TODO: Refactor at some point
+
 class StringFormatUtils {
   static String formatDepthAndHold(/*int numberOfHands,*/ double depth,
       String depthMeasurementSystem, String fingerConfiguration, String hold) {

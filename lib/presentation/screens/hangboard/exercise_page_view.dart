@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/widgets/dots_indicator.dart';
-import 'package:crux/widgets/exercise_form.dart';
-import 'package:crux/widgets/hangboard_page.dart';
+import 'package:crux/presentation/widgets/dots_indicator.dart';
+import 'package:crux/presentation/widgets/exercise_form.dart';
+import 'package:crux/presentation/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';

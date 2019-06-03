@@ -4,7 +4,7 @@ import 'entities/workout_entity.dart';
 abstract class HangboardWorkoutsRepository {
   Stream<List<ExerciseEntity>> exercises(String workoutPath);
 
-  Future<void> addExercise(ExerciseEntity exerciseEntity);
+  Future<void> addNewExercise(ExerciseEntity exerciseEntity);
 
   Future<void> deleteExercise(ExerciseEntity exerciseEntity);
 
@@ -12,7 +12,7 @@ abstract class HangboardWorkoutsRepository {
 
   Stream<List<WorkoutEntity>> workouts();
 
-  Future<void> addWorkout(WorkoutEntity workoutEntity);
+  Future<void> addNewWorkout(WorkoutEntity workoutEntity);
 
   Future<void> deleteWorkout(WorkoutEntity workoutEntity);
 

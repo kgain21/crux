@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/model/finger_configurations_enum.dart';
-import 'package:crux/model/hold_enum.dart';
-import 'package:crux/widgets/local_unit_picker_tile.dart';
+import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
+import 'package:crux/backend/models/hangboard/hold_enum.dart';
+import 'package:crux/presentation//widgets/local_unit_picker_tile.dart';
+import 'package:crux/utils/string_format_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../utils/string_format_utils.dart';
 
 class ExerciseForm extends StatefulWidget {
   final String workoutTitle;

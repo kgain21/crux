@@ -10,7 +10,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   final Preferences preferences;
   final FirestoreHangboardWorkoutsRepository firestore;
 
-  TimerBloc({@required this.preferences, @required this.firestore});
+  //todo: possibly need to listen to exercise page state? for dispose, init, etc
+  TimerBloc({@required this.preferences,
+              @required this.firestore,});
 
   @override
   TimerState get initialState => TimerLoading();
@@ -18,13 +20,11 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   @override
   Stream<TimerState> mapEventToState(TimerEvent event) async* {
     if(event is LoadTimer) {
-      yield* _mapLoadTimerToState();
-    } else if(event is AddTimer) {
-      yield* _mapAddTimerToState(event);
-    } else if(event is DeleteTimer) {
-      yield* _mapDeleteTimerToState(event);
-    } else if(event is UpdateTimer) {
-      yield* _mapUpdateTimerToState(event);
+      yield* _mapLoadTimerToState(event);
+    } else if(event is StartTimer) {
+      yield* _mapStartTimerToState(event);
+    } else if(event is PauseTimer) {
+      yield* _mapPauseTimerToState(event);
     } else if(event is TimerComplete) {
       yield* _mapTimerCompleteToState(event);
     } else if(event is TimerDispose) {
@@ -34,19 +34,25 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
   }
 
-  Stream<TimerState> _mapLoadTimerToState() {
+  Stream<TimerState> _mapLoadTimerToState(LoadTimer event) async* {
     try {
-      final savedTimerState = await this.firestore.
-      yield TimerLoaded
+      final timerEntity = preferences.getTimerPreferences(event.storageKey);
+      yield TimerLoaded(
+        timerEntity.storageKey,
+        timerEntity.duration,
+        timerEntity.direction,
+        timerEntity.previouslyRunning,
+        timerEntity.deviceTimeOnExit,
+        timerEntity.deviceTimeOnReturn,
+        timerEntity.controllerValueOnExit,
+      );
     }
-    catch
-    (
-    Exception e) {
-
+    catch(_) {
+      yield TimerNotLoaded();
     }
   }
 
-  Stream<TimerState> _mapAddTimerToState(event) {
+  /*Stream<TimerState> _mapAddTimerToState(event) {
     return null;
   }
 
@@ -55,6 +61,14 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   Stream<TimerState> _mapUpdateTimerToState(event) {
+    return null;
+  }*/
+
+  Stream<TimerState> _mapStartTimerToState(event) {
+    return null;
+  }
+
+  Stream<TimerState> _mapPauseTimerToState(event) {
     return null;
   }
 
@@ -68,17 +82,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
   Stream<TimerState> _mapClearTimerPreferencesToState(event) {
     return null;
-  }
-
-  @override
-  void onTransition(Transition<TimerEvent, TimerState> transition) {
-    print(transition);
-  }
-
-
-  @override
-  void onError(Object error, StackTrace stacktrace) {
-    print(error);
   }
 
   ///retrieve prefs from device or set defaults if not present

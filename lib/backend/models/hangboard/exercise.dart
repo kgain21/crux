@@ -1,4 +1,4 @@
-class ExerciseEntity {
+class Exercise {
   final String depthMeasurementSystem;
   final String resistanceMeasurementSystem;
   final int numberOfHands;
@@ -12,18 +12,19 @@ class ExerciseEntity {
   final int repDuration; // Formerly timeOn
   final int restDuration; // Formerly timeOff
 
-  ExerciseEntity(this.depthMeasurementSystem,
-                 this.resistanceMeasurementSystem,
-                 this.numberOfHands,
-                 this.holdType,
-                 this.fingerConfiguration,
-                 this.holdDepth,
-                 this.hangsPerSet,
-                 this.numberOfSets,
-                 this.resistance,
-                 this.timeBetweenSets,
-                 this.repDuration,
-                 this.restDuration);
+  Exercise(
+      this.depthMeasurementSystem,
+      this.resistanceMeasurementSystem,
+      this.numberOfHands,
+      this.holdType,
+      this.fingerConfiguration,
+      this.holdDepth,
+      this.hangsPerSet,
+      this.numberOfSets,
+      this.resistance,
+      this.timeBetweenSets,
+      this.repDuration,
+      this.restDuration);
 
   /*TODO: going to hold off on these for now but may need in future
   @override
@@ -60,7 +61,7 @@ class ExerciseEntity {
 
   @override
   String toString() {
-    return 'ExerciseEntity{depthMeasurementSystem: $depthMeasurementSystem, '
+    return 'Exercise{depthMeasurementSystem: $depthMeasurementSystem, '
         'resistanceMeasurementSystem: $resistanceMeasurementSystem, '
         'numberOfHands: $numberOfHands, '
         'holdType: $holdType,'
@@ -75,8 +76,8 @@ class ExerciseEntity {
         '}';
   }
 
-  static ExerciseEntity fromJson(Map<String, Object> json) {
-    return ExerciseEntity(
+  static Exercise fromJson(Map<String, Object> json) {
+    return Exercise(
       json["depthMeasurementSystem"] as String,
       json["resistanceMeasurementSystem"] as String,
       json["numberOfHands"] as int,

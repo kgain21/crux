@@ -1,4 +1,4 @@
-import 'package:crux/services/base_auth.dart';
+import 'package:crux/backend/services/base_auth.dart';
 import 'package:flutter/material.dart';
 
 class SharedAppBar {

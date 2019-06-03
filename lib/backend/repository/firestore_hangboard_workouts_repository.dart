@@ -15,7 +15,7 @@ class FirestoreHangboardWorkoutsRepository
   const FirestoreHangboardWorkoutsRepository(this.firestore);
 
   @override
-  Future<void> addNewTodo(TodoEntity todo) {
+  Future<void> addNewTodo(ExerciseEntity todo) {
     return firestore.collection(path).document(todo.id).setData(todo.toJson());
   }
 
@@ -27,10 +27,10 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<void> updateTodo(TodoEntity todo) {
+  Future<void> updateTodo(ExerciseEntity exercise) {
     return firestore
         .collection(path)
-        .document(todo.id)
+        .document(exercise..id)
         .updateData(todo.toJson());
   }
 
@@ -38,7 +38,22 @@ class FirestoreHangboardWorkoutsRepository
   Stream<List<ExerciseEntity>> exercises(String workoutPath) {
     return firestore.collection(path).snapshots().map((snapshot) {
       return snapshot.documents.map((doc) {
-        return ExerciseEntity(/*TODO figure this entity out*/);
+        var data = doc.data;
+
+        return ExerciseEntity(
+            data["depthMeasurementSystem"],
+            data["resistanceMeasurementSystem"],
+            data["numberOfHands"],
+            data["holdType"],
+            data["fingerConfiguration"],
+            data["holdDepth"],
+            data["hangsPerSet"],
+            data["numberOfSets"],
+            data["resistance"],
+            data["timeBetweenSets"],
+            data["repDuration"],
+            data["restDuration"]
+        );
       }).toList();
     });
   }
