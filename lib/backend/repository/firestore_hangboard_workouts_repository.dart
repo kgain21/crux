@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/backend/repository/entities/exercise_entity.dart';
-import 'package:crux/backend/repository/entities/workout_entity.dart';
+import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart';
+import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 
 import 'hangboard_workouts_repository.dart';
 
@@ -15,7 +15,7 @@ class FirestoreHangboardWorkoutsRepository
   const FirestoreHangboardWorkoutsRepository(this.firestore);
 
   @override
-  Future<void> addNewTodo(ExerciseEntity todo) {
+  Future<void> addNewTodo(HangboardExerciseEntity todo) {
     return firestore.collection(path).document(todo.id).setData(todo.toJson());
   }
 
@@ -27,7 +27,7 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<void> updateTodo(ExerciseEntity exercise) {
+  Future<void> updateTodo(HangboardExerciseEntity exercise) {
     return firestore
         .collection(path)
         .document(exercise..id)
@@ -35,69 +35,87 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Stream<List<ExerciseEntity>> exercises(String workoutPath) {
+  Stream<List<HangboardExerciseEntity>> exercises(String workoutPath) {
     return firestore.collection(path).snapshots().map((snapshot) {
       return snapshot.documents.map((doc) {
-        var data = doc.data;
-
-        return ExerciseEntity(
-            data["depthMeasurementSystem"],
-            data["resistanceMeasurementSystem"],
-            data["numberOfHands"],
-            data["holdType"],
-            data["fingerConfiguration"],
-            data["holdDepth"],
-            data["hangsPerSet"],
-            data["numberOfSets"],
-            data["resistance"],
-            data["timeBetweenSets"],
-            data["repDuration"],
-            data["restDuration"]
-        );
+        return HangboardExerciseEntity.fromJson(doc.data);
       }).toList();
     });
   }
 
   @override
-  Future<void> addExercise(ExerciseEntity exerciseEntity) {
-    // TODO: implement addExercise
-    return null;
+  Future<void> addNewExercise(HangboardExerciseEntity exerciseEntity) {
+    return firestore.collection(path).add(exerciseEntity.toJson());
   }
 
   @override
-  Future<void> updateExercise(ExerciseEntity exerciseEntity) {
-    // TODO: implement updateExercise
-    return null;
+  Future<void> updateExercise(HangboardExerciseEntity exerciseEntity) {
+    //todo: should I have a get method that the ui calls and then decides to add or update?
+    //Todo: dispatch to add/update event and have it decide in the bloc?
+    String hangboardExerciseId = createHangboardExerciseId(exerciseEntity);
+    var exerciseRef = firestore.collection(path).document(hangboardExerciseId);
+    exerciseRef.get().then((doc) {
+      if(doc.exists) {
+        _exerciseExistsAlert(scaffoldContext, exerciseRef, data);
+      } else {
+        exerciseRef.setData(exerciseEntity.toJson());
+        exerciseSavedSnackbar(scaffoldContext);
+      }
+    });
+    return firestore.collection(path)(exerciseEntity.toJson());
   }
 
   @override
-  Future<void> deleteExercise(ExerciseEntity exerciseEntity) async {
+  Future<void> deleteExercise(HangboardExerciseEntity exerciseEntity) async {
     // TODO: implement deleteExercise
   }
 
   @override
-  Stream<List<WorkoutEntity>> workouts() {
+  Stream<List<HangboardWorkoutEntity>> workouts() {
     return firestore.collection(path).snapshots().map((snapshot) {
       return snapshot.documents.map((doc) {
-        return WorkoutEntity(/*TODO figure this entity out*/);
+        return HangboardWorkoutEntity.fromJson(doc.data);
       }).toList();
     });
   }
 
   @override
-  Future<void> deleteWorkout(WorkoutEntity workoutEntity) async {
+  Future<void> deleteWorkout(HangboardWorkoutEntity workoutEntity) async {
     // TODO: implement deleteWorkout
   }
 
   @override
-  Future<void> addWorkout(WorkoutEntity workoutEntity) {
+  Future<void> addWorkout(HangboardWorkoutEntity workoutEntity) {
     // TODO: implement addWorkout
     return null;
   }
 
   @override
-  Future<void> updateWorkout(WorkoutEntity workoutEntity) {
+  Future<void> updateWorkout(HangboardWorkoutEntity workoutEntity) {
     // TODO: implement updateWorkout
     return null;
+  }
+
+  String createHangboardExerciseId(
+      HangboardExerciseEntity hangboardExerciseEntity) {
+    String exerciseId =
+        '${hangboardExerciseEntity.numberOfHands.toString()} handed';
+
+    if(hangboardExerciseEntity.holdDepth == null) {
+      if(hangboardExerciseEntity.fingerConfiguration == null ||
+          hangboardExerciseEntity.fingerConfiguration == '') {
+        exerciseId += ' ${hangboardExerciseEntity.holdType}';
+      } else {
+        exerciseId +=
+        ' ${hangboardExerciseEntity
+            .fingerConfiguration} ${hangboardExerciseEntity.holdType}';
+      }
+    } else {
+      exerciseId +=
+      ' ${hangboardExerciseEntity.holdDepth}${hangboardExerciseEntity
+          .depthMeasurementSystem} ${hangboardExerciseEntity
+          .fingerConfiguration} ${hangboardExerciseEntity.holdType}';
+    }
+    return exerciseId;
   }
 }

@@ -1,4 +1,5 @@
-class Exercise {
+class HangboardExerciseEntity {
+  final String exerciseTitle;
   final String depthMeasurementSystem;
   final String resistanceMeasurementSystem;
   final int numberOfHands;
@@ -12,19 +13,19 @@ class Exercise {
   final int repDuration; // Formerly timeOn
   final int restDuration; // Formerly timeOff
 
-  Exercise(
-      this.depthMeasurementSystem,
-      this.resistanceMeasurementSystem,
-      this.numberOfHands,
-      this.holdType,
-      this.fingerConfiguration,
-      this.holdDepth,
-      this.hangsPerSet,
-      this.numberOfSets,
-      this.resistance,
-      this.timeBetweenSets,
-      this.repDuration,
-      this.restDuration);
+  HangboardExerciseEntity(this.exerciseTitle,
+                          this.depthMeasurementSystem,
+                          this.resistanceMeasurementSystem,
+                          this.numberOfHands,
+                          this.holdType,
+                          this.fingerConfiguration,
+                          this.holdDepth,
+                          this.hangsPerSet,
+                          this.numberOfSets,
+                          this.resistance,
+                          this.timeBetweenSets,
+                          this.repDuration,
+                          this.restDuration);
 
   /*TODO: going to hold off on these for now but may need in future
   @override
@@ -44,6 +45,7 @@ class Exercise {
 
   Map<String, Object> toJson() {
     return {
+      "exerciseTitle": exerciseTitle,
       "depthMeasurementSystem": depthMeasurementSystem,
       "resistanceMeasurementSystem": resistanceMeasurementSystem,
       "numberOfHands": numberOfHands,
@@ -61,23 +63,25 @@ class Exercise {
 
   @override
   String toString() {
-    return 'Exercise{depthMeasurementSystem: $depthMeasurementSystem, '
+    return 'HangboardExerciseEntity { exerciseTitle: $exerciseTitle, '
+        'depthMeasurementSystem: $depthMeasurementSystem, '
         'resistanceMeasurementSystem: $resistanceMeasurementSystem, '
         'numberOfHands: $numberOfHands, '
         'holdType: $holdType,'
-        'fingerConfiguration: $fingerConfiguration,'
-        'holdDepth: $holdDepth,'
-        'hangsPerSet: $hangsPerSet,'
-        'numberOfSets: $numberOfSets,'
-        'resistance: $resistance,'
-        'timeBetweenSets: $timeBetweenSets,'
-        'repDuration: $repDuration,'
-        'restDuration: $restDuration,'
+        'fingerConfiguration: $fingerConfiguration, '
+        'holdDepth: $holdDepth, '
+        'hangsPerSet: $hangsPerSet, '
+        'numberOfSets: $numberOfSets, '
+        'resistance: $resistance, '
+        'timeBetweenSets: $timeBetweenSets, '
+        'repDuration: $repDuration, '
+        'restDuration: $restDuration '
         '}';
   }
 
-  static Exercise fromJson(Map<String, Object> json) {
-    return Exercise(
+  static HangboardExerciseEntity fromJson(Map<String, Object> json) {
+    return HangboardExerciseEntity(
+      json["exerciseTitle"] as String,
       json["depthMeasurementSystem"] as String,
       json["resistanceMeasurementSystem"] as String,
       json["numberOfHands"] as int,

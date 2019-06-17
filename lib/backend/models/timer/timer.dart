@@ -31,18 +31,18 @@ class Timer extends Equatable {
 
   Timer copyWith({
                    String lookupKey,
-                   int timerDuration,
-                   TimerDirection timerDirection,
-                   bool timerPreviouslyRunning,
+                   int duration,
+                   TimerDirection direction,
+                   bool previouslyRunning,
                    int deviceTimeOnExit,
                    int deviceTimeOnReturn,
                    double controllerValueOnExit,
                  }) {
     return Timer(
       lookupKey,
-      timerDuration,
-      timerDirection,
-      timerPreviouslyRunning,
+      duration,
+      direction,
+      previouslyRunning,
       deviceTimeOnExit,
       deviceTimeOnReturn,
       controllerValueOnExit,

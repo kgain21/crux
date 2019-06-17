@@ -30,12 +30,12 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   AnimationController _controller;
 
-  /*bool _forwardAnimation;
+  bool _forwardAnimation;
   int _endTimeMillis;
   bool _timerPreviouslyRunning;
   String _id;
   double _endValue;
-  int _currentTime;*/
+  int _currentTime;
 
   //Preferences _preferences;
 
@@ -62,7 +62,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
         vsync: this, value: 1.0, duration: Duration(seconds: widget.time));
     _id = widget.id;
     //TODO: Put this in Main?
-    _preferences = Preferences();
+//    _preferences = Preferences();
     //TODO: Dependency injection template for future refactoring
 //    (context.inheritFromWidgetOfExactType(MyApp) as MyApp).sharedPreferences;
 //    _sharedPreferences = SharedPreferences.getInstance();

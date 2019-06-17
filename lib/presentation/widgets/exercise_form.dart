@@ -444,7 +444,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  /// Tried to make a generic validator for the different [exercise] fields since
+  /// Tried to make a generic validator for the different [hangboardExercise] fields since
   /// they're almost all [int] fields. If there are other non [int] fields that
   /// I add, I could always abstract it out another level to an even more generic
   /// validation picker method.
@@ -468,13 +468,13 @@ class _ExerciseFormState extends State<ExerciseForm> {
     }
   }
 
-  void saveHangboardWorkoutToFirebase(BuildContext scaffoldContext) {
+  /*void saveHangboardWorkoutToFirebase(BuildContext scaffoldContext) {
     CollectionReference collectionReference = Firestore.instance
         .collection('hangboard/${widget.workoutTitle}/exercises');
 
     var data = createHangboardData();
     String dataId = createDataId(data);
-
+//todo: work on moving this to bloc and dispatch update event from here
     var exerciseRef = collectionReference.document(dataId);
     exerciseRef.get().then((doc) {
       if (doc.exists) {
@@ -484,15 +484,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
         exerciseSavedSnackbar(scaffoldContext);
       }
     });
-  }
+  }*/
 
-  /// This method currently packages the data to be sent to the Firestore.
+  /* /// This method currently packages the data to be sent to the Firestore.
   /// Not sure if I need this or want to make a separate object (probably should
   /// do that anyway) to send the data instead. I could also make the [exercises]
-  /// field a member var of this tab, and then each [exercise] could add it's own
+  /// field a member var of this tab, and then each [hangboardExercise] could add it's own
   /// state info like [_depth] and [_hold] to the global [exercises].
   /// //TODO: Make sure these defaults are ok
-  /// //TODO: Make object that gets serialized to be sent to FireBase
   Map createHangboardData() {
     Map<String, dynamic> data = {
       "resistanceMeasurementSystem": _resistanceMeasurementSystem,
@@ -511,9 +510,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
       "numberOfSets": _numberOfSets,
     };
     return data;
-  }
+  }*/
 
-  //TODO: This needs to have more to it - 1/2 hands, etc.
+  /*//TODO: This needs to have more to it - 1/2 hands, etc.
   String createDataId(Map data) {
     var depth = data['depth'];
     var measurement = data['depthMeasurementSystem'];
@@ -529,7 +528,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     } else {
       return '$depth$measurement $fingerConfiguration $hold';
     }
-  }
+  }*/
 
   List<Widget> mapFingerConfigurations(Hold hold) {
     if (hold == Hold.POCKET) {

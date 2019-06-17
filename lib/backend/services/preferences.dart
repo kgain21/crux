@@ -11,8 +11,9 @@ class Preferences {
         json.decode(sharedPreferences.getString(timerStorageKey)));
   }
 
-  void storeTimerPreferences(TimerEntity timerEntity, String timerStorageKey) {
-    sharedPreferences.setString(
+  Future storeTimerPreferences(String timerStorageKey,
+                               TimerEntity timerEntity) {
+    return sharedPreferences.setString(
         timerStorageKey, json.encode(timerEntity.toJson()));
   }
 

@@ -16,6 +16,7 @@ class LoadTimer extends TimerEvent {
   String toString() => 'LoadTimer { storageKey: $storageKey }';
 }
 
+/*
 class StartTimer extends TimerEvent {
   final Timer timer;
 
@@ -33,6 +34,7 @@ class PauseTimer extends TimerEvent {
   @override
   String toString() => 'PauseTimer { timer: $timer }';
 }
+*/
 
 class TimerComplete extends TimerEvent {
   final Timer timer;
@@ -43,13 +45,14 @@ class TimerComplete extends TimerEvent {
   String toString() => 'TimerComplete { timer: $timer }';
 }
 
-class TimerDispose extends TimerEvent {
+class DisposeTimer extends TimerEvent {
   final Timer timer;
 
-  TimerDispose(this.timer) : super([timer]);
+
+  DisposeTimer(this.timer) : super([timer]);
 
   @override
-  String toString() => 'TimerDispose { timer: $timer }';
+  String toString() => 'DisposeTimer { timer: $timer }';
 }
 
 class ClearTimerPreferences extends TimerEvent {

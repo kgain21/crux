@@ -1,20 +1,20 @@
-import 'entities/exercise_entity.dart';
-import 'entities/workout_entity.dart';
+import 'entities/hangboard_exercise_entity.dart';
+import 'entities/hangboard_workout_entity.dart';
 
 abstract class HangboardWorkoutsRepository {
-  Stream<List<ExerciseEntity>> exercises(String workoutPath);
+  Stream<List<HangboardExerciseEntity>> exercises(String workoutPath);
 
-  Future<void> addNewExercise(ExerciseEntity exerciseEntity);
+  Future<void> addNewExercise(HangboardExerciseEntity exerciseEntity);
 
-  Future<void> deleteExercise(ExerciseEntity exerciseEntity);
+  Future<void> deleteExercise(HangboardExerciseEntity exerciseEntity);
 
-  Future<void> updateExercise(ExerciseEntity exerciseEntity);
+  Future<void> updateExercise(HangboardExerciseEntity exerciseEntity);
 
-  Stream<List<WorkoutEntity>> workouts();
+  Stream<List<HangboardWorkoutEntity>> workouts();
 
-  Future<void> addNewWorkout(WorkoutEntity workoutEntity);
+  Future<void> addNewWorkout(HangboardWorkoutEntity workoutEntity);
 
-  Future<void> deleteWorkout(WorkoutEntity workoutEntity);
+  Future<void> deleteWorkout(HangboardWorkoutEntity workoutEntity);
 
-  Future<void> updateWorkout(WorkoutEntity workoutEntity);
+  Future<void> updateWorkout(HangboardWorkoutEntity workoutEntity);
 }
