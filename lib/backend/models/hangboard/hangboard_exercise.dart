@@ -9,23 +9,23 @@ class HangboardExercise {
   final int hangsPerSet;
   final int numberOfSets;
   final double resistance;
-  final int timeBetweenSets;
+  final int breakDuration;
   final int repDuration; // Formerly timeOn
   final int restDuration; // Formerly timeOff
 
   HangboardExercise(this.exerciseTitle,
-      this.depthMeasurementSystem,
-      this.resistanceMeasurementSystem,
-      this.numberOfHands,
-      this.holdType,
-      this.fingerConfiguration,
-      this.holdDepth,
-      this.hangsPerSet,
-      this.numberOfSets,
-      this.resistance,
-      this.timeBetweenSets,
-      this.repDuration,
-      this.restDuration);
+                    this.depthMeasurementSystem,
+                    this.resistanceMeasurementSystem,
+                    this.numberOfHands,
+                    this.holdType,
+                    this.fingerConfiguration,
+                    this.holdDepth,
+                    this.hangsPerSet,
+                    this.numberOfSets,
+                    this.resistance,
+                    this.breakDuration,
+                    this.repDuration,
+                    this.restDuration);
 
   /*TODO: going to hold off on these for now but may need in future
   @override
@@ -55,7 +55,7 @@ class HangboardExercise {
       "hangsPerSet": hangsPerSet,
       "numberOfSets": numberOfSets,
       "resistance": resistance,
-      "timeBetweenSets": timeBetweenSets,
+      "breakDuration": breakDuration,
       "repDuration": repDuration,
       "restDuration": restDuration,
     };
@@ -73,7 +73,7 @@ class HangboardExercise {
         'hangsPerSet: $hangsPerSet, '
         'numberOfSets: $numberOfSets, '
         'resistance: $resistance, '
-        'timeBetweenSets: $timeBetweenSets, '
+        'breakDuration: $breakDuration, '
         'repDuration: $repDuration, '
         'restDuration: $restDuration '
         '}';
@@ -91,7 +91,7 @@ class HangboardExercise {
       json["hangsPerSet"] as int,
       json["numberOfSets"] as int,
       json["resistance"] as double,
-      json["timeBetweenSets"] as int,
+      json["breakDuration"] as int,
       json["repDuration"] as int,
       json["restDuration"] as int,
     );

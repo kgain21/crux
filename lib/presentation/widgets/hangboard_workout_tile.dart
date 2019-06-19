@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'exercise_tile.dart';
 
 class HangboardWorkoutTile extends StatefulWidget {
 //  final BaseAuth auth;

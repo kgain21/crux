@@ -38,9 +38,12 @@ class TimerEntity {
     };
   }
 
+  //todo: defaults here for timer that is just loaded and doesn't have sharedprefs yet?
+  //todo: defaults should be what's passed in for exercise ideally
   static TimerEntity fromJson(Map<String, Object> json) {
     return TimerEntity(
-      json["storageKey"] as String,
+      json["storageKey"] as String ?? '',
+      //todo: not sure if this actually works
       json["duration"] as int,
       json["direction"] as TimerDirection,
       json["previouslyRunning,"] as bool,

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/backend//services/base_auth.dart';
+import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/presentation/shared_layouts/app_bar.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
 import 'package:crux/presentation/widgets/hangboard_workout_tile.dart';

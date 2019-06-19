@@ -1,3 +1,4 @@
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/timer/timer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
@@ -8,12 +9,12 @@ abstract class TimerEvent extends Equatable {
 }
 
 class LoadTimer extends TimerEvent {
-  final storageKey;
+  final HangboardExercise hangboardExercise;
 
-  LoadTimer(this.storageKey) : super([storageKey]);
+  LoadTimer(this.hangboardExercise) : super([hangboardExercise]);
 
   @override
-  String toString() => 'LoadTimer { storageKey: $storageKey }';
+  String toString() => 'LoadTimer { hangboardExercise: $hangboardExercise }';
 }
 
 /*
@@ -43,6 +44,36 @@ class TimerComplete extends TimerEvent {
 
   @override
   String toString() => 'TimerComplete { timer: $timer }';
+}
+
+class ReplaceWithRepTimer extends TimerEvent {
+  final HangboardExercise hangboardExercise;
+
+  ReplaceWithRepTimer(this.hangboardExercise) : super([hangboardExercise]);
+
+  @override
+  String toString() =>
+      'ReplaceWithRepTimer { hangboardExercise: $hangboardExercise }';
+}
+
+class ReplaceWithRestTimer extends TimerEvent {
+  final HangboardExercise hangboardExercise;
+
+  ReplaceWithRestTimer(this.hangboardExercise) : super([hangboardExercise]);
+
+  @override
+  String toString() =>
+      'ReplaceWithRestTimer { hangboardExercise: $hangboardExercise }';
+}
+
+class ReplaceWithBreakTimer extends TimerEvent {
+  final HangboardExercise hangboardExercise;
+
+  ReplaceWithBreakTimer(this.hangboardExercise) : super([hangboardExercise]);
+
+  @override
+  String toString() =>
+      'ReplaceWithBreakTimer { hangboardExercise: $hangboardExercise }';
 }
 
 class DisposeTimer extends TimerEvent {

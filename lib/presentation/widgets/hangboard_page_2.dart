@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
 import 'package:crux/backend/blocs/timer/timer_bloc.dart';
+import 'package:crux/backend/blocs/timer/timer_event.dart';
 import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/timer/timer.dart';
@@ -75,7 +76,7 @@ class _HangboardPageState extends State<HangboardPage>
     _timeBetweenSetsController = AnimationController(
       vsync: this,
       value: 1.0,
-      duration: Duration(seconds: widget.hangboardExercise.timeBetweenSets),
+      duration: Duration(seconds: widget.hangboardExercise.breakDuration),
     );
 
 //    _circularTimer = CircularTimer(
@@ -188,10 +189,9 @@ class _HangboardPageState extends State<HangboardPage>
                     IconButton(
                       icon: Icon(Icons.refresh),
                       onPressed: () {
-                        //todo: dispatch here?
-                        //todo: work on this event name
-                        _hangboardExerciseBloc.dispatch(ResetTimerToRep());
-                        switchTimer(false, state.hangboardExercise.repDuration);
+                        _timerBloc.dispatch(
+                            ReplaceWithRepTimer(widget.hangboardExercise));
+//                        switchTimer(false, state.hangboardExercise.repDuration);
 //                        switchTimer(false, _timeOn);
                       },
                     ),
@@ -205,9 +205,9 @@ class _HangboardPageState extends State<HangboardPage>
                         textDirection: TextDirection.rtl,
                       ),
                       onPressed: () {
-                        //todo: dispatch here?
-                        _hangboardExerciseBloc.dispatch(ResetTimerToRest());
-                        switchTimer(true, state.hangboardExercise.restDuration);
+                        _timerBloc.dispatch(
+                            ReplaceWithRestTimer(widget.hangboardExercise));
+//                        switchTimer(true, state.hangboardExercise.restDuration);
 //                        switchTimer(true, _timeOff);
                       },
                     ),

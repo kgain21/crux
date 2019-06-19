@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:crux/widgets/animated_box.dart';
 import 'package:flutter/widgets.dart';
+
+import 'animated_box.dart';
 
 class ListCycleWidget extends StatefulWidget {
   ListCycleWidget({Key key, this.widgetList}) : super(key: key);

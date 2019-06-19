@@ -9,7 +9,7 @@ class HangboardExerciseEntity {
   final int hangsPerSet;
   final int numberOfSets;
   final double resistance;
-  final int timeBetweenSets;
+  final int breakDuration;
   final int repDuration; // Formerly timeOn
   final int restDuration; // Formerly timeOff
 
@@ -23,7 +23,7 @@ class HangboardExerciseEntity {
                           this.hangsPerSet,
                           this.numberOfSets,
                           this.resistance,
-                          this.timeBetweenSets,
+                          this.breakDuration,
                           this.repDuration,
                           this.restDuration);
 
@@ -55,7 +55,7 @@ class HangboardExerciseEntity {
       "hangsPerSet": hangsPerSet,
       "numberOfSets": numberOfSets,
       "resistance": resistance,
-      "timeBetweenSets": timeBetweenSets,
+      "breakDuration": breakDuration,
       "repDuration": repDuration,
       "restDuration": restDuration,
     };
@@ -73,7 +73,7 @@ class HangboardExerciseEntity {
         'hangsPerSet: $hangsPerSet, '
         'numberOfSets: $numberOfSets, '
         'resistance: $resistance, '
-        'timeBetweenSets: $timeBetweenSets, '
+        'breakDuration: $breakDuration, '
         'repDuration: $repDuration, '
         'restDuration: $restDuration '
         '}';
@@ -91,7 +91,7 @@ class HangboardExerciseEntity {
       json["hangsPerSet"] as int,
       json["numberOfSets"] as int,
       json["resistance"] as double,
-      json["timeBetweenSets"] as int,
+      json["breakDuration"] as int,
       json["repDuration"] as int,
       json["restDuration"] as int,
     );

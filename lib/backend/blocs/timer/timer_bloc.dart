@@ -6,6 +6,7 @@ import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:bloc/bloc.dart';
 import 'package:crux/backend/blocs/timer/timer_event.dart';
 import 'package:crux/backend/models/timer/timer.dart';
+import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/backend/services/preferences.dart';
 import 'package:meta/meta.dart';
 
@@ -14,12 +15,12 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   final HangboardExerciseBloc hangboardExerciseBloc;
   StreamSubscription hangboardExerciseSubscription;
 
-  /// Listens for exercise to be created, then goes to SharedPreferences to look
-  /// for any timer preferences.
+  /// Listens for [HangboardExercise] to be created before dispatching to
+  /// [LoadTimer].
   TimerBloc({@required this.hangboardExerciseBloc}) {
     hangboardExerciseSubscription = hangboardExerciseBloc.state.listen((state) {
       if(state is HangboardExerciseLoaded) {
-        dispatch(LoadTimer(state.hangboardExercise.exerciseTitle));
+        dispatch(LoadTimer(state.hangboardExercise));
       }
     });
   }
@@ -33,6 +34,12 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       yield* _mapLoadTimerToState(event);
     } else if(event is TimerComplete) {
       yield* _mapTimerCompleteToState(event);
+    } else if(event is ReplaceWithRepTimer) {
+      yield* _mapReplaceWithRepTimerToState(event);
+    } else if(event is ReplaceWithRestTimer) {
+      yield*_mapReplaceWithRestTimerToState(event);
+    } else if(event is ReplaceWithBreakTimer) {
+      yield* _mapReplaceWithBreakTimerToState(event);
     } else if(event is DisposeTimer) {
       yield* _mapDisposeTimerToState(event);
     } else if(event is ClearTimerPreferences) {
@@ -40,17 +47,79 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
   }
 
+  /// Looks for a [Timer] in the [SharedPreferences] first. If none is present,
+  /// creates a new [Timer] from the passed in event's [HangboardExercise].
   Stream<TimerState> _mapLoadTimerToState(LoadTimer event) async* {
     try {
-      final timerEntity = Preferences().getTimerPreferences(event.storageKey);
-      yield TimerLoaded(
-          Timer.fromEntity(timerEntity)
-      );
-    }
-    catch(exception) {
+      final timerEntity = Preferences().getTimerPreferences(
+          event.hangboardExercise.exerciseTitle);
+
+      if(timerEntity != null) {
+        yield TimerLoaded(
+            Timer.fromEntity(timerEntity)
+        );
+      } else {
+        yield TimerLoaded(
+          Timer(
+            event.hangboardExercise.exerciseTitle,
+            event.hangboardExercise.repDuration,
+            TimerDirection.COUNTERCLOCKWISE,
+            false,
+            0,
+            0,
+            0.0,
+          ),
+        );
+      }
+    } catch(exception) {
       print(exception);
       yield TimerNotLoaded();
     }
+  }
+
+  Stream<TimerState> _mapReplaceWithRepTimerToState(
+      ReplaceWithRepTimer event) async* {
+    yield TimerLoaded(
+        Timer(
+          event.hangboardExercise.exerciseTitle,
+          event.hangboardExercise.repDuration,
+          TimerDirection.COUNTERCLOCKWISE,
+          false,
+          0,
+          0,
+          0.0,
+        ),
+    );
+  }
+
+  Stream<TimerState> _mapReplaceWithRestTimerToState(
+      ReplaceWithRestTimer event) async* {
+    yield TimerLoaded(
+        Timer(
+          event.hangboardExercise.exerciseTitle,
+          event.hangboardExercise.restDuration,
+          TimerDirection.CLOCKWISE,
+          false,
+          0,
+          0,
+          0.0,
+        ),
+    );
+  }
+
+  Stream<TimerState> _mapReplaceWithBreakTimerToState(
+      ReplaceWithBreakTimer event) async* {
+    yield TimerLoaded(
+        Timer(
+          event.hangboardExercise.exerciseTitle,
+          event.hangboardExercise.breakDuration,
+          TimerDirection.CLOCKWISE,
+          false,
+          0,
+          0,
+          0.0,
+        ),
+    );
   }
 
   Stream<TimerState> _mapTimerCompleteToState(event) {

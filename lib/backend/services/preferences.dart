@@ -7,8 +7,11 @@ class Preferences {
   static SharedPreferences sharedPreferences;
 
   TimerEntity getTimerPreferences(String timerStorageKey) {
-    return TimerEntity.fromJson(
-        json.decode(sharedPreferences.getString(timerStorageKey)));
+    String timerData = sharedPreferences.getString(timerStorageKey);
+    if(timerData != null && timerData.isNotEmpty) {
+      return TimerEntity.fromJson(json.decode(timerData));
+    } else
+      return null;
   }
 
   Future storeTimerPreferences(String timerStorageKey,
