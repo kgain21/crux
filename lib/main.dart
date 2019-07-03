@@ -11,7 +11,6 @@ import 'package:crux/presentation/screens/hangboard/hangboard_workout_screen.dar
 import 'package:crux/presentation/screens/sign_in_screen.dart';
 import 'package:crux/presentation/screens/spotify_test_screen.dart';
 import 'package:crux/presentation/screens/stopwatch_screen.dart';
-import 'package:crux/presentation/widgets/workout_timer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +85,7 @@ class MyApp extends StatelessWidget {
             title: title,
             auth: auth,
             firestore: firestore),
-        '/countdown_timer_screen': (context) => WorkoutTimer(),
+//        '/countdown_timer_screen': (context) => WorkoutTimer(),
         '/spotify_test_screen': (context) => SpotifyTestScreen(),
         '/exercise_page_view': (context) => ExercisePageView(),
         '/calendar_screen': (context) => CalendarScreen(auth: auth),

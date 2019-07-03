@@ -1,19 +1,22 @@
 import 'package:bloc/bloc.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_event.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/preferences.dart';
 import 'package:meta/meta.dart';
 
-class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
+class WorkoutBloc extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
   final Preferences preferences;
   final FirestoreHangboardWorkoutsRepository firestore;
 
   WorkoutBloc({@required this.preferences, @required this.firestore});
 
   @override
-  WorkoutState get initialState => WorkoutLoading();
+  HangboardWorkoutState get initialState => WorkoutLoading();
 
   @override
-  Stream<WorkoutState> mapEventToState(WorkoutEvent event) async* {
+  Stream<HangboardWorkoutState> mapEventToState(
+      HangboardWorkoutEvent event) async* {
     if (event is LoadWorkout) {
       yield* _mapLoadWorkoutToState();
     } else if (event is AddWorkout) {
@@ -25,7 +28,7 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     }
   }
 
-  Stream<WorkoutState> _mapLoadWorkoutToState() async* {
+  Stream<HangboardWorkoutState> _mapLoadWorkoutToState() async* {
     try {
       final workout = firestore.exercises(workoutPath);
       yield WorkoutLoaded();
@@ -34,15 +37,15 @@ class WorkoutBloc extends Bloc<WorkoutEvent, WorkoutState> {
     }
   }
 
-  Stream<WorkoutState> _mapAddWorkoutToState(event) {
+  Stream<HangboardWorkoutState> _mapAddWorkoutToState(event) {
     return null;
   }
 
-  Stream<WorkoutState> _mapDeleteWorkoutToState(event) {
+  Stream<HangboardWorkoutState> _mapDeleteWorkoutToState(event) {
     return null;
   }
 
-  Stream<WorkoutState> _mapUpdateWorkoutToState(event) {
+  Stream<HangboardWorkoutState> _mapUpdateWorkoutToState(event) {
     return null;
   }
 }

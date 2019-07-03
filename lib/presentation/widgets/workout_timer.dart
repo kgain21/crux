@@ -1,3 +1,4 @@
+/*
 import 'package:crux/utils/timer_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -50,7 +51,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
       duration = _controller.duration * _controller.value;
     }
     return '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
-    /*.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';*/
+.${(duration.inMilliseconds % 100).toString().padLeft(2, '0')}';
+
   }
 
 
@@ -188,7 +190,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   Widget loadingScreen() {
     return Column(
       children: <Widget>[
-        /*Empty to help avoid any flickering from quick loads*/
+Empty to help avoid any flickering from quick loads
+
       ],
     );
   }
@@ -206,15 +209,19 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     super.dispose();
   }
 
-  /*vvv INITSTATE METHODS vvv*/
+vvv INITSTATE METHODS vvv
+
 //  Started waiting for sharedPrefs to come back in build so everything that was
 //  here went to the build methods
-  /*^^^ INITSTATE METHODS ^^^*/
-
-  /*vvv BUILD METHODS vvv*/
+^^^ INITSTATE METHODS ^^^
 
 
-  /*/// Get all sharedPrefs at once during build
+vvv BUILD METHODS vvv
+
+
+
+//*
+// Get all sharedPrefs at once during build
   void getSharedPrefs(SharedPreferences preferences) {
     _endTimeMillis = (preferences.getInt('$_id EndTimeMillis') ?? 0);
 
@@ -233,7 +240,8 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     /// running state and needs to use this value.
     /// Otherwise, rebuild the timer with whatever new time came in.
     _currentTime = (preferences.getInt('$_id Time')) ?? widget.time;
-  }*/
+  }
+
 
   double getValueIfTimerPreviouslyRunning() {
     if (_timerPreviouslyRunning) {
@@ -301,8 +309,9 @@ class _WorkoutTimerState extends State<WorkoutTimer>
       } else {
         value = 1.0;
       }
-      /*if(!widget.startTimer)
-        _timerPreviouslyRunning = false;*/
+if(!widget.startTimer)
+        _timerPreviouslyRunning = false;
+
 
       _currentTime = widget.time;
       _forwardAnimation = widget.switchForward;
@@ -403,9 +412,11 @@ class _WorkoutTimerState extends State<WorkoutTimer>
   }
 
 
-/*^^^ BUILD METHODS ^^^*/
+^^^ BUILD METHODS ^^^
 
-/*vvv DISPOSE METHODS vvv*/
+
+vvv DISPOSE METHODS vvv
+
   void setSharedPrefsBeforeDispose() {
     setForwardAnimation(_forwardAnimation);
     setEndValue(_controller.value ?? 0.0);
@@ -413,9 +424,6 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     setTime(_currentTime);
   }
 
-/*^^^ DISPOSE METHODS ^^^*/
-
-  @override
-// TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
-}
+^^^ DISPOSE METHODS ^^^
+*/
+ */

@@ -9,38 +9,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CircularTimer extends StatelessWidget {
-  final AnimationController controller;
+  final AnimationController timerController;
+  final VoidCallback timerControllerCallback;
 
-  CircularTimer({
-                  this.controller,
-                });
-
-  //TimerBloc _timerBloc;
-
-  /*bool _forwardAnimation;
-  int _endTimeMillis;
-  bool _timerPreviouslyRunning;
-  String _id;
-  double _endValue;
-  int _currentTime;*/
-
-  //Preferences _preferences;
-
-/*
-  @override
-  void initState() {
-    print('Timer ${widget.timer.storageKey} initState');
-
-    _timerBloc = TimerBloc(preferences: Preferences());
-
-
-    super.initState();
-  }
-*/
+  const CircularTimer({
+                        @required this.timerController,
+                        @required this.timerControllerCallback,
+                      });
 
   @override
   Widget build(BuildContext context) {
-//    print('Timer ${timer.storageKey} build');
     final TimerBloc timerBloc = BlocProvider.of<TimerBloc>(context);
 
     return BlocBuilder(
@@ -51,11 +29,10 @@ class CircularTimer extends StatelessWidget {
         } else if(state is TimerLoaded) {
           return GestureDetector(
             onTap: () {
-              startStopTimer(controller);
+              startStopTimer(state.timer);
             },
             onLongPress: () {
-              resetTimer(controller);
-//              timerBloc.dispatch(ResetTimer(timer.copyWith()))
+              resetTimer();
             },
             child: AspectRatio(
               aspectRatio: 1.0,
@@ -81,11 +58,11 @@ class CircularTimer extends StatelessWidget {
   Widget circularTimer() {
     return Positioned(
       child: AnimatedBuilder(
-        animation: controller,
+        animation: timerController,
         builder: (context, child) {
           return CustomPaint(
             painter: TimerPainter(
-              animation: controller,
+              animation: timerController,
               backgroundColor: Theme
                   .of(context)
                   .canvasColor,
@@ -121,7 +98,7 @@ class CircularTimer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           AnimatedBuilder(
-            animation: controller,
+            animation: timerController,
             builder: (context, child) {
               return Text(
                 timerString(state),
@@ -147,38 +124,63 @@ class CircularTimer extends StatelessWidget {
   String timerString(TimerLoaded state) {
     Duration duration;
     if(state.timer.direction == TimerDirection.COUNTERCLOCKWISE) {
-      duration = controller.duration * (1 - controller.value);
+      duration = timerController.duration * (1 - timerController.value);
     } else {
-      duration = controller.duration * controller.value;
+      duration = timerController.duration * timerController.value;
     }
     return '${duration.inMinutes}:${(duration.inSeconds % 60)
         .toString()
         .padLeft(2, '0')}';
   }
 
-  Widget workoutTimer(SharedPreferences preferences) {
-    ///retrieve prefs from device or set defaults if not present
-//    getSharedPrefs(preferences);
-
-    /// Gets the difference in time if timer was left running
-    /// Gets 0.0 or 1.0 if time was exceeded in either direction
-    /// Get value of animation if stopped
-//    double value = getValueIfTimerPreviouslyRunning();
-
-    /// Resets value to 0.0 or 1.0 if one of the switch timer buttons was pressed
-//    value = checkIfResetTimer(value);
-
-    /// Creates controller with appropriate animation value determined above
-    setupController(value);
-
-    // checkIfPreviouslyRunning();
-    // checkIfShouldStart();
-
+  /// Controls starting or stopping the [timerController] and determines which
+  /// way it should animate using the boolean [_forwardAnimation], where true is
+  /// forward and false is reverse. This method is passed to the onClickEvent
+  /// of the [WorkoutTimer].
+  ///
+  /// When the animation completes, a notification is sent to the parent
+  /// [WorkoutScreen] widget to tell it that it has finished.
+  ///
+  /// Additionally, the [SharedPreferences] get nulled out so that future timers
+  /// don't try to read old values.
+  void startStopTimer(Timer timer) {
+    if(timerController != null) {
+      if(timerController.isAnimating) {
+        timerController.stop(canceled: false);
+      } else {
+        timerControllerCallback();
+//        setupControllerCallback(timerController, timer);
+      }
+    }
   }
 
-  //TODO: STEP 1
+  /// Resets the timer based on its current status. This method is passed to the
+  /// onLongPress event of the circular timer.
+  void resetTimer() {
+    if(timerController.isAnimating) {
+      timerController.stop(canceled: false);
+      if(timerController.status == AnimationStatus.reverse) {
+        timerController.value = 1.0;
+      } else if(timerController.status == AnimationStatus.forward) {
+        timerController.value = 0.0;
+      }
+    } else {
+      if(timerController.status == AnimationStatus.reverse) {
+        timerController.value = 1.0;
+      } else if(timerController.status == AnimationStatus.forward) {
+        timerController.value = 0.0;
+      }
+    }
+  }
+
+//  //TODO: make this do more
+//  void handleError(Error error) {
+//    startStopTimer(timer);
+//  }
+
+/*//TODO: STEP 1 - in timer bloc right now
   double determineControllerValue(TimerLoaded state) {
-    if(state.timer.previouslyRunning) {
+    if (state.timer.previouslyRunning) {
       return valueDifference(state.timer);
     } else {
       return state.timer.controllerValueOnExit;
@@ -189,9 +191,7 @@ class CircularTimer extends StatelessWidget {
   /// current system time and divides that by the starting duration to get the
   /// new value accounting for elapsed time.
   double valueDifference(Timer timer) {
-    int currentTimeMillis = DateTime
-        .now()
-        .millisecondsSinceEpoch;
+    int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
 
     int elapsedDuration = currentTimeMillis - timer.deviceTimeOnExit;
 
@@ -204,60 +204,17 @@ class CircularTimer extends StatelessWidget {
     /// return 0.0 as the value (can't have a negative value).
     /// Else if difference is greater than 1, return 1.
     /// Finally, return calculated value if neither of the above are true.
-    if(timer.direction == TimerDirection.CLOCKWISE) {
+    if (timer.direction == TimerDirection.CLOCKWISE) {
       value =
           (timerDurationOnExit + elapsedDuration) / (timer.duration * 1000.0);
-      if(value <= 0.0) return 0.0;
+      if (value <= 0.0) return 0.0;
     } else {
       value =
           (timerDurationOnExit - elapsedDuration) / (timer.duration * 1000.0);
-      if(value >= 1) return 1.0;
+      if (value >= 1) return 1.0;
     }
     return value;
-  }
-
-  /*@override
-  void dispose() {
-    print('Timer ${widget.id} dispose');
-    setSharedPrefsBeforeDispose();
-
-    if(_controller != null) {
-      _controller.stop();
-      _controller.dispose();
-    }
-
-    super.dispose();
   }*/
-
-  /*vvv INITSTATE METHODS vvv*/
-//  Started waiting for sharedPrefs to come back in build so everything that was
-//  here went to the build methods
-  /*^^^ INITSTATE METHODS ^^^*/
-
-  /*vvv BUILD METHODS vvv*/
-
-  /*/// Get all sharedPrefs at once during build
-  void getSharedPrefs(SharedPreferences preferences) {
-    _endTimeMillis = (preferences.getInt('$_id EndTimeMillis') ?? 0);
-
-    _forwardAnimation = (preferences.getBool('$_id ForwardAnimation') ?? false);
-
-    _timerPreviouslyRunning =
-    (preferences.getBool('$_id TimerPreviouslyRunning') ?? false);
-
-    /// If there is no endValue stored, check forwardAnimation and set to
-    /// appropriate start value
-    _endValue = (preferences.getDouble('$_id EndValue') ??
-        (_forwardAnimation ? 0.0 : 1.0));
-
-    /// This is for reloading an already running timer.
-    /// The assumption is that if there is a value here the timer was left in a
-    /// running state and needs to use this value.
-    /// Otherwise, rebuild the timer with whatever new time came in.
-    _currentTime = (preferences.getInt('$_id Time')) ?? widget.time;
-  }*/
-
-
 
   /// Creates an AnimationController based on whether or not the timer should
   /// be animating forward or not. The duration is the rest duration if
@@ -265,27 +222,24 @@ class CircularTimer extends StatelessWidget {
   /// was left running or retrieved from memory if stopped.
 
   //TODO: STEP 2 (???)
-  void setupController(double value, TimerLoaded state) {
-    controller.value = value;
-    controller.duration = Duration(seconds: state.timer.duration);
-    if(state.timer.previouslyRunning) {
-      setupControllerCallback(controller, state.timer);
+/*void setupController(double value, TimerLoaded state) {
+    timerController.value = value;
+    timerController.duration = Duration(seconds: state.timer.duration);
+    if (state.timer.previouslyRunning) {
+      setupControllerCallback(timerController, state.timer);
     }
   }
 
   void setupControllerCallback(AnimationController controller, Timer timer) {
-    if(timer.direction == TimerDirection.COUNTERCLOCKWISE) {
+    if (timer.direction == TimerDirection.COUNTERCLOCKWISE) {
       controller.reverse().whenComplete(() {
         //TODO: left off here 6/19 => trying to decide how to handle this. Does exercise pass in callback?
         //TODO: dispatch to timerComplete? dispatch to exercise? need to figure this out
-        if(controller.status == AnimationStatus.dismissed) {
-          /*_preferences.setTimerPreviouslyRunning(true);
-          setTime(null);
-          setEndValue(null);
-          setEndTimeMillis(null);
-          if (widget.notifyParentReverseComplete != null) {
-            widget.notifyParentReverseComplete();
-          }*/
+        if (controller.status == AnimationStatus.dismissed) {
+          //TODO: 6/26 - thinking about dispatching to both here -> one to create
+          //todo: the next timer and one to update set/rep count with the exercise
+          timerBloc.dispatch(TimerComplete(timer));
+          hangboardExerciseBloc.dispatch(RepComplete());
         }
       }).catchError((error) {
         print('Timer failed animating counterclockwise: $error');
@@ -293,119 +247,19 @@ class CircularTimer extends StatelessWidget {
       });
     } else {
       controller.forward().whenComplete(() {
-        if(controller.status == AnimationStatus.completed) {
-          /*setTimerPreviouslyRunning(true);
-          setTime(null);
-          setEndValue(null);
-          setEndTimeMillis(null);
-          if (widget.notifyParentForwardComplete != null) {
-            widget.notifyParentForwardComplete();
-          }*/
+        if (controller.status == AnimationStatus.completed) {
+          timerBloc.dispatch(TimerComplete(timer));
+          //TODO: 6/26 - Thinking that I only need to dispatch to exercise after
+          //todo: rep and rest have completed. if i dispatch here I'm assuming that's the case
+
+          //todo: Random thought but do i want to pass in exercise bloc to make this more generic?
+
+          hangboardExerciseBloc.dispatch(RepComplete());
         }
       }).catchError((error) {
         print('Timer failed animating clockwise: $error');
         startStopTimer(controller);
       });
     }
-  }
-
-/*  /// Checks if switch flag was passed in - this should signal a new build of the
-  /// timer with the passed in new time and opposite direction.
-  ///
-  /// Since the timer only rebuilds when being switched, the [switchTimer] flag
-  /// will always start false at initialization and become true from the first
-  /// user switch up until it is disposed of.
-  /// The only flag that will change is the [switchForward] flag each time the
-  /// user switches times.
-  ///
-  /// If the timer finished, the callback uses the [switchTimer] method which
-  /// may also pass in the [startTimer] flag. This signals that the timer should
-  /// start up immediately to keep the workout going smoothly.
-  double checkIfResetTimer(double value) {
-    if(widget.switchTimer) {
-//      double value;
-      if(widget.switchForward) {
-        value = 0.0;
-      } else {
-        value = 1.0;
-      }
-      */ /*if(!widget.startTimer)
-        _timerPreviouslyRunning = false;*/ /*
-
-      _currentTime = widget.time;
-      _forwardAnimation = widget.switchForward;
-//      _controller.value = value;
-//      _controller.duration = Duration(seconds: _currentTime);
-    }
-    return value;
   }*/
-
-  /// Controls starting or stopping the [_controller] and determines which
-  /// way it should animate using the boolean [_forwardAnimation], where true is
-  /// forward and false is reverse. This method is passed to the onClickEvent
-  /// of the [WorkoutTimer].
-  ///
-  /// When the animation completes, a notification is sent to the parent
-  /// [WorkoutScreen] widget to tell it that it has finished.
-  ///
-  /// Additionally, the [SharedPreferences] get nulled out so that future timers
-  /// don't try to read old values.
-  void startStopTimer(AnimationController controller) {
-    if(controller != null) {
-      if(controller.isAnimating) {
-//        setTimerPreviouslyRunning(false);
-
-        controller.stop(canceled: false);
-      } else {
-//        setTimerPreviouslyRunning(true);
-        setupControllerCallback(controller);
-      }
-    }
-  }
-
-
-  //TODO: make this do more
-  void handleError(Error error) {
-    startStopTimer(controller);
-  }
-
-  /// Resets the timer based on its current status. This method is passed to the
-  /// onLongPress event of the circular timer.
-  void resetTimer(AnimationController controller) {
-//    setTimerPreviouslyRunning(false);
-    if(controller.isAnimating) {
-      controller.stop(canceled: false);
-      if(controller.status == AnimationStatus.reverse) {
-        /*setState(() {
-          controller.value = 1.0;
-        });*/
-      } else if(controller.status == AnimationStatus.forward) {
-        /*setState(() {
-          controller.value = 0.0;
-        });*/
-      }
-    } else {
-      if(controller.status == AnimationStatus.reverse) {
-        /*setState(() {
-          controller.value = 1.0;
-        });*/
-      } else if(controller.status == AnimationStatus.forward) {
-        /*setState(() {
-          controller.value = 0.0;
-        });*/
-      }
-    }
-  }
-
-/*^^^ BUILD METHODS ^^^*/
-
-/*vvv DISPOSE METHODS vvv*/
-  void setSharedPrefsBeforeDispose() {
-    /*setForwardAnimation(_forwardAnimation);
-    setEndValue(_controller.value ?? 0.0);
-    setEndTimeMillis(DateTime.now().millisecondsSinceEpoch);
-    setTime(_currentTime);*/
-  }
-
-/*^^^ DISPOSE METHODS ^^^*/
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
@@ -6,9 +8,9 @@ import 'package:crux/backend/blocs/timer/timer_event.dart';
 import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/timer/timer.dart';
+import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/presentation/widgets/circular_timer.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
-import 'package:crux/presentation/widgets/workout_timer.dart';
 import 'package:crux/utils/string_format_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -17,7 +19,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class HangboardPage extends StatefulWidget {
   final int index;
 
-//  final Map<String, dynamic> exerciseParameters;
   final VoidCallback nextPageCallback;
   final DocumentReference documentReference;
   final String workoutTitle;
@@ -25,13 +26,12 @@ class HangboardPage extends StatefulWidget {
   final HangboardExercise hangboardExercise;
 
   HangboardPage({
-    this.index,
-//    this.exerciseParameters,
-    this.nextPageCallback,
-    this.documentReference,
-    this.workoutTitle,
-    this.hangboardExercise,
-  });
+                  this.index,
+                  this.nextPageCallback,
+                  this.documentReference,
+                  this.workoutTitle,
+                  this.hangboardExercise,
+                });
 
   @override
   State<HangboardPage> createState() => _HangboardPageState();
@@ -39,67 +39,28 @@ class HangboardPage extends StatefulWidget {
 
 class _HangboardPageState extends State<HangboardPage>
     with TickerProviderStateMixin {
-//  PageStorageKey timerKey;
-  bool _isEditing;
 
-  AnimationController _repController;
-  AnimationController _restController;
-  AnimationController _timeBetweenSetsController;
+  int _originalNumberOfSets;
+  int _originalNumberOfHangs;
 
-//  String _exerciseTitle;
-
-//  int _originalNumberOfSets;
-//  int _originalNumberOfHangs;
-//  CircularTimer _circularTimer;
   TimerBloc _timerBloc;
   HangboardExerciseBloc _hangboardExerciseBloc;
 
   @override
   void initState() {
-//    _isEditing = false;
-//    _originalNumberOfSets = widget.exerciseParameters['numberOfSets'];
-//    _originalNumberOfHangs = widget.exerciseParameters['hangsPerSet'];
+    _originalNumberOfSets = widget.hangboardExercise.numberOfSets;
+    _originalNumberOfHangs = widget.hangboardExercise.hangsPerSet;
 //    getParams(widget.exerciseParameters);
 
     /*_exerciseTitle = StringFormatUtils.formatDepthAndHold(
         _depth, _depthMeasurementSystem, _fingerConfiguration, _hold);*/
-    _repController = AnimationController(
-      vsync: this,
-      value: 0.0,
-      duration: Duration(seconds: widget.hangboardExercise.repDuration),
-    );
-    _restController = AnimationController(
-      vsync: this,
-      value: 1.0,
-      duration: Duration(seconds: widget.hangboardExercise.restDuration),
-    );
-    _timeBetweenSetsController = AnimationController(
-      vsync: this,
-      value: 1.0,
-      duration: Duration(seconds: widget.hangboardExercise.breakDuration),
-    );
-
-//    _circularTimer = CircularTimer(
-
-//      id: '${widget.workoutTitle} $_exerciseTitle',
-//      time: _timeOn,
-//      switchForward: false,
-//      switchTimer: false,
-//      notifyParentReverseComplete: notifyParentReverseComplete,
-//      notifyParentForwardComplete: notifyParentForwardComplete,
-//      preferencesClearedFlag: widget.preferencesClearedFlag,
-//        );
+    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final HangboardExerciseBloc hangboardExerciseBloc =
-        BlocProvider.of<HangboardExerciseBloc>(context);
-
-    final TimerBloc timerBloc =
-        TimerBloc(hangboardExerciseBloc: hangboardExerciseBloc);
-
+    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
     return BlocBuilder(
         bloc: _hangboardExerciseBloc,
         builder: (BuildContext context, HangboardExerciseState state) {
@@ -112,7 +73,7 @@ class _HangboardPageState extends State<HangboardPage>
                 child: ListView(
                   children: <Widget>[
                     titleTile(state),
-                    workoutTimerTile(state, timerBloc),
+                    workoutTimerTile(state, _timerBloc, _hangboardExerciseBloc),
                     IntrinsicHeight(
                       child: Row(
                         children: <Widget>[
@@ -139,7 +100,8 @@ class _HangboardPageState extends State<HangboardPage>
           child: Column(
             children: <Widget>[
               Text(
-                '${state.hangboardExercise.numberOfHands} Handed ${state.hangboardExercise.exerciseTitle}',
+                '${state.hangboardExercise.numberOfHands} Handed '
+                    '${state.hangboardExercise.exerciseTitle}',
                 softWrap: true,
                 style: TextStyle(
                   fontSize: 20.0,
@@ -152,79 +114,145 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Widget workoutTimerTile(HangboardExerciseLoaded state, TimerBloc timerBloc) {
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.width / 1.2,
-      ),
-      child: ExerciseTile(
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              top: 0.0,
-              bottom: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+  Widget workoutTimerTile(HangboardExerciseLoaded state, TimerBloc timerBloc,
+                          HangboardExerciseBloc hangboardExerciseBloc) {
+    return BlocBuilder(
+      bloc: timerBloc,
+      builder: (BuildContext context, TimerState state) {
+        AnimationController timerController;
+
+        if(state is TimerLoaded) {
+          timerController = AnimationController(
+              vsync: this,
+              value: state.controllerValue,
+              duration: Duration(seconds: state.timer.duration));
+
+          VoidCallback timerControllerCallback = setupTimerControllerCallback(
+              timerController, state.timer, timerBloc, hangboardExerciseBloc);
+
+          return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery
+                  .of(context)
+                  .size
+                  .width / 1.2,
+            ),
+            child: ExerciseTile(
+              child: Stack(
                 children: <Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.width / 1.4,
+                  Positioned(
+                    top: 0.0,
+                    bottom: 0.0,
+                    left: 0.0,
+                    right: 0.0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery
+                                .of(context)
+                                .size
+                                .width / 1.4,
+                          ),
+                          child: CircularTimer(
+                            timerController: timerController,
+                            timerControllerCallback: timerControllerCallback,
+                          ),
+                        ),
+                      ],
                     ),
-                    child: CircularTimer(),
+                  ),
+                  Positioned(
+                    bottom: 0.0,
+                    left: 0.0,
+                    right: 0.0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.refresh),
+                            onPressed: () {
+                              _timerBloc.dispatch(
+                                //Todo: come back to this
+                                  ReplaceWithRepTimer(
+                                      widget.hangboardExercise));
+//                        switchTimer(false, state.hangboardExercise.repDuration);
+//                        switchTimer(false, _timeOn);
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              IconData(
+                                0xe5d5,
+                                fontFamily: 'MaterialIcons',
+                                matchTextDirection: true,
+                              ),
+                              textDirection: TextDirection.rtl,
+                            ),
+                            onPressed: () {
+                              _timerBloc.dispatch(
+                                //Todo: come back to this
+                                  ReplaceWithRestTimer(
+                                      widget.hangboardExercise));
+//                        switchTimer(true, state.hangboardExercise.restDuration);
+//                        switchTimer(true, _timeOff);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            Positioned(
-              bottom: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.refresh),
-                      onPressed: () {
-                        _timerBloc.dispatch(
-                            ReplaceWithRepTimer(widget.hangboardExercise));
-//                        switchTimer(false, state.hangboardExercise.repDuration);
-//                        switchTimer(false, _timeOn);
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        IconData(
-                          0xe5d5,
-                          fontFamily: 'MaterialIcons',
-                          matchTextDirection: true,
-                        ),
-                        textDirection: TextDirection.rtl,
-                      ),
-                      onPressed: () {
-                        _timerBloc.dispatch(
-                            ReplaceWithRestTimer(widget.hangboardExercise));
-//                        switchTimer(true, state.hangboardExercise.restDuration);
-//                        switchTimer(true, _timeOff);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          );
+        }
+      },
     );
   }
 
+//todo: left off here 6/28 - looking pretty good, hopefully this is all it takes.
+  //todo: still need to figure out repComplete dispatching but I just want to start with timer for now.
+  VoidCallback setupTimerControllerCallback(AnimationController controller,
+                                            Timer timer,
+                                            TimerBloc timerBloc,
+                                            HangboardExerciseBloc hangboardExerciseBloc) {
+    if(timer.direction == TimerDirection.COUNTERCLOCKWISE) {
+      return () {
+        controller.reverse().whenComplete(() {
+          if(controller.status == AnimationStatus.dismissed) {
+            timerBloc.dispatch(TimerComplete(timer));
+//          hangboardExerciseBloc.dispatch(RepComplete());
+          }
+        }).catchError((error) {
+          print('Timer failed animating counterclockwise: $error');
+          controller.stop(canceled: false);
+//        startStopTimer(controller);
+        });
+      };
+    } else {
+      return () {
+        controller.forward().whenComplete(() {
+          if(controller.status == AnimationStatus.completed) {
+            timerBloc.dispatch(TimerComplete(timer));
+//          hangboardExerciseBloc.dispatch(RepComplete());
+          }
+        }).catchError((error) {
+          print('Timer failed animating clockwise: $error');
+          controller.stop(canceled: false);
+        });
+      };
+    }
+  }
+
   Widget hangsAndResistanceTile(HangboardExerciseLoaded state) {
+    var hangsPerSet = state.hangboardExercise.hangsPerSet;
     return Container(
       constraints:
-          BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2.0),
+      BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2.0),
       child: ExerciseTile(
         edgeInsets: const EdgeInsets.only(left: 8.0, top: 8.0, right: 4.0),
         child: Padding(
@@ -235,47 +263,47 @@ class _HangboardPageState extends State<HangboardPage>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  _hangsPerSet < _originalNumberOfHangs
+                  hangsPerSet < _originalNumberOfHangs
                       ? IconButton(
-                          icon: Icon(Icons.arrow_drop_up),
-                          onPressed: () {
-                            if (_hangsPerSet != _originalNumberOfHangs) {
-                              setState(() {
-                                _hangsPerSet++;
-                              });
-                              //TODO: stop timer
-                            }
-                          })
+                      icon: Icon(Icons.arrow_drop_up),
+                      onPressed: () {
+                        if(hangsPerSet != _originalNumberOfHangs) {
+                          //TODO: stop timer
+                          _hangboardExerciseBloc
+                              .dispatch(IncreaseNumberOfHangs());
+                        }
+                      })
                       : IconButton(
-                          onPressed: () => null,
-                          icon: Icon(
-                            Icons.arrow_drop_up,
-                            color: Theme.of(context).primaryColorLight,
-                          ),
-                        ),
+                    // Placeholder button that does nothing
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_up,
+                      color: Theme.of(context).primaryColorLight,
+                    ),
+                  ),
                   Text(
-                    '$_hangsPerSet',
+                    '$hangsPerSet Hangs',
                     style: TextStyle(fontSize: 30.0),
                   ),
-                  _hangsPerSet > 0
+                  hangsPerSet > 0
                       ? IconButton(
-                          icon: Icon(Icons.arrow_drop_down),
-                          onPressed: () {
-                            if (_hangsPerSet != 0) {
-                              setState(() {
-                                _hangsPerSet--;
-                              });
-                              //TODO: stop timer
-                            }
-                          },
-                        )
+                    icon: Icon(Icons.arrow_drop_down),
+                    onPressed: () {
+                      if(hangsPerSet != 0) {
+                        //TODO: stop timer
+                        _hangboardExerciseBloc
+                            .dispatch(DecreaseNumberOfHangs());
+                      }
+                    },
+                  )
                       : IconButton(
-                          onPressed: () => null,
-                          icon: Icon(
-                            Icons.arrow_drop_down,
-                            color: Theme.of(context).primaryColorLight,
-                          ),
-                        ),
+                    // Placeholder button that does nothing
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: Theme.of(context).primaryColorLight,
+                    ),
+                  ),
                 ],
               ),
               Row(
@@ -283,8 +311,10 @@ class _HangboardPageState extends State<HangboardPage>
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      StringFormatUtils.formatHangsAndResistance(_hangsPerSet,
-                          _resistance, _resistanceMeasurementSystem),
+                      StringFormatUtils.formatHangsAndResistance(
+                          hangsPerSet,
+                          state.hangboardExercise.resistance.toInt(),
+                          state.hangboardExercise.resistanceMeasurementSystem),
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 18.0),
                     ),
@@ -299,9 +329,11 @@ class _HangboardPageState extends State<HangboardPage>
   }
 
   Widget setsTile(HangboardExerciseLoaded state) {
+    var numberOfSets = state.hangboardExercise.numberOfSets;
+
     return Container(
       constraints:
-          BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2.0),
+      BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2.0),
       child: ExerciseTile(
         edgeInsets: const EdgeInsets.only(left: 4.0, top: 8.0, right: 8.0),
         child: Padding(
@@ -313,48 +345,46 @@ class _HangboardPageState extends State<HangboardPage>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  _numberOfSets < _originalNumberOfSets
+                  numberOfSets < _originalNumberOfSets
                       ? IconButton(
-                          icon: Icon(Icons.arrow_drop_up),
-                          onPressed: () {
-                            if (_numberOfSets != _originalNumberOfSets) {
-                              setState(() {
-                                _numberOfSets++;
-                              });
-                              //TODO: stop timer
-                            }
-                          },
-                        )
+                    icon: Icon(Icons.arrow_drop_up),
+                    onPressed: () {
+                      if(numberOfSets != _originalNumberOfSets) {
+                        //TODO: stop timer
+                        _hangboardExerciseBloc
+                            .dispatch(IncreaseNumberOfSets());
+                      }
+                    },
+                  )
                       : IconButton(
-                          onPressed: () => null,
-                          icon: Icon(
-                            Icons.arrow_drop_up,
-                            color: Theme.of(context).primaryColorLight,
-                          ),
-                        ),
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_up,
+                      color: Theme.of(context).primaryColorLight,
+                    ),
+                  ),
                   Text(
-                    '$_numberOfSets',
+                    '$numberOfSets Sets',
                     style: TextStyle(fontSize: 30.0),
                   ),
-                  _numberOfSets > 0
+                  numberOfSets > 0
                       ? IconButton(
-                          icon: Icon(Icons.arrow_drop_down),
-                          onPressed: () {
-                            if (_numberOfSets != 0) {
-                              setState(() {
-                                _numberOfSets--;
-                                //TODO: stop timer
-                              });
-                            }
-                          },
-                        )
+                    icon: Icon(Icons.arrow_drop_down),
+                    onPressed: () {
+                      if(numberOfSets != 0) {
+                        //TODO: stop timer
+                        _hangboardExerciseBloc
+                            .dispatch(DecreaseNumberOfSets());
+                      }
+                    },
+                  )
                       : IconButton(
-                          onPressed: () => null,
-                          icon: Icon(
-                            Icons.arrow_drop_down,
-                            color: Theme.of(context).primaryColorLight,
-                          ),
-                        ),
+                    onPressed: () => null,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: Theme.of(context).primaryColorLight,
+                    ),
+                  ),
                 ],
               ),
               Row(
@@ -362,7 +392,7 @@ class _HangboardPageState extends State<HangboardPage>
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      _numberOfSets == 1 ? ' set' : ' sets',
+                      numberOfSets == 1 ? ' set' : ' sets',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 18.0),
                     ),
@@ -397,7 +427,7 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  /// Timer should only know about rep OR rest, not both
+  /*/// Timer should only know about rep OR rest, not both
   void switchTimer(bool resetForward, int time) {
     setState(() {
       _workoutTimer = WorkoutTimer(
@@ -410,15 +440,17 @@ class _HangboardPageState extends State<HangboardPage>
         time: time,
       );
     });
-  }
+  }*/
 
-  void notifyParentReverseComplete() {
-    setState(() {
-      _hangsPerSet = _hangsPerSet > 0 ? (_hangsPerSet - 1) : 0;
-
-      /// Start time between sets and provide callback that decrements number of
-      /// sets as well as resets number of hangs
-      if (_hangsPerSet == 0) {
+  /// Start time between sets and provide callback that decrements number of
+  /// sets as well as resets number of hangs
+  /// TODO: Figure this out - global listener? cancel at end of if block? both seem weird
+  void setCompleteListener() {
+//    _hangsPerSet = _hangsPerSet > 0 ? (_hangsPerSet - 1) : 0;
+    StreamSubscription hangboardExerciseListener = _hangboardExerciseBloc.state
+        .listen((state) {
+      if(state is HangboardExerciseLoaded &&
+          state.hangboardExercise.numberOfSets == 0) {
         Scaffold.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -433,6 +465,32 @@ class _HangboardPageState extends State<HangboardPage>
             ),
           ),
         );
+      }
+    });
+    /*BlocListener(
+      bloc: _hangboardExerciseBloc,
+      listener: (BuildContext context, HangboardExerciseState state) {
+
+      },
+    );*/
+  }
+//TODO: need to make this a streamListener
+/*Scaffold.of(context).showSnackBar(SnackBar(
+  duration: Duration(days: 1),
+  content: Row(),
+  action: SnackBarAction(
+  label: 'Next Exercise',
+  onPressed: widget.nextPageCallback,
+  ),
+  ));*/
+
+//  Widget
+
+/*void notifyParentReverseComplete() {
+    setState(() {
+      
+
+      
         _workoutTimer = WorkoutTimer(
           notifyParentReverseComplete: notifyParentReverseComplete,
           notifyParentForwardComplete:
@@ -457,9 +515,9 @@ class _HangboardPageState extends State<HangboardPage>
       // return AlertDialog(content: Text('Set Finished!'),);
       // start timebetweensets if applicable
     });
-  }
+  }*/
 
-  void notifyParentForwardComplete() {
+/*void notifyParentForwardComplete() {
     setState(() {
       _workoutTimer = WorkoutTimer(
         notifyParentReverseComplete: notifyParentReverseComplete,
@@ -471,9 +529,9 @@ class _HangboardPageState extends State<HangboardPage>
         time: _timeOn,
       );
     });
-  }
+  }*/
 
-  void notifyParentForwardTimeBetweenSetsComplete() {
+/*void notifyParentForwardTimeBetweenSetsComplete() {
     setState(() {
       _numberOfSets = _numberOfSets > 0 ? _numberOfSets - 1 : 0;
 
@@ -488,7 +546,7 @@ class _HangboardPageState extends State<HangboardPage>
           startTimer: false,
           time: 0,
         );
-        //TODO: still want to add banner
+        //TODO: need to make this a streamListener
         Scaffold.of(context).showSnackBar(SnackBar(
           duration: Duration(days: 1),
           content: Row(),
@@ -511,8 +569,8 @@ class _HangboardPageState extends State<HangboardPage>
         );
       }
     });
-  }
-
+  }*/
+/*
 //TODO: should this be separated from the widget in a dao?
   void getParams(Map<String, dynamic> exerciseParameters) {
     _depth = getDoubleVal(exerciseParameters, 'depth');
@@ -530,9 +588,10 @@ class _HangboardPageState extends State<HangboardPage>
     _timeOn = getIntVal(exerciseParameters, 'timeOn');
     _timeOff = getIntVal(exerciseParameters, 'timeOff');
     _numberOfHands = getIntVal(exerciseParameters, 'numberOfHands');
-  }
+  }*/
 
-  int getIntVal(Map<String, dynamic> exerciseParameters, String fieldName) {
+//todo: hopefully won't need these but leaving them jic
+/*int getIntVal(Map<String, dynamic> exerciseParameters, String fieldName) {
     try {
       var intVal = exerciseParameters[fieldName];
       if (intVal is int) return intVal;
@@ -564,5 +623,5 @@ class _HangboardPageState extends State<HangboardPage>
       print('Unable to find $fieldName: $e');
     }
     return '';
-  }
+  }*/
 }

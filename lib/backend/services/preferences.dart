@@ -20,6 +20,10 @@ class Preferences {
         timerStorageKey, json.encode(timerEntity.toJson()));
   }
 
+  void removeTimerPreferences(String timerStorageKey) {
+    sharedPreferences.getKeys().remove(timerStorageKey);
+  }
+
   /// SINGLETON
   static final Preferences _preferences = Preferences._internal();
 

@@ -7,9 +7,14 @@ abstract class HangboardExerciseEvent extends Equatable {
   HangboardExerciseEvent([List props = const []]) : super(props);
 }
 
-class LoadExercise extends HangboardExerciseEvent {
+class LoadHangboardExercise extends HangboardExerciseEvent {
+  final HangboardExercise hangboardExercise;
+
+  LoadHangboardExercise(this.hangboardExercise) : super([hangboardExercise]);
+
   @override
-  String toString() => 'LoadHangboardExercise';
+  String toString() =>
+      'LoadHangboardExercise { hangboardExercise: $hangboardExercise }';
 }
 
 class AddHangboardExercise extends HangboardExerciseEvent {

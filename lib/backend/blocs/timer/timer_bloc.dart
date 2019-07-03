@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:bloc/bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
-import 'package:crux/backend/blocs/timer/timer_state.dart';
-import 'package:bloc/bloc.dart';
 import 'package:crux/backend/blocs/timer/timer_event.dart';
+import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:crux/backend/models/timer/timer.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/backend/services/preferences.dart';
@@ -18,7 +18,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   /// Listens for [HangboardExercise] to be created before dispatching to
   /// [LoadTimer].
   TimerBloc({@required this.hangboardExerciseBloc}) {
-    hangboardExerciseSubscription = hangboardExerciseBloc.state.listen((state) {
+    hangboardExerciseSubscription = hangboardExerciseBloc.state.listen((
+        state) { //TODO: how often will this rebuild???
       if(state is HangboardExerciseLoaded) {
         dispatch(LoadTimer(state.hangboardExercise));
       }
@@ -47,17 +48,26 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
   }
 
-  /// Looks for a [Timer] in the [SharedPreferences] first. If none is present,
-  /// creates a new [Timer] from the passed in event's [HangboardExercise].
+  /// Loading the [Timer] assumes that this is the first time the user has
+  /// interacted with this particular [Timer] since its workout has been loaded.
+  /// [SharedPreferences] are checked and if none are found a [Timer] is created
+  /// based on the [HangboardExerciseWorkout]. This [Timer] defaults to animating
+  /// counterclockwise and starting with a controller value of 1.0 since these
+  /// values signify a 'Rep'.
+  ///
+  /// If [SharedPreferences] are found, than the user has interacted with this
+  /// [Timer] before and navigated away. The appropriate controller value is
+  /// calculated based on how much time has elapsed and is passed back to
+  /// the ExercisePage.
   Stream<TimerState> _mapLoadTimerToState(LoadTimer event) async* {
     try {
       final timerEntity = Preferences().getTimerPreferences(
           event.hangboardExercise.exerciseTitle);
 
       if(timerEntity != null) {
-        yield TimerLoaded(
-            Timer.fromEntity(timerEntity)
-        );
+        Timer timer = Timer.fromEntity(timerEntity);
+        double controllerValue = determineControllerValue(timer);
+        yield TimerLoaded(timer, controllerValue);
       } else {
         yield TimerLoaded(
           Timer(
@@ -66,9 +76,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
             TimerDirection.COUNTERCLOCKWISE,
             false,
             0,
-            0,
             0.0,
           ),
+            0.0
         );
       }
     } catch(exception) {
@@ -76,6 +86,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       yield TimerNotLoaded();
     }
   }
+
 
   Stream<TimerState> _mapReplaceWithRepTimerToState(
       ReplaceWithRepTimer event) async* {
@@ -86,9 +97,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           TimerDirection.COUNTERCLOCKWISE,
           false,
           0,
-          0,
           0.0,
         ),
+        1.0
     );
   }
 
@@ -101,9 +112,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           TimerDirection.CLOCKWISE,
           false,
           0,
-          0,
           0.0,
         ),
+        0.0
     );
   }
 
@@ -116,9 +127,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           TimerDirection.CLOCKWISE,
           false,
           0,
-          0,
           0.0,
         ),
+        0.0
     );
   }
 
@@ -142,194 +153,48 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         timer.storageKey, timer.toEntity());
   }
 
+  double determineControllerValue(Timer timer) {
+    if(timer.previouslyRunning) {
+      return valueDifference(timer);
+    } else {
+      return timer.controllerValueOnExit;
+    }
+  }
+
+  /// Finds the difference in time from the saved ending system time and the
+  /// current system time and divides that by the starting duration to get the
+  /// new value accounting for elapsed time.
+  double valueDifference(Timer timer) {
+    int currentTimeMillis = DateTime
+        .now()
+        .millisecondsSinceEpoch;
+
+    int elapsedDuration = currentTimeMillis - timer.deviceTimeOnExit;
+
+    double timerDurationOnExit =
+        timer.controllerValueOnExit * (timer.duration * 1000.0);
+
+    double value;
+
+    /// If animating forward and the calculated value difference is less than 0,
+    /// return 0.0 as the value (can't have a negative value).
+    /// Else if difference is greater than 1, return 1.
+    /// Finally, return calculated value if neither of the above are true.
+    if(timer.direction == TimerDirection.CLOCKWISE) {
+      value =
+          (timerDurationOnExit + elapsedDuration) / (timer.duration * 1000.0);
+      if(value <= 0.0) return 0.0;
+    } else {
+      value =
+          (timerDurationOnExit - elapsedDuration) / (timer.duration * 1000.0);
+      if(value >= 1) return 1.0;
+    }
+    return value;
+  }
+
   @override
   void dispose() {
     hangboardExerciseSubscription.cancel();
     super.dispose();
   }
 }
-
-
-/// Gets the difference in time if timer was left running
-/// Gets 0.0 or 1.0 if time was exceeded in either direction
-/// Get value of animation if stopped
-double value = getValueIfTimerPreviouslyRunning();
-
-/// Resets value to 0.0 or 1.0 if one of the switch timer buttons was pressed
-value
-
-=
-
-checkIfResetTimer(value);
-
-/// Creates controller with appropriate animation value determined above
-setupController(value);
-
-double getValueIfTimerPreviouslyRunning() {
-  if(_timerPreviouslyRunning) {
-    return valueDifference();
-  } else {
-    return _endValue;
-  }
-}
-
-/// Finds the difference in time from the saved ending system time and the
-/// current system time and divides that by the starting duration to get the
-/// new value accounting for elapsed time.
-double valueDifference() {
-  int currentTimeMillis = DateTime
-      .now()
-      .millisecondsSinceEpoch;
-  int elapsedDuration = currentTimeMillis - _endTimeMillis;
-  double endDuration = _endValue * (_currentTime * 1000.0);
-  double value;
-
-  /// If animating forward and the calculated value difference is less than 0,
-  /// return 0.0 as the value (can't have a negative value).
-  /// Else if difference is greater than 1, return 1.
-  /// Finally, return calculated value if neither of the above are true.
-  if(_forwardAnimation) {
-    value = (endDuration + elapsedDuration) / (_currentTime * 1000.0);
-    if(value <= 0.0) return 0.0;
-  } else {
-    value = (endDuration - elapsedDuration) / (_currentTime * 1000.0);
-    if(value >= 1) return 1.0;
-  }
-  return value;
-}
-
-/// Creates an AnimationController based on whether or not the timer should
-/// be animating forward or not. The duration is the rest duration if
-/// forward, or rep duration if reverse. Value is calculated if the timer
-/// was left running or retrieved from memory if stopped.
-void setupController(double value) {
-//    _controller = new AnimationController(
-//        vsync: this, value: value, duration: Duration(seconds: _currentTime));
-
-  _controller.value = value;
-  _controller.duration = Duration(seconds: _currentTime);
-  if(_timerPreviouslyRunning) {
-    setupControllerCallback(_controller);
-  }
-}
-
-/// Checks if switch flag was passed in - this should signal a new build of the
-/// timer with the passed in new time and opposite direction.
-///
-/// Since the timer only rebuilds when being switched, the [switchTimer] flag
-/// will always start false at initialization and become true from the first
-/// user switch up until it is disposed of.
-/// The only flag that will change is the [switchForward] flag each time the
-/// user switches times.
-///
-/// If the timer finished, the callback uses the [switchTimer] method which
-/// may also pass in the [startTimer] flag. This signals that the timer should
-/// start up immediately to keep the workout going smoothly.
-double checkIfResetTimer(double value) {
-  if(widget.switchTimer) {
-//      double value;
-    if(widget.switchForward) {
-      value = 0.0;
-    } else {
-      value = 1.0;
-    }
-    /*if(!widget.startTimer)
-        _timerPreviouslyRunning = false;*/
-
-    _currentTime = widget.time;
-    _forwardAnimation = widget.switchForward;
-//      _controller.value = value;
-//      _controller.duration = Duration(seconds: _currentTime);
-  }
-  return value;
-}
-
-
-/// Controls starting or stopping the [_controller] and determines which
-/// way it should animate using the boolean [_forwardAnimation], where true is
-/// forward and false is reverse. This method is passed to the onClickEvent
-/// of the [WorkoutTimer].
-///
-/// When the animation completes, a notification is sent to the parent
-/// [WorkoutScreen] widget to tell it that it has finished.
-///
-/// Additionally, the [SharedPreferences] get nulled out so that future timers
-/// don't try to read old values.
-void startStopTimer(AnimationController controller) {
-  if(controller != null) {
-    if(controller.isAnimating) {
-      setTimerPreviouslyRunning(false);
-      controller.stop(canceled: false);
-    } else {
-      setTimerPreviouslyRunning(true);
-      setupControllerCallback(controller);
-    }
-  }
-}
-
-void setupControllerCallback(AnimationController controller) {
-  if(!_forwardAnimation) {
-    controller.reverse().whenComplete(() {
-      if(controller.status == AnimationStatus.dismissed) {
-        _preferences.setTimerPreviouslyRunning(true);
-        setTime(null);
-        setEndValue(null);
-        setEndTimeMillis(null);
-        if(widget.notifyParentReverseComplete != null) {
-          widget.notifyParentReverseComplete();
-        }
-      }
-    }).catchError((error) {
-      print('Timer failed animating in reverse: $error');
-      startStopTimer(_controller);
-    });
-  } else {
-    controller.forward().whenComplete(() {
-      if(controller.status == AnimationStatus.completed) {
-        setTimerPreviouslyRunning(true);
-        setTime(null);
-        setEndValue(null);
-        setEndTimeMillis(null);
-        if(widget.notifyParentForwardComplete != null) {
-          widget.notifyParentForwardComplete();
-        }
-      }
-    }).catchError((error) {
-      print('Timer failed animating forward: $error');
-      startStopTimer(_controller);
-    });
-  }
-}
-
-//TODO: make this do more
-void handleError(Error error) {
-  startStopTimer(_controller);
-}
-
-/// Resets the timer based on its current status. This method is passed to the
-/// onLongPress event of the circular timer.
-void resetTimer(AnimationController controller) {
-  setTimerPreviouslyRunning(false);
-  if(controller.isAnimating) {
-    controller.stop(canceled: false);
-    if(controller.status == AnimationStatus.reverse) {
-      setState(() {
-        controller.value = 1.0;
-      });
-    } else if(controller.status == AnimationStatus.forward) {
-      setState(() {
-        controller.value = 0.0;
-      });
-    }
-  } else {
-    if(controller.status == AnimationStatus.reverse) {
-      setState(() {
-        controller.value = 1.0;
-      });
-    } else if(controller.status == AnimationStatus.forward) {
-      setState(() {
-        controller.value = 0.0;
-      });
-    }
-  }
-}}

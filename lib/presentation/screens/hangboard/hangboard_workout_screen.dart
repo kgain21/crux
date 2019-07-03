@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
+import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/presentation/shared_layouts/app_bar.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
@@ -9,12 +12,13 @@ import 'package:flutter/widgets.dart';
 class HangboardWorkoutScreen extends StatefulWidget {
   final String title;
   final BaseAuth auth;
-  final Firestore firestore;
+  final HangboardWorkoutsRepository firestoreHangboardWorkoutsRepository;
 
   @override
   State<StatefulWidget> createState() => new _HangboardWorkoutScreenState();
 
-  HangboardWorkoutScreen({this.title, this.auth, this.firestore});
+  HangboardWorkoutScreen(
+      {this.title, this.auth, this.firestoreHangboardWorkoutsRepository});
 }
 
 class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
@@ -22,7 +26,7 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar:
-          SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
+      SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
       body: Stack(
         children: <Widget>[
           Column(
@@ -32,14 +36,17 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
                 padding: const EdgeInsets.only(top: 16.0),
                 child: Text(
                   'Your Hangboard Workouts:',
-                  style: Theme.of(context).textTheme.title,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .title,
                   textAlign: TextAlign.start,
                 ),
               ),
               StreamBuilder<QuerySnapshot>(
                 stream: Firestore.instance.collection('/hangboard').snapshots(),
                 builder: (scaffoldContext, snapshot) {
-                  switch (snapshot.connectionState) {
+                  switch(snapshot.connectionState) {
                     case ConnectionState.waiting:
                     case ConnectionState.none:
                       return Padding(
@@ -85,7 +92,7 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
     );
   }
 
-  void saveWorkoutToFirebase(String workoutTitle,
+  /*void saveWorkoutToFirebase(String workoutTitle,
                              BuildContext scaffoldContext) {
     CollectionReference collectionReference =
     Firestore.instance.collection('hangboard');
@@ -99,7 +106,7 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
         exerciseSavedSnackbar(scaffoldContext);
       }
     });
-  }
+  }*/
 
   Future<void> _exerciseExistsAlert(BuildContext scaffoldContext,
                                     String workoutTitle) async {
@@ -198,7 +205,8 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
     );
   }
 
-  void addWorkoutDialog(BuildContext scaffoldContext) {
+  void addWorkoutDialog(BuildContext scaffoldContext,
+                        HangboardWorkout hangboardWorkout) {
     showDialog(
       context: context,
       builder: (context) {
@@ -229,6 +237,14 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
                         .accentColor),
                   ),
                   onPressed: () {
+                    widget.firestoreHangboardWorkoutsRepository.addNewWorkout(
+                        hangboardWorkout).then((workoutAdded) {
+                      if(workoutAdded) {
+                        exerciseSavedSnackbar(scaffoldContext);
+                      } else {
+                        _exerciseExistsAlert(scaffoldContext, workoutTitle);
+                      }
+                    })
                     saveWorkoutToFirebase(
                         controller.text, scaffoldContext);
                     Navigator.of(context).pop();

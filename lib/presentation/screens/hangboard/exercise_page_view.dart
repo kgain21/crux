@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/presentation/widgets/dots_indicator.dart';
 import 'package:crux/presentation/widgets/exercise_form.dart';
-import 'package:crux/presentation/widgets/hangboard_page.dart';
+import 'package:crux/presentation/widgets/hangboard_page_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -281,8 +281,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         child: HangboardPage(
           workoutTitle: widget.title,
           index: index,
-          exerciseParameters: Map<String, dynamic>.from(document.data),
           nextPageCallback: nextPageCallback,
+          documentReference: document.reference,
         ),
       );
     } else if (index == _currentPageValue.floor() + 1) {
@@ -292,8 +292,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         child: HangboardPage(
           workoutTitle: widget.title,
           index: index,
-          exerciseParameters: Map<String, dynamic>.from(document.data),
           nextPageCallback: nextPageCallback,
+          documentReference: document.reference,
         ),
       );
     }
@@ -303,8 +303,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         HangboardPage(
           workoutTitle: widget.title,
           index: index,
-          exerciseParameters: Map<String, dynamic>.from(document.data),
           nextPageCallback: nextPageCallback,
+          documentReference: document.reference,
         ),
         _zoomOut
             ? Padding(

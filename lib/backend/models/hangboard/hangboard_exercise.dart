@@ -1,17 +1,22 @@
-class HangboardExercise {
+import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart';
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
+
+@immutable
+class HangboardExercise extends Equatable {
   final String exerciseTitle;
   final String depthMeasurementSystem;
   final String resistanceMeasurementSystem;
   final int numberOfHands;
-  final String holdType; // Formerly hold
+  final String holdType;
   final String fingerConfiguration;
-  final double holdDepth; // formerly depth
+  final double holdDepth;
   final int hangsPerSet;
   final int numberOfSets;
   final double resistance;
   final int breakDuration;
-  final int repDuration; // Formerly timeOn
-  final int restDuration; // Formerly timeOff
+  final int repDuration;
+  final int restDuration;
 
   HangboardExercise(this.exerciseTitle,
                     this.depthMeasurementSystem,
@@ -25,40 +30,42 @@ class HangboardExercise {
                     this.resistance,
                     this.breakDuration,
                     this.repDuration,
-                    this.restDuration);
+                    this.restDuration,);
 
-  /*TODO: going to hold off on these for now but may need in future
-  @override
-  int get hashCode =>
-      complete.hashCode ^ task.hashCode ^ note.hashCode ^ id.hashCode;
+  //TODO: left off here 7/3 - updating workoutScreen and repository methods to
+  //todo: add new workouts. Also updating models/entities as needed
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is ExerciseEntity &&
-              runtimeType == other.runtimeType &&
-              complete == other.complete &&
-              task == other.task &&
-              note == other.note &&
-              id == other.id;
-  */
 
-  Map<String, Object> toJson() {
-    return {
-      "exerciseTitle": exerciseTitle,
-      "depthMeasurementSystem": depthMeasurementSystem,
-      "resistanceMeasurementSystem": resistanceMeasurementSystem,
-      "numberOfHands": numberOfHands,
-      "holdType": holdType,
-      "fingerConfiguration": fingerConfiguration,
-      "holdDepth": holdDepth,
-      "hangsPerSet": hangsPerSet,
-      "numberOfSets": numberOfSets,
-      "resistance": resistance,
-      "breakDuration": breakDuration,
-      "repDuration": repDuration,
-      "restDuration": restDuration,
-    };
+  HangboardExercise copyWith({
+                               String exerciseTitle,
+                               String depthMeasurementSystem,
+                               String resistanceMeasurementSystem,
+                               int numberOfHands,
+                               String holdType,
+                               String fingerConfiguration,
+                               double holdDepth,
+                               int hangsPerSet,
+                               int numberOfSets,
+                               double resistance,
+                               int breakDuration,
+                               int repDuration,
+                               int restDuration,
+                             }) {
+    return HangboardExercise(
+      exerciseTitle,
+      depthMeasurementSystem,
+      resistanceMeasurementSystem,
+      numberOfHands,
+      holdType,
+      fingerConfiguration,
+      holdDepth,
+      hangsPerSet,
+      numberOfSets,
+      resistance,
+      breakDuration,
+      repDuration,
+      restDuration,
+    );
   }
 
   @override
@@ -79,21 +86,39 @@ class HangboardExercise {
         '}';
   }
 
-  static HangboardExercise fromJson(Map<String, Object> json) {
+  HangboardExerciseEntity toEntity() {
+    return HangboardExerciseEntity(
+      exerciseTitle,
+      depthMeasurementSystem,
+      resistanceMeasurementSystem,
+      numberOfHands,
+      holdType,
+      fingerConfiguration,
+      holdDepth,
+      hangsPerSet,
+      numberOfSets,
+      resistance,
+      breakDuration,
+      repDuration,
+      restDuration,
+    );
+  }
+
+  HangboardExercise fromEntity(HangboardExerciseEntity entity) {
     return HangboardExercise(
-      json["exerciseTitle"] as String,
-      json["depthMeasurementSystem"] as String,
-      json["resistanceMeasurementSystem"] as String,
-      json["numberOfHands"] as int,
-      json["holdType"] as String,
-      json["fingerConfiguration"] as String,
-      json["holdDepth"] as double,
-      json["hangsPerSet"] as int,
-      json["numberOfSets"] as int,
-      json["resistance"] as double,
-      json["breakDuration"] as int,
-      json["repDuration"] as int,
-      json["restDuration"] as int,
+      entity.exerciseTitle,
+      entity.depthMeasurementSystem,
+      entity.resistanceMeasurementSystem,
+      entity.numberOfHands,
+      entity.holdType,
+      entity.fingerConfiguration,
+      entity.holdDepth,
+      entity.hangsPerSet,
+      entity.numberOfSets,
+      entity.resistance,
+      entity.breakDuration,
+      entity.repDuration,
+      entity.restDuration,
     );
   }
 }

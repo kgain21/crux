@@ -7,7 +7,7 @@ class TimerEntity {
   final TimerDirection direction;
   final bool previouslyRunning;
   final int deviceTimeOnExit; // In epoch milliseconds
-  final int deviceTimeOnReturn; // In epoch milliseconds
+//  final int deviceTimeOnReturn; // In epoch milliseconds
   final double controllerValueOnExit; // Value of animationController
 
   TimerEntity(this.storageKey,
@@ -15,15 +15,14 @@ class TimerEntity {
               this.direction,
               this.previouslyRunning,
               this.deviceTimeOnExit,
-              this.deviceTimeOnReturn,
+              //    this.deviceTimeOnReturn,
               this.controllerValueOnExit,);
 
   @override
   String toString() {
     return 'TimerEntity { storageKey: $storageKey, duration: $duration, '
         'direction: $direction, previouslyRunning: $previouslyRunning,'
-        'deviceTimeOnExit: $deviceTimeOnExit, deviceTimeOnReturn: $deviceTimeOnReturn,'
-        'controllerValueOnExit: $controllerValueOnExit';
+        'deviceTimeOnExit: $deviceTimeOnExit, controllerValueOnExit: $controllerValueOnExit';
   }
 
   Map<String, Object> toJson() {
@@ -33,7 +32,7 @@ class TimerEntity {
       "direction": direction,
       "previouslyRunning": previouslyRunning,
       "deviceTimeOnExit": deviceTimeOnExit,
-      "deviceTimeOnReturn": deviceTimeOnReturn,
+//      "deviceTimeOnReturn": deviceTimeOnReturn,
       "controllerValueOnExit": controllerValueOnExit,
     };
   }
@@ -48,7 +47,7 @@ class TimerEntity {
       json["direction"] as TimerDirection,
       json["previouslyRunning,"] as bool,
       json["deviceTimeOnExit,"] as int,
-      json["deviceTimeOnReturn,"] as int,
+//      json["deviceTimeOnReturn,"] as int,
       json["controllerValueOnExit,"] as double,
     );
   }

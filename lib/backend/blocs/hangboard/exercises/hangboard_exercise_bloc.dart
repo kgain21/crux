@@ -6,12 +6,13 @@ import 'package:meta/meta.dart';
 
 class HangboardExerciseBloc
     extends Bloc<HangboardExerciseEvent, HangboardExerciseState> {
-//  final Preferences preferences;
   final FirestoreHangboardWorkoutsRepository firestore;
   final String workoutTitle;
 
-  HangboardExerciseBloc(
-      { /*@required this.preferences,*/ @required this.firestore, this.workoutTitle,});
+  HangboardExerciseBloc({
+                          @required this.firestore,
+                          this.workoutTitle,
+                        });
 
   @override
   HangboardExerciseState get initialState => HangboardExerciseLoading();
@@ -19,8 +20,8 @@ class HangboardExerciseBloc
   @override
   Stream<HangboardExerciseState> mapEventToState(
       HangboardExerciseEvent event) async* {
-    if(event is LoadExercise) {
-      yield* _mapLoadHangboardExerciseToState();
+    if(event is LoadHangboardExercise) {
+      yield* _mapLoadHangboardExerciseToState(event);
     } else if(event is AddHangboardExercise) {
       yield* _mapAddHangboardExerciseToState(event);
     } else if(event is DeleteHangboardExercise) {
@@ -34,11 +35,11 @@ class HangboardExerciseBloc
     }
   }
 
-  Stream<HangboardExerciseState> _mapLoadHangboardExerciseToState() async* {
+  //TODO: do i even need this? seems like I could just pass the exercise to the hbpage instead
+  Stream<HangboardExerciseState> _mapLoadHangboardExerciseToState(
+      LoadHangboardExercise event) async* {
     try {
-      final hangboardExercise = firestore.exercises(workoutTitle);
-      //todo: left off here 6/10 working on getting data from firebase and turning that into a hangboardExercise
-      yield HangboardExerciseLoaded();
+      yield HangboardExerciseLoaded(event.hangboardExercise);
     } catch(_) {
       yield HangboardExerciseNotLoaded();
     }

@@ -1,3 +1,4 @@
+/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
 import 'package:crux/presentation/widgets/workout_timer.dart';
@@ -86,7 +87,8 @@ class _HangboardPageState extends State<HangboardPage> {
               ],
             ),
           ),
-          /*Stack(
+          */
+/*Stack(
             children: <Widget>[
               _exerciseFinished
                   ? Banner(
@@ -95,7 +97,8 @@ class _HangboardPageState extends State<HangboardPage> {
                     )
                   : null,
             ].where(notNull).toList(),
-          ),*/
+          ),*/ /*
+
           notesTile(),
         ],
       ),
@@ -556,3 +559,4 @@ class _HangboardPageState extends State<HangboardPage> {
     return '';
   }
 }
+*/

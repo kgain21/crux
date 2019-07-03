@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/services/preferences.dart';
 import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'exercise_tile.dart';
 
@@ -100,19 +100,20 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                         Navigator.of(context).pop();
                         // TODO: can (should?) be extracted to GCF
                         // https://firebase.google.com/docs/firestore/solutions/delete-collections
-                        collectionRef.getDocuments().then((snapshot) {
+                        /*collectionRef.getDocuments().then((snapshot) {
                           snapshot.documents.forEach(
                               (document) => document.reference.delete());
                           Firestore.instance
                               .document('hangboard/$workoutTitle')
                               .delete();
-                        });
+                        });*/
 
                         /// Clear out sharedPrefs with workout deletion
                         /// //TODO: make sure this works
-                        SharedPreferences.getInstance().then((preferences) {
+                        /*SharedPreferences.getInstance().then((preferences) {
                           preferences.getKeys().remove(workoutTitle);
-                        });
+                        });*/
+                        Preferences().getTimerPreferences(workoutTitle);
                       },
                     )
                   ],

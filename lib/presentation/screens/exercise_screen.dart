@@ -1,9 +1,11 @@
+/*
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/presentation/shared_layouts/app_bar.dart';
 import 'package:crux/presentation/shared_layouts/fab_bottom_app_bar.dart';
 import 'package:crux/presentation/widgets/exercise_form.dart';
 import 'package:crux/presentation/widgets/hangboard_page.dart';
+import 'package:crux/presentation/widgets/hangboard_page_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -99,7 +101,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           },
         ),
         floatingActionButton: FloatingActionButton(
-          /*onPressed: () {
+          */
+/*onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) {
@@ -111,7 +114,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 );
               }),
             );
-          },*/
+          },*/ /*
+
           onPressed: () {
             showOverlay(context);
           },
@@ -145,9 +149,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
     return OverlayEntry(
         builder: (context) => Positioned(
-              left: size.width / /*6.0*/ 100.0,
+              left: size.width / */
+/*6.0*/ /*
+ 100.0,
               top: size.height / 3.0,
-              width: size.width /* / 1.2*/,
+              width: size.width */
+/* / 1.2*/ /*
+,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxHeight: size.height / 2.0,
@@ -163,3 +171,4 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }
+*/

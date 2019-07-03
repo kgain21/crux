@@ -21,6 +21,7 @@ class TimerLoading extends TimerState {
 
 class TimerLoaded extends TimerState {
   final Timer timer;
+  final double controllerValue;
 
 //  final String storageKey; // Storage key for SharedPreferences
 //  final int duration;
@@ -30,8 +31,10 @@ class TimerLoaded extends TimerState {
 //  final int deviceTimeOnReturn; // In epoch milliseconds
 //  final double controllerValueOnExit; // Value of animationController
 
-  TimerLoaded(this.timer) : super([
-    timer
+  TimerLoaded(this.timer,
+              this.controllerValue,) : super([
+    timer,
+    controllerValue,
   ]);
 
   @override
