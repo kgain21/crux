@@ -45,7 +45,6 @@ class CircularTimer extends StatelessWidget {
             ),
           );
         } else {
-          //TODO: figure out if this is what i want
           return loadingScreen();
         }
       },
@@ -172,94 +171,4 @@ class CircularTimer extends StatelessWidget {
       }
     }
   }
-
-//  //TODO: make this do more
-//  void handleError(Error error) {
-//    startStopTimer(timer);
-//  }
-
-/*//TODO: STEP 1 - in timer bloc right now
-  double determineControllerValue(TimerLoaded state) {
-    if (state.timer.previouslyRunning) {
-      return valueDifference(state.timer);
-    } else {
-      return state.timer.controllerValueOnExit;
-    }
-  }
-
-  /// Finds the difference in time from the saved ending system time and the
-  /// current system time and divides that by the starting duration to get the
-  /// new value accounting for elapsed time.
-  double valueDifference(Timer timer) {
-    int currentTimeMillis = DateTime.now().millisecondsSinceEpoch;
-
-    int elapsedDuration = currentTimeMillis - timer.deviceTimeOnExit;
-
-    double timerDurationOnExit =
-        timer.controllerValueOnExit * (timer.duration * 1000.0);
-
-    double value;
-
-    /// If animating forward and the calculated value difference is less than 0,
-    /// return 0.0 as the value (can't have a negative value).
-    /// Else if difference is greater than 1, return 1.
-    /// Finally, return calculated value if neither of the above are true.
-    if (timer.direction == TimerDirection.CLOCKWISE) {
-      value =
-          (timerDurationOnExit + elapsedDuration) / (timer.duration * 1000.0);
-      if (value <= 0.0) return 0.0;
-    } else {
-      value =
-          (timerDurationOnExit - elapsedDuration) / (timer.duration * 1000.0);
-      if (value >= 1) return 1.0;
-    }
-    return value;
-  }*/
-
-  /// Creates an AnimationController based on whether or not the timer should
-  /// be animating forward or not. The duration is the rest duration if
-  /// forward, or rep duration if reverse. Value is calculated if the timer
-  /// was left running or retrieved from memory if stopped.
-
-  //TODO: STEP 2 (???)
-/*void setupController(double value, TimerLoaded state) {
-    timerController.value = value;
-    timerController.duration = Duration(seconds: state.timer.duration);
-    if (state.timer.previouslyRunning) {
-      setupControllerCallback(timerController, state.timer);
-    }
-  }
-
-  void setupControllerCallback(AnimationController controller, Timer timer) {
-    if (timer.direction == TimerDirection.COUNTERCLOCKWISE) {
-      controller.reverse().whenComplete(() {
-        //TODO: left off here 6/19 => trying to decide how to handle this. Does exercise pass in callback?
-        //TODO: dispatch to timerComplete? dispatch to exercise? need to figure this out
-        if (controller.status == AnimationStatus.dismissed) {
-          //TODO: 6/26 - thinking about dispatching to both here -> one to create
-          //todo: the next timer and one to update set/rep count with the exercise
-          timerBloc.dispatch(TimerComplete(timer));
-          hangboardExerciseBloc.dispatch(RepComplete());
-        }
-      }).catchError((error) {
-        print('Timer failed animating counterclockwise: $error');
-        startStopTimer(controller);
-      });
-    } else {
-      controller.forward().whenComplete(() {
-        if (controller.status == AnimationStatus.completed) {
-          timerBloc.dispatch(TimerComplete(timer));
-          //TODO: 6/26 - Thinking that I only need to dispatch to exercise after
-          //todo: rep and rest have completed. if i dispatch here I'm assuming that's the case
-
-          //todo: Random thought but do i want to pass in exercise bloc to make this more generic?
-
-          hangboardExerciseBloc.dispatch(RepComplete());
-        }
-      }).catchError((error) {
-        print('Timer failed animating clockwise: $error');
-        startStopTimer(controller);
-      });
-    }
-  }*/
 }

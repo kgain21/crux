@@ -83,8 +83,7 @@ class MyApp extends StatelessWidget {
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
         '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
             title: title,
-            auth: auth,
-            firestore: firestore),
+            auth: auth),
 //        '/countdown_timer_screen': (context) => WorkoutTimer(),
         '/spotify_test_screen': (context) => SpotifyTestScreen(),
         '/exercise_page_view': (context) => ExercisePageView(),

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
-import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/presentation/shared_layouts/app_bar.dart';
@@ -8,6 +8,7 @@ import 'package:crux/presentation/widgets/exercise_tile.dart';
 import 'package:crux/presentation/widgets/hangboard_workout_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HangboardWorkoutScreen extends StatefulWidget {
   final String title;
@@ -22,72 +23,87 @@ class HangboardWorkoutScreen extends StatefulWidget {
 }
 
 class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
+  WorkoutBloc _workoutBloc;
+
+
+  @override
+  void initState() {
+    _workoutBloc = WorkoutBloc();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar:
-      SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
-      body: Stack(
-        children: <Widget>[
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Text(
-                  'Your Hangboard Workouts:',
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .title,
-                  textAlign: TextAlign.start,
+    return BlocBuilder(
+      bloc:,
+      builder:,
+      child: Scaffold(
+        appBar:
+        SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
+        body: Stack(
+          children: <Widget>[
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text(
+                    'Your Hangboard Workouts:',
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .title,
+                    textAlign: TextAlign.start,
+                  ),
                 ),
-              ),
-              StreamBuilder<QuerySnapshot>(
-                stream: Firestore.instance.collection('/hangboard').snapshots(),
-                builder: (scaffoldContext, snapshot) {
-                  switch(snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      return Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: const Text('Retrieving workouts...'),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Center(
-                                child: CircularProgressIndicator(),
+                StreamBuilder<QuerySnapshot>(
+                  stream: Firestore.instance.collection('/hangboard')
+                      .snapshots(),
+                  builder: (scaffoldContext, snapshot) {
+                    switch(snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                      case ConnectionState.none:
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: const Text('Retrieving workouts...'),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    default:
-                      return Flexible(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: (snapshot.data.documents.length + 1),
-                          itemBuilder: (context, index) {
-                            if(index == snapshot.data.documents.length) {
-                              return addWorkoutButton(scaffoldContext);
-                            }
-                            return HangboardWorkoutTile(
-                              snapshot: snapshot,
-                              index: index,
-                            );
-                          },
-                        ),
-                      );
-                  }
-                },
-              ),
-            ],
-          ),
-        ],
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      default:
+                        return Flexible(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: (snapshot.data.documents.length + 1),
+                            itemBuilder: (context, index) {
+                              if(index == snapshot.data.documents.length) {
+                                return addWorkoutButton(
+                                    scaffoldContext,
+                                    snapshot.data.hangboardWorkout);
+                              }
+                              return HangboardWorkoutTile(
+                                snapshot: snapshot,
+                                index: index,
+                              );
+                            },
+                          ),
+                        );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -188,7 +204,8 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
     );
   }
 
-  Widget addWorkoutButton(BuildContext scaffoldContext) {
+  Widget addWorkoutButton(BuildContext scaffoldContext,
+                          HangboardWorkout hangboardWorkout) {
     return ExerciseTile(
       tileColor: Theme
           .of(context)
@@ -198,7 +215,7 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
             .of(context)
             .primaryColor,
         onPressed: () {
-          addWorkoutDialog(scaffoldContext);
+          addWorkoutDialog(scaffoldContext, hangboardWorkout);
         },
         child: const Text('Add Workout'),
       ),
@@ -231,22 +248,23 @@ class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
                 FlatButton(
                   child: Text(
                     'Ok',
-                    style:
-                    TextStyle(color: Theme
+                    style: TextStyle(color: Theme
                         .of(context)
                         .accentColor),
                   ),
                   onPressed: () {
-                    widget.firestoreHangboardWorkoutsRepository.addNewWorkout(
-                        hangboardWorkout).then((workoutAdded) {
+                    widget.firestoreHangboardWorkoutsRepository
+                        .addNewWorkout(hangboardWorkout)
+                        .then((workoutAdded) {
                       if(workoutAdded) {
                         exerciseSavedSnackbar(scaffoldContext);
                       } else {
-                        _exerciseExistsAlert(scaffoldContext, workoutTitle);
+                        _exerciseExistsAlert(
+                            scaffoldContext, hangboardWorkout.workoutTitle);
                       }
-                    })
-                    saveWorkoutToFirebase(
-                        controller.text, scaffoldContext);
+                    });
+                    /*saveWorkoutToFirebase(
+                        controller.text, scaffoldContext);*/
                     Navigator.of(context).pop();
                   },
                 ),

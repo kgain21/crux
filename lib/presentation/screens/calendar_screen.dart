@@ -103,8 +103,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
               Text(
                 '${date.toString()}',
-                //TODO: going to need to go to db to find workout assoc w/ this day
-                //TODO: if nothing there, option to create new or select from premade workouts
+                //TODO: go to db, if nothing there, option to create new or select from premade workouts
 //                style: TextStyle(fontSize: 12.0, color: Colors.black),
               ),
             ],

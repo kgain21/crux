@@ -65,7 +65,6 @@ class _HangboardPageState extends State<HangboardPage> {
       time: _timeOn,
       switchForward: false,
       switchTimer: false,
-      //TODO: is there a better way to do this?
       notifyParentReverseComplete: notifyParentReverseComplete,
       notifyParentForwardComplete: notifyParentForwardComplete,
 //      preferencesClearedFlag: widget.preferencesClearedFlag,
@@ -156,7 +155,6 @@ class _HangboardPageState extends State<HangboardPage> {
                           setState(() {
                             _hangsPerSet++;
                           });
-                          //TODO: stop timer
                         }
                       })
                       : IconButton(
@@ -180,7 +178,6 @@ class _HangboardPageState extends State<HangboardPage> {
                         setState(() {
                           _hangsPerSet--;
                         });
-                        //TODO: stop timer
                       }
                     },
                   )
@@ -241,7 +238,6 @@ class _HangboardPageState extends State<HangboardPage> {
                         setState(() {
                           _numberOfSets++;
                         });
-                        //TODO: stop timer
                       }
                     },
                   )
@@ -265,7 +261,6 @@ class _HangboardPageState extends State<HangboardPage> {
                       if(_numberOfSets != 0) {
                         setState(() {
                           _numberOfSets--;
-                          //TODO: stop timer
                         });
                       }
                     },
@@ -481,7 +476,6 @@ class _HangboardPageState extends State<HangboardPage> {
           startTimer: false,
           time: 0,
         );
-        //TODO: still want to add banner
         Scaffold.of(context).showSnackBar(SnackBar(
           duration: Duration(days: 1),
           content: Row(),
@@ -506,7 +500,6 @@ class _HangboardPageState extends State<HangboardPage> {
     });
   }
 
-//TODO: should this be separated from the widget in a dao?
   void getParams(Map<String, dynamic> exerciseParameters) {
     _depth = getDoubleVal(exerciseParameters, 'depth');
     _depthMeasurementSystem =

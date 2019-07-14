@@ -1,13 +1,11 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_event.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
 import 'package:crux/backend/blocs/timer/timer_bloc.dart';
 import 'package:crux/backend/blocs/timer/timer_event.dart';
 import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
-import 'package:crux/backend/models/timer/timer.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/presentation/widgets/circular_timer.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
@@ -39,28 +37,33 @@ class HangboardPage extends StatefulWidget {
 
 class _HangboardPageState extends State<HangboardPage>
     with TickerProviderStateMixin {
-
   int _originalNumberOfSets;
   int _originalNumberOfHangs;
 
+  AnimationController _timerController;
+
   TimerBloc _timerBloc;
   HangboardExerciseBloc _hangboardExerciseBloc;
+
+//  StreamSubscription _hangboardExerciseStreamSubscription;
 
   @override
   void initState() {
     _originalNumberOfSets = widget.hangboardExercise.numberOfSets;
     _originalNumberOfHangs = widget.hangboardExercise.hangsPerSet;
-//    getParams(widget.exerciseParameters);
 
     /*_exerciseTitle = StringFormatUtils.formatDepthAndHold(
         _depth, _depthMeasurementSystem, _fingerConfiguration, _hold);*/
-    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
+//    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
+    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
+    _timerBloc = new TimerBloc();
+    _timerBloc.dispatch(LoadTimer(widget.hangboardExercise));
+//    _hangboardExerciseStreamSubscription = setHangboardExerciseStreamListener();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
     return BlocBuilder(
         bloc: _hangboardExerciseBloc,
         builder: (BuildContext context, HangboardExerciseState state) {
@@ -68,12 +71,13 @@ class _HangboardPageState extends State<HangboardPage>
             return Container();
           } else if (state is HangboardExerciseLoaded) {
             return BlocProvider(
+              // todo: is this necessary?
               bloc: _timerBloc,
               child: Container(
                 child: ListView(
                   children: <Widget>[
                     titleTile(state),
-                    workoutTimerTile(state, _timerBloc, _hangboardExerciseBloc),
+                    workoutTimerTile(state),
                     IntrinsicHeight(
                       child: Row(
                         children: <Widget>[
@@ -114,21 +118,18 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Widget workoutTimerTile(HangboardExerciseLoaded state, TimerBloc timerBloc,
-                          HangboardExerciseBloc hangboardExerciseBloc) {
+  Widget workoutTimerTile(HangboardExerciseLoaded hangboardState) {
     return BlocBuilder(
-      bloc: timerBloc,
-      builder: (BuildContext context, TimerState state) {
-        AnimationController timerController;
-
-        if(state is TimerLoaded) {
-          timerController = AnimationController(
+      bloc: _timerBloc,
+      builder: (BuildContext context, TimerState timerState) {
+        if(timerState is TimerLoaded) {
+          _timerController = AnimationController(
               vsync: this,
-              value: state.controllerValue,
-              duration: Duration(seconds: state.timer.duration));
+              value: timerState.controllerValue,
+              duration: Duration(seconds: timerState.timer.duration));
 
-          VoidCallback timerControllerCallback = setupTimerControllerCallback(
-              timerController, state.timer, timerBloc, hangboardExerciseBloc);
+          VoidCallback timerControllerCallback =
+          setupTimerControllerCallback(hangboardState, timerState);
 
           return Container(
             constraints: BoxConstraints(
@@ -156,7 +157,7 @@ class _HangboardPageState extends State<HangboardPage>
                                 .width / 1.4,
                           ),
                           child: CircularTimer(
-                            timerController: timerController,
+                            timerController: _timerController,
                             timerControllerCallback: timerControllerCallback,
                           ),
                         ),
@@ -175,12 +176,8 @@ class _HangboardPageState extends State<HangboardPage>
                           IconButton(
                             icon: Icon(Icons.refresh),
                             onPressed: () {
-                              _timerBloc.dispatch(
-                                //Todo: come back to this
-                                  ReplaceWithRepTimer(
-                                      widget.hangboardExercise));
-//                        switchTimer(false, state.hangboardExercise.repDuration);
-//                        switchTimer(false, _timeOn);
+                              _hangboardExerciseBloc.dispatch(RepButtonPressed(
+                                  hangboardState.hangboardExercise));
                             },
                           ),
                           IconButton(
@@ -193,18 +190,15 @@ class _HangboardPageState extends State<HangboardPage>
                               textDirection: TextDirection.rtl,
                             ),
                             onPressed: () {
-                              _timerBloc.dispatch(
-                                //Todo: come back to this
-                                  ReplaceWithRestTimer(
-                                      widget.hangboardExercise));
-//                        switchTimer(true, state.hangboardExercise.restDuration);
-//                        switchTimer(true, _timeOff);
+                              _hangboardExerciseBloc.dispatch(RestButtonPressed(
+                                  hangboardState.hangboardExercise));
                             },
                           ),
                         ],
                       ),
                     ),
                   ),
+                  setCompleteNotifier(), //todo: don't know if this goes here but let's find out
                 ],
               ),
             ),
@@ -214,35 +208,38 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-//todo: left off here 6/28 - looking pretty good, hopefully this is all it takes.
-  //todo: still need to figure out repComplete dispatching but I just want to start with timer for now.
-  VoidCallback setupTimerControllerCallback(AnimationController controller,
-                                            Timer timer,
-                                            TimerBloc timerBloc,
-                                            HangboardExerciseBloc hangboardExerciseBloc) {
-    if(timer.direction == TimerDirection.COUNTERCLOCKWISE) {
+  VoidCallback setupTimerControllerCallback(
+      HangboardExerciseLoaded hangboardState, TimerLoaded timerState) {
+    if(timerState.timer.direction == TimerDirection.COUNTERCLOCKWISE) {
       return () {
-        controller.reverse().whenComplete(() {
-          if(controller.status == AnimationStatus.dismissed) {
-            timerBloc.dispatch(TimerComplete(timer));
-//          hangboardExerciseBloc.dispatch(RepComplete());
+        _timerController.reverse().whenComplete(() {
+          if(_timerController.status == AnimationStatus.dismissed) {
+            /// let bloc determine new exercise props and timer
+            _hangboardExerciseBloc.dispatch(ReverseComplete(
+                hangboardState.hangboardExercise,
+                timerState.timer,
+                _timerBloc));
           }
+          //todo: make sure controller keeps animating with new timer
         }).catchError((error) {
           print('Timer failed animating counterclockwise: $error');
-          controller.stop(canceled: false);
-//        startStopTimer(controller);
+          _timerController.stop(canceled: false);
         });
       };
     } else {
       return () {
-        controller.forward().whenComplete(() {
-          if(controller.status == AnimationStatus.completed) {
-            timerBloc.dispatch(TimerComplete(timer));
-//          hangboardExerciseBloc.dispatch(RepComplete());
+        _timerController.forward().whenComplete(() {
+          if(_timerController.status == AnimationStatus.completed) {
+            /// let bloc determine new exercise props and timer
+            _hangboardExerciseBloc.dispatch(ForwardComplete(
+                hangboardState.hangboardExercise,
+                timerState.timer,
+                _timerBloc));
           }
+          //todo: make sure controller keeps animating with new timer
         }).catchError((error) {
           print('Timer failed animating clockwise: $error');
-          controller.stop(canceled: false);
+          _timerController.stop(canceled: false);
         });
       };
     }
@@ -252,7 +249,10 @@ class _HangboardPageState extends State<HangboardPage>
     var hangsPerSet = state.hangboardExercise.hangsPerSet;
     return Container(
       constraints:
-      BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2.0),
+      BoxConstraints(maxWidth: MediaQuery
+          .of(context)
+          .size
+          .width / 2.0),
       child: ExerciseTile(
         edgeInsets: const EdgeInsets.only(left: 8.0, top: 8.0, right: 4.0),
         child: Padding(
@@ -268,17 +268,24 @@ class _HangboardPageState extends State<HangboardPage>
                       icon: Icon(Icons.arrow_drop_up),
                       onPressed: () {
                         if(hangsPerSet != _originalNumberOfHangs) {
-                          //TODO: stop timer
-                          _hangboardExerciseBloc
-                              .dispatch(IncreaseNumberOfHangs());
+                          _timerController.stop(
+                              canceled:
+                              false); //todo: make sure i reset controller, not jsut stop it(use value method below if needed)
+                          //_timerController.value();
+                          _hangboardExerciseBloc.dispatch(
+                              IncreaseNumberOfHangsButtonPressed(
+                                  state.hangboardExercise));
+//                          _timerBloc.dispatch(event) not sure if i need to interact w/ timerbloc here or not
                         }
                       })
                       : IconButton(
-                    // Placeholder button that does nothing
+                    // Placeholder button that does nothing (can't go higher than originalNumberOfHangs)
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_up,
-                      color: Theme.of(context).primaryColorLight,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
                     ),
                   ),
                   Text(
@@ -290,9 +297,12 @@ class _HangboardPageState extends State<HangboardPage>
                     icon: Icon(Icons.arrow_drop_down),
                     onPressed: () {
                       if(hangsPerSet != 0) {
-                        //TODO: stop timer
-                        _hangboardExerciseBloc
-                            .dispatch(DecreaseNumberOfHangs());
+                        _timerController.stop(canceled: false);
+                        //_timerController.value();
+                        _hangboardExerciseBloc.dispatch(
+                            DecreaseNumberOfHangsButtonPressed(
+                                state.hangboardExercise));
+                        //todo: update here if above gets updated
                       }
                     },
                   )
@@ -301,7 +311,9 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_down,
-                      color: Theme.of(context).primaryColorLight,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
                     ),
                   ),
                 ],
@@ -333,7 +345,10 @@ class _HangboardPageState extends State<HangboardPage>
 
     return Container(
       constraints:
-      BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2.0),
+      BoxConstraints(maxWidth: MediaQuery
+          .of(context)
+          .size
+          .width / 2.0),
       child: ExerciseTile(
         edgeInsets: const EdgeInsets.only(left: 4.0, top: 8.0, right: 8.0),
         child: Padding(
@@ -350,9 +365,11 @@ class _HangboardPageState extends State<HangboardPage>
                     icon: Icon(Icons.arrow_drop_up),
                     onPressed: () {
                       if(numberOfSets != _originalNumberOfSets) {
-                        //TODO: stop timer
-                        _hangboardExerciseBloc
-                            .dispatch(IncreaseNumberOfSets());
+                        _timerController.stop(canceled: false);
+                        _hangboardExerciseBloc.dispatch(
+                            IncreaseNumberOfSetsButtonPressed(
+                                state.hangboardExercise));
+                        //todo: update here if above gets updated
                       }
                     },
                   )
@@ -360,7 +377,9 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_up,
-                      color: Theme.of(context).primaryColorLight,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
                     ),
                   ),
                   Text(
@@ -372,9 +391,11 @@ class _HangboardPageState extends State<HangboardPage>
                     icon: Icon(Icons.arrow_drop_down),
                     onPressed: () {
                       if(numberOfSets != 0) {
-                        //TODO: stop timer
-                        _hangboardExerciseBloc
-                            .dispatch(DecreaseNumberOfSets());
+                        _timerController.stop(canceled: false);
+                        _hangboardExerciseBloc.dispatch(
+                            DecreaseNumberOfSetsButtonPressed(
+                                state.hangboardExercise));
+                        //todo: update here if above gets updated
                       }
                     },
                   )
@@ -382,7 +403,9 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_down,
-                      color: Theme.of(context).primaryColorLight,
+                      color: Theme
+                          .of(context)
+                          .primaryColorLight,
                     ),
                   ),
                 ],
@@ -427,27 +450,12 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  /*/// Timer should only know about rep OR rest, not both
-  void switchTimer(bool resetForward, int time) {
-    setState(() {
-      _workoutTimer = WorkoutTimer(
-        notifyParentReverseComplete: notifyParentReverseComplete,
-        notifyParentForwardComplete: notifyParentForwardComplete,
-        id: _exerciseTitle,
-        switchTimer: true,
-        switchForward: resetForward,
-        startTimer: false,
-        time: time,
-      );
-    });
-  }*/
-
   /// Start time between sets and provide callback that decrements number of
   /// sets as well as resets number of hangs
   /// TODO: Figure this out - global listener? cancel at end of if block? both seem weird
-  void setCompleteListener() {
+  /*void setHangboardExerciseStreamListener() {
 //    _hangsPerSet = _hangsPerSet > 0 ? (_hangsPerSet - 1) : 0;
-    StreamSubscription hangboardExerciseListener = _hangboardExerciseBloc.state
+    _hangboardExerciseStreamSubscription = _hangboardExerciseBloc.state
         .listen((state) {
       if(state is HangboardExerciseLoaded &&
           state.hangboardExercise.numberOfSets == 0) {
@@ -459,7 +467,9 @@ class _HangboardPageState extends State<HangboardPage>
                 Text(
                   'Set Complete!',
                   style: TextStyle(
-                      fontSize: 25.0, color: Theme.of(context).accentColor),
+                      fontSize: 25.0, color: Theme
+                      .of(context)
+                      .accentColor),
                 ),
               ],
             ),
@@ -467,13 +477,36 @@ class _HangboardPageState extends State<HangboardPage>
         );
       }
     });
-    /*BlocListener(
+  }*/
+
+  //todo: think i'm going to try this widget but might want to use above commented listener instead, not sure which one will work
+  Widget setCompleteNotifier() {
+    return BlocListener(
       bloc: _hangboardExerciseBloc,
       listener: (BuildContext context, HangboardExerciseState state) {
-
+        if(state is HangboardExerciseLoaded &&
+            state.hangboardExercise.numberOfSets == 0) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Set Complete!',
+                    style: TextStyle(
+                        fontSize: 25.0, color: Theme
+                        .of(context)
+                        .accentColor),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
       },
-    );*/
+    );
   }
+}
 //TODO: need to make this a streamListener
 /*Scaffold.of(context).showSnackBar(SnackBar(
   duration: Duration(days: 1),
@@ -570,58 +603,3 @@ class _HangboardPageState extends State<HangboardPage>
       }
     });
   }*/
-/*
-//TODO: should this be separated from the widget in a dao?
-  void getParams(Map<String, dynamic> exerciseParameters) {
-    _depth = getDoubleVal(exerciseParameters, 'depth');
-    _depthMeasurementSystem =
-        getStringVal(exerciseParameters, 'depthMeasurementSystem');
-    _fingerConfiguration =
-        getStringVal(exerciseParameters, 'fingerConfiguration');
-    _hold = getStringVal(exerciseParameters, 'hold');
-    _hangsPerSet = getIntVal(exerciseParameters, 'hangsPerSet');
-    _numberOfSets = getIntVal(exerciseParameters, 'numberOfSets');
-    _resistance = getIntVal(exerciseParameters, 'resistance');
-    _resistanceMeasurementSystem =
-        getStringVal(exerciseParameters, 'resistanceMeasurementSystem');
-    _timeBetweenSets = getIntVal(exerciseParameters, 'timeBetweenSets');
-    _timeOn = getIntVal(exerciseParameters, 'timeOn');
-    _timeOff = getIntVal(exerciseParameters, 'timeOff');
-    _numberOfHands = getIntVal(exerciseParameters, 'numberOfHands');
-  }*/
-
-//todo: hopefully won't need these but leaving them jic
-/*int getIntVal(Map<String, dynamic> exerciseParameters, String fieldName) {
-    try {
-      var intVal = exerciseParameters[fieldName];
-      if (intVal is int) return intVal;
-    } on Exception catch (e) {
-      print('Unable to find $fieldName: $e');
-    }
-    return 0;
-  }
-
-  double getDoubleVal(
-      Map<String, dynamic> exerciseParameters, String fieldName) {
-    try {
-      var doubleVal = exerciseParameters[fieldName];
-      if (doubleVal is double) return doubleVal;
-    } on Exception catch (e) {
-      print('Unable to find $fieldName: $e');
-    }
-    return 0.0;
-  }
-
-  String getStringVal(
-      Map<String, dynamic> exerciseParameters, String fieldName) {
-    try {
-      var stringVal = exerciseParameters[fieldName];
-      if (stringVal is String) {
-        return stringVal;
-      }
-    } on Exception catch (e) {
-      print('Unable to find $fieldName: $e');
-    }
-    return '';
-  }*/
-}

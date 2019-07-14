@@ -7,16 +7,12 @@ import 'package:flutter/widgets.dart';
 import 'exercise_tile.dart';
 
 class HangboardWorkoutTile extends StatefulWidget {
-//  final BaseAuth auth;
-  final AsyncSnapshot snapshot;
+//  final AsyncSnapshot snapshot;
   final int index;
 
-//  final SharedPreferences sharedPreferences;
-
   HangboardWorkoutTile({
-    this.snapshot,
+//    this.snapshot,
     this.index,
-    /*this.sharedPreferences*/
   }) : super();
 
   @override
@@ -76,9 +72,6 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
     return GestureDetector(
       child: Icon(Icons.close),
       onTap: () {
-        var collectionRef =
-            Firestore.instance.collection('hangboard/$workoutTitle/exercises');
-
         showDialog(
             barrierDismissible: false,
             context: context,
@@ -98,7 +91,6 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                       child: Text('Delete'),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        // TODO: can (should?) be extracted to GCF
                         // https://firebase.google.com/docs/firestore/solutions/delete-collections
                         /*collectionRef.getDocuments().then((snapshot) {
                           snapshot.documents.forEach(
@@ -109,11 +101,11 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                         });*/
 
                         /// Clear out sharedPrefs with workout deletion
-                        /// //TODO: make sure this works
                         /*SharedPreferences.getInstance().then((preferences) {
                           preferences.getKeys().remove(workoutTitle);
                         });*/
-                        Preferences().getTimerPreferences(workoutTitle);
+                        //todo: pass in bloc and dispatch to delete here
+                        Preferences().removeTimerPreferences(workoutTitle);
                       },
                     )
                   ],

@@ -32,9 +32,6 @@ class HangboardExercise extends Equatable {
                     this.repDuration,
                     this.restDuration,);
 
-  //TODO: left off here 7/3 - updating workoutScreen and repository methods to
-  //todo: add new workouts. Also updating models/entities as needed
-
 
   HangboardExercise copyWith({
                                String exerciseTitle,

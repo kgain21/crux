@@ -136,7 +136,6 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           )
         ],
         //TODO: Add action menu that allows you to reset all exercises (clear sharedPrefs)
-        //TODO: SHould sharedPrefs be extracted to one common class that all pages go through? (Yes)
       ),
       body: exercisePageView(),
     );

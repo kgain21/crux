@@ -7,7 +7,6 @@ class TimerEntity {
   final TimerDirection direction;
   final bool previouslyRunning;
   final int deviceTimeOnExit; // In epoch milliseconds
-//  final int deviceTimeOnReturn; // In epoch milliseconds
   final double controllerValueOnExit; // Value of animationController
 
   TimerEntity(this.storageKey,
@@ -15,7 +14,6 @@ class TimerEntity {
               this.direction,
               this.previouslyRunning,
               this.deviceTimeOnExit,
-              //    this.deviceTimeOnReturn,
               this.controllerValueOnExit,);
 
   @override
@@ -32,7 +30,6 @@ class TimerEntity {
       "direction": direction,
       "previouslyRunning": previouslyRunning,
       "deviceTimeOnExit": deviceTimeOnExit,
-//      "deviceTimeOnReturn": deviceTimeOnReturn,
       "controllerValueOnExit": controllerValueOnExit,
     };
   }
@@ -41,13 +38,11 @@ class TimerEntity {
   //todo: defaults should be what's passed in for exercise ideally
   static TimerEntity fromJson(Map<String, Object> json) {
     return TimerEntity(
-      json["storageKey"] as String ?? '',
-      //todo: not sure if this actually works
+      json["storageKey"] as String ?? '', //todo: make sure this works
       json["duration"] as int,
       json["direction"] as TimerDirection,
       json["previouslyRunning,"] as bool,
       json["deviceTimeOnExit,"] as int,
-//      json["deviceTimeOnReturn,"] as int,
       json["controllerValueOnExit,"] as double,
     );
   }

@@ -1,18 +1,15 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
 import 'package:crux/backend/blocs/timer/timer_event.dart';
 import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:crux/backend/models/timer/timer.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/backend/services/preferences.dart';
-import 'package:meta/meta.dart';
 
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
 
-  final HangboardExerciseBloc hangboardExerciseBloc;
+  /*final HangboardExerciseBloc hangboardExerciseBloc;
   StreamSubscription hangboardExerciseSubscription;
 
   /// Listens for [HangboardExercise] to be created before dispatching to
@@ -24,8 +21,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         dispatch(LoadTimer(state.hangboardExercise));
       }
     });
-  }
-
+  }*/
   @override
   TimerState get initialState => TimerLoading();
 
@@ -48,7 +44,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
   }
 
-  /// Loading the [Timer] assumes that this is the first time the user has
+  /// Loading the [Timer] assumes that this is the first time the user has// todo: <- not necessarily, if I'm listening to hbexerciseLoaded it should just pass in the new exercise each time and I can build off that right?
   /// interacted with this particular [Timer] since its workout has been loaded.
   /// [SharedPreferences] are checked and if none are found a [Timer] is created
   /// based on the [HangboardExerciseWorkout]. This [Timer] defaults to animating
@@ -86,7 +82,6 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       yield TimerNotLoaded();
     }
   }
-
 
   Stream<TimerState> _mapReplaceWithRepTimerToState(
       ReplaceWithRepTimer event) async* {
@@ -191,10 +186,10 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     }
     return value;
   }
-
+/*
   @override
   void dispose() {
     hangboardExerciseSubscription.cancel();
     super.dispose();
-  }
+  }*/
 }

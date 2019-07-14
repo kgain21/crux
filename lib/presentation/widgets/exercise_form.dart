@@ -462,7 +462,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
   void saveTileFields(BuildContext scaffoldContext) {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
-//      saveHangboardWorkoutToFirebase(scaffoldContext); //TODO: make dao here?
     } else {
       setState(() => _autoValidate = true);
     }
@@ -491,7 +490,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
   /// do that anyway) to send the data instead. I could also make the [exercises]
   /// field a member var of this tab, and then each [hangboardExercise] could add it's own
   /// state info like [_depth] and [_hold] to the global [exercises].
-  /// //TODO: Make sure these defaults are ok
   Map createHangboardData() {
     Map<String, dynamic> data = {
       "resistanceMeasurementSystem": _resistanceMeasurementSystem,
@@ -510,24 +508,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
       "numberOfSets": _numberOfSets,
     };
     return data;
-  }*/
-
-  /*//TODO: This needs to have more to it - 1/2 hands, etc.
-  String createDataId(Map data) {
-    var depth = data['depth'];
-    var measurement = data['depthMeasurementSystem'];
-    var hold = data['hold'];
-    var fingerConfiguration = data['fingerConfiguration'];
-
-    if (depth == null || depth == '') {
-      if (fingerConfiguration == null || fingerConfiguration == '') {
-        return hold;
-      } else {
-        return '$fingerConfiguration $hold';
-      }
-    } else {
-      return '$depth$measurement $fingerConfiguration $hold';
-    }
   }*/
 
   List<Widget> mapFingerConfigurations(Hold hold) {

@@ -23,14 +23,6 @@ class TimerLoaded extends TimerState {
   final Timer timer;
   final double controllerValue;
 
-//  final String storageKey; // Storage key for SharedPreferences
-//  final int duration;
-//  final TimerDirection direction;
-//  final bool previouslyRunning;
-//  final int deviceTimeOnExit; // In epoch milliseconds
-//  final int deviceTimeOnReturn; // In epoch milliseconds
-//  final double controllerValueOnExit; // Value of animationController
-
   TimerLoaded(this.timer,
               this.controllerValue,) : super([
     timer,
@@ -41,13 +33,6 @@ class TimerLoaded extends TimerState {
   String toString() {
     return 'TimerLoaded: { '
         'timer: ${timer.toString()}'
-//        'storageKey: $storageKey, '
-//        'duration: $duration, '
-//        'direction: $direction, '
-//        'previouslyRunning: $previouslyRunning, '
-//        'deviceTimeOnExit: $deviceTimeOnExit, '
-//        'deviceTimeOnReturn: $deviceTimeOnReturn, '
-//        'controllerValueOnExit: $controllerValueOnExit '
         '}';
   }
 }

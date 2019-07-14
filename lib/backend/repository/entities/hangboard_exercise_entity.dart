@@ -31,7 +31,8 @@ class HangboardExerciseEntity {
   @override
   int get hashCode =>
       complete.hashCode ^ task.hashCode ^ note.hashCode ^ id.hashCode;
-
+//todo: 7/12 - is the equality of exercises going to save me? state won't rebuild if the exercises are the same
+//todo: so I might still be able to trigger off the exercisebloc for timers
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

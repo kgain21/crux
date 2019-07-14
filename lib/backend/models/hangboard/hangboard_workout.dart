@@ -1,4 +1,5 @@
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
+import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 
 class HangboardWorkout {
   final String workoutTitle;
@@ -7,13 +8,6 @@ class HangboardWorkout {
   HangboardWorkout(this.workoutTitle,
                    this.hangboardExerciseList,);
 
-  Map<String, Object> toJson() {
-    return {
-      "workoutTitle": workoutTitle,
-      "hangboardExerciseList": hangboardExerciseList,
-    };
-  }
-
   @override
   String toString() {
     return 'HangboardWorkout { workoutTitle: $workoutTitle, '
@@ -21,10 +15,17 @@ class HangboardWorkout {
         '}';
   }
 
-  static HangboardWorkout fromJson(Map<String, Object> json) {
+  HangboardWorkoutEntity toEntity() {
+    return HangboardWorkoutEntity(
+      workoutTitle,
+      hangboardExerciseList,
+    );
+  }
+
+  static HangboardWorkout fromEntity(HangboardWorkoutEntity entity) {
     return HangboardWorkout(
-      json["workoutTitle"] as String,
-      json["hangboardExerrciseList"] as List<HangboardExercise>,
+      entity.workoutTitle,
+      entity.hangboardExerciseList,
     );
   }
 }

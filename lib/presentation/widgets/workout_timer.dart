@@ -63,9 +63,7 @@ class _WorkoutTimerState extends State<WorkoutTimer>
     _controller = AnimationController(
         vsync: this, value: 1.0, duration: Duration(seconds: widget.time));
     _id = widget.id;
-    //TODO: Put this in Main?
 //    _preferences = Preferences();
-    //TODO: Dependency injection template for future refactoring
 //    (context.inheritFromWidgetOfExactType(MyApp) as MyApp).sharedPreferences;
 //    _sharedPreferences = SharedPreferences.getInstance();
   }
@@ -378,7 +376,6 @@ if(!widget.startTimer)
     }
   }
 
-  //TODO: make this do more
   void handleError(Error error) {
     startStopTimer(_controller);
   }

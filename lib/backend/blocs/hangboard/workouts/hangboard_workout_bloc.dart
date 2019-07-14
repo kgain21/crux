@@ -6,18 +6,18 @@ import 'package:crux/backend/services/preferences.dart';
 import 'package:meta/meta.dart';
 
 class WorkoutBloc extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
-  final Preferences preferences;
-  final FirestoreHangboardWorkoutsRepository firestore;
+  /*final Preferences preferences;
+  final FirestoreHangboardWorkoutsRepository firestore;*/
 
-  WorkoutBloc({@required this.preferences, @required this.firestore});
+//  WorkoutBloc({@required this.preferences, @required this.firestore});
 
   @override
-  HangboardWorkoutState get initialState => WorkoutLoading();
+  HangboardWorkoutState get initialState => HangboardWorkoutLoading();
 
   @override
   Stream<HangboardWorkoutState> mapEventToState(
       HangboardWorkoutEvent event) async* {
-    if (event is LoadWorkout) {
+    if(event is LoadHangboardWorkout) {
       yield* _mapLoadWorkoutToState();
     } else if (event is AddWorkout) {
       yield* _mapAddWorkoutToState(event);

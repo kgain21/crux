@@ -11,7 +11,6 @@ class Timer extends Equatable {
   final TimerDirection direction;
   final bool previouslyRunning;
   final int deviceTimeOnExit; // In epoch milliseconds
-//  final int deviceTimeOnReturn; // In epoch milliseconds
   final double controllerValueOnExit; // Value of animationController
 
   Timer(this.storageKey,
@@ -19,7 +18,6 @@ class Timer extends Equatable {
         this.direction,
         this.previouslyRunning,
         this.deviceTimeOnExit,
-        //    this.deviceTimeOnReturn,
         this.controllerValueOnExit,);
 
   Timer copyWith({
@@ -28,7 +26,6 @@ class Timer extends Equatable {
                    TimerDirection direction,
                    bool previouslyRunning,
                    int deviceTimeOnExit,
-//    int deviceTimeOnReturn,
                    double controllerValueOnExit,
                  }) {
     return Timer(
@@ -37,7 +34,6 @@ class Timer extends Equatable {
       direction,
       previouslyRunning,
       deviceTimeOnExit,
-//      deviceTimeOnReturn,
       controllerValueOnExit,
     );
   }
@@ -56,7 +52,6 @@ class Timer extends Equatable {
       direction,
       previouslyRunning,
       deviceTimeOnExit,
-//      deviceTimeOnReturn,
       controllerValueOnExit,
     );
   }
@@ -68,7 +63,6 @@ class Timer extends Equatable {
       entity.direction,
       entity.previouslyRunning,
       entity.deviceTimeOnExit,
-//      entity.deviceTimeOnReturn,
       entity.controllerValueOnExit,
     );
   }
