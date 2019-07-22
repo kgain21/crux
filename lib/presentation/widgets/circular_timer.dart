@@ -1,53 +1,39 @@
-import 'package:crux/backend/blocs/timer/timer_bloc.dart';
 import 'package:crux/backend/blocs/timer/timer_state.dart';
-import 'package:crux/backend/models/timer/timer.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/utils/timer_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CircularTimer extends StatelessWidget {
   final AnimationController timerController;
   final VoidCallback timerControllerCallback;
+  final TimerLoaded timerState;
 
   const CircularTimer({
                         @required this.timerController,
                         @required this.timerControllerCallback,
+                        @required this.timerState,
                       });
 
   @override
   Widget build(BuildContext context) {
-    final TimerBloc timerBloc = BlocProvider.of<TimerBloc>(context);
-
-    return BlocBuilder(
-      bloc: timerBloc,
-      builder: (BuildContext context, TimerState state) {
-        if(state is TimerLoading) {
-          return loadingScreen();
-        } else if(state is TimerLoaded) {
-          return GestureDetector(
-            onTap: () {
-              startStopTimer(state.timer);
-            },
-            onLongPress: () {
-              resetTimer();
-            },
-            child: AspectRatio(
-              aspectRatio: 1.0,
-              child: Stack(
-                children: <Widget>[
-                  circularTimer(),
-                  timerText(state),
-                ],
-              ),
-            ),
-          );
-        } else {
-          return loadingScreen();
-        }
+    return GestureDetector(
+      onTap: () {
+        startStopTimer();
       },
+      onLongPress: () {
+        resetTimer();
+      },
+      child: AspectRatio(
+        aspectRatio: 1.0,
+        child: Stack(
+          children: <Widget>[
+            circularTimer(),
+            timerText(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -89,7 +75,7 @@ class CircularTimer extends StatelessWidget {
   /// Widget that builds the [timerString] for the [WorkoutTimer].
   /// The string is displayed in Minutes:Seconds and is controlled
   /// by [_controller].
-  Widget timerText(TimerLoaded state) {
+  Widget timerText() {
     return Align(
       alignment: FractionalOffset.center,
       child: Column(
@@ -100,7 +86,7 @@ class CircularTimer extends StatelessWidget {
             animation: timerController,
             builder: (context, child) {
               return Text(
-                timerString(state),
+                timerString(),
                 style: TextStyle(
                   fontSize: 50.0,
                 ),
@@ -112,17 +98,9 @@ class CircularTimer extends StatelessWidget {
     );
   }
 
-  Widget loadingScreen() {
-    return Column(
-      children: <Widget>[
-        /*Empty to help avoid any flickering from quick loads*/
-      ],
-    );
-  }
-
-  String timerString(TimerLoaded state) {
+  String timerString() {
     Duration duration;
-    if(state.timer.direction == TimerDirection.COUNTERCLOCKWISE) {
+    if(timerState.timer.direction == TimerDirection.COUNTERCLOCKWISE) {
       duration = timerController.duration * (1 - timerController.value);
     } else {
       duration = timerController.duration * timerController.value;
@@ -142,13 +120,12 @@ class CircularTimer extends StatelessWidget {
   ///
   /// Additionally, the [SharedPreferences] get nulled out so that future timers
   /// don't try to read old values.
-  void startStopTimer(Timer timer) {
+  void startStopTimer() {
     if(timerController != null) {
       if(timerController.isAnimating) {
         timerController.stop(canceled: false);
       } else {
         timerControllerCallback();
-//        setupControllerCallback(timerController, timer);
       }
     }
   }

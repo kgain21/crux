@@ -56,7 +56,9 @@ class _HangboardPageState extends State<HangboardPage>
         _depth, _depthMeasurementSystem, _fingerConfiguration, _hold);*/
 //    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
     _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
-    _timerBloc = new TimerBloc();
+    _timerBloc =
+    new TimerBloc(); // todo: do i want to add this at a higher level and provide it to the whole pageview?
+    //todo: think about other blocs and where I provide them as well
     _timerBloc.dispatch(LoadTimer(widget.hangboardExercise));
 //    _hangboardExerciseStreamSubscription = setHangboardExerciseStreamListener();
     super.initState();
@@ -70,25 +72,21 @@ class _HangboardPageState extends State<HangboardPage>
           if (state is HangboardExerciseLoading) {
             return Container();
           } else if (state is HangboardExerciseLoaded) {
-            return BlocProvider(
-              // todo: is this necessary?
-              bloc: _timerBloc,
-              child: Container(
-                child: ListView(
-                  children: <Widget>[
-                    titleTile(state),
-                    workoutTimerTile(state),
-                    IntrinsicHeight(
-                      child: Row(
-                        children: <Widget>[
-                          hangsAndResistanceTile(state),
-                          setsTile(state),
-                        ],
-                      ),
+            return Container(
+              child: ListView(
+                children: <Widget>[
+                  titleTile(state),
+                  workoutTimerTile(state),
+                  IntrinsicHeight(
+                    child: Row(
+                      children: <Widget>[
+                        hangsAndResistanceTile(state),
+                        setsTile(state),
+                      ],
                     ),
-                    notesTile(state),
-                  ],
-                ),
+                  ),
+                  notesTile(state),
+                ],
               ),
             );
           }
@@ -122,7 +120,9 @@ class _HangboardPageState extends State<HangboardPage>
     return BlocBuilder(
       bloc: _timerBloc,
       builder: (BuildContext context, TimerState timerState) {
-        if(timerState is TimerLoaded) {
+        if(timerState is TimerLoading) {
+          return loadingScreen();
+        } else if(timerState is TimerLoaded) {
           _timerController = AnimationController(
               vsync: this,
               value: timerState.controllerValue,
@@ -159,6 +159,7 @@ class _HangboardPageState extends State<HangboardPage>
                           child: CircularTimer(
                             timerController: _timerController,
                             timerControllerCallback: timerControllerCallback,
+                            timerState: timerState,
                           ),
                         ),
                       ],
@@ -216,10 +217,12 @@ class _HangboardPageState extends State<HangboardPage>
           if(_timerController.status == AnimationStatus.dismissed) {
             /// let bloc determine new exercise props and timer
             _hangboardExerciseBloc.dispatch(ReverseComplete(
-                hangboardState.hangboardExercise,
-                timerState.timer,
-                _timerBloc));
+              hangboardState.hangboardExercise,
+              timerState.timer,
+              _timerBloc,
+            ));
           }
+
           //todo: make sure controller keeps animating with new timer
         }).catchError((error) {
           print('Timer failed animating counterclockwise: $error');
@@ -232,10 +235,12 @@ class _HangboardPageState extends State<HangboardPage>
           if(_timerController.status == AnimationStatus.completed) {
             /// let bloc determine new exercise props and timer
             _hangboardExerciseBloc.dispatch(ForwardComplete(
-                hangboardState.hangboardExercise,
-                timerState.timer,
-                _timerBloc));
+              hangboardState.hangboardExercise,
+              timerState.timer,
+              _timerBloc,
+            ));
           }
+
           //todo: make sure controller keeps animating with new timer
         }).catchError((error) {
           print('Timer failed animating clockwise: $error');
@@ -268,9 +273,8 @@ class _HangboardPageState extends State<HangboardPage>
                       icon: Icon(Icons.arrow_drop_up),
                       onPressed: () {
                         if(hangsPerSet != _originalNumberOfHangs) {
-                          _timerController.stop(
-                              canceled:
-                              false); //todo: make sure i reset controller, not jsut stop it(use value method below if needed)
+                          _timerController.stop(canceled: false);
+                          //todo: make sure i reset controller, not jsut stop it(use value method below if needed)
                           //_timerController.value();
                           _hangboardExerciseBloc.dispatch(
                               IncreaseNumberOfHangsButtonPressed(
@@ -447,6 +451,14 @@ class _HangboardPageState extends State<HangboardPage>
           ],
         ),
       ),
+    );
+  }
+
+  Widget loadingScreen() {
+    return Column(
+      children: <Widget>[
+        /*Empty to help avoid any flickering from quick loads*/
+      ],
     );
   }
 

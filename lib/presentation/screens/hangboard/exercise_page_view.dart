@@ -1,11 +1,16 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
+import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/presentation/widgets/dots_indicator.dart';
 import 'package:crux/presentation/widgets/exercise_form.dart';
 import 'package:crux/presentation/widgets/hangboard_page_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ShakeCurve extends Curve {
@@ -15,15 +20,13 @@ class ShakeCurve extends Curve {
 
 class ExercisePageView extends StatefulWidget {
   final String title;
-  final CollectionReference collectionReference;
-
-//  final BaseAuth auth;
+  final HangboardWorkout hangboardWorkout;
   final workoutId;
 
   @override
   State createState() => _ExercisePageViewState();
 
-  ExercisePageView({this.title, this.collectionReference, this.workoutId});
+  ExercisePageView({this.title, this.hangboardWorkout, this.workoutId});
 }
 
 class _ExercisePageViewState extends State<ExercisePageView> {
@@ -45,6 +48,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   bool _zoomOut;
   bool _exerciseFinished;
   bool _preferencesClearedFlag;
+
+  WorkoutBloc _workoutBloc;
 
   /* bool _handlePageNotification(ScrollNotification notification,
                                PageController leader, PageController follower) {
@@ -82,6 +87,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         _currentPageValue = _controller.page;
       });
     });
+
   }
 
   @override
@@ -97,8 +103,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               if(value == 'reset workout') {
                 SharedPreferences.getInstance().then((preferences) {
                   preferences.getKeys().forEach((key) {
-                    if(key.contains(widget.title))
-                      preferences.remove(key);
+                    if(key.contains(widget.title)) preferences.remove(key);
                   });
                   setState(() {
                     _preferencesClearedFlag = !_preferencesClearedFlag;
@@ -151,6 +156,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   Widget exercisePageView() {
     return GestureDetector(
       onLongPress: () {
+
         setState(() {
           _zoomOut = true;
           print('editing');
@@ -168,19 +174,15 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   }
 
   Widget exerciseStreamBuilder() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance
-          .collection('hangboard/${widget.title}/exercises')
-          .snapshots(),
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-          case ConnectionState.none:
-          default:
-            int documentsLength = 0;
-            if (snapshot.data != null) {
-              documentsLength = snapshot.data.documents.length;
-            }
+    return BlocBuilder(
+        bloc: _workoutBloc,
+        builder: (context, hangboardWorkoutState) {
+          int documentsLength = 0;
+          if(hangboardWorkoutState is HangboardWorkoutLoaded) {
+            var exerciseList =
+                hangboardWorkoutState.hangboardWorkout.hangboardExerciseList;
+            documentsLength = exerciseList.length;
+
             _pageCount = documentsLength + 1;
 
             return Center(
@@ -193,19 +195,18 @@ class _ExercisePageViewState extends State<ExercisePageView> {
                   children: <Widget>[
                     PageView(
                       controller: _zoomOut ? _zoomController : _controller,
-                      children: createPageList(documentsLength, snapshot),
+                      children: createPageList(documentsLength, exerciseList),
                     ),
                     dotsIndicator(),
                   ],
                 ),
               ),
             );
-        }
-      },
-    );
+          }
+        });
   }
 
-  List<Widget> createPageList(int documentsLength, AsyncSnapshot snapshot) {
+  List<Widget> createPageList(List hangboardExerciseList) {
     final List<Widget> pages = <Widget>[];
     double pictureHeight = MediaQuery.of(context).size.height * 0.6;
     double pictureWidth = MediaQuery.of(context).size.width * 0.6;
@@ -213,10 +214,10 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     for (int i = 0; i < _pageCount; i++) {
       Widget child;
 
-      if (i == documentsLength) {
+      if(i == hangboardExerciseList.length) {
         child = newExercisePage();
       } else {
-        child = animatedHangboardPage(i, snapshot.data.documents[i]);
+        child = animatedHangboardPage(i, hangboardExerciseList[i]);
       }
 
       var alignment = Alignment.center
@@ -271,7 +272,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     );
   }
 
-  Widget animatedHangboardPage(int index, DocumentSnapshot document) {
+  Widget animatedHangboardPage(int index, HangboardExercise hangboardExercise) {
     /// Last page should always be a [newExercisePage]; this index will always
     /// be greater than the current exercises list so this must be checked first
     if(index == _currentPageValue.floor()) {
@@ -281,7 +282,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           workoutTitle: widget.title,
           index: index,
           nextPageCallback: nextPageCallback,
-          documentReference: document.reference,
+          hangboardExercise: hangboardExercise,
         ),
       );
     } else if (index == _currentPageValue.floor() + 1) {
@@ -292,7 +293,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           workoutTitle: widget.title,
           index: index,
           nextPageCallback: nextPageCallback,
-          documentReference: document.reference,
+          hangboardExercise: hangboardExercise,
         ),
       );
     }
@@ -303,7 +304,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           workoutTitle: widget.title,
           index: index,
           nextPageCallback: nextPageCallback,
-          documentReference: document.reference,
+          hangboardExercise: hangboardExercise,
         ),
         _zoomOut
             ? Padding(

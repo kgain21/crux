@@ -7,7 +7,7 @@ import 'package:crux/backend/services/preferences.dart';
 import 'package:crux/presentation/screens/calendar_screen.dart';
 import 'package:crux/presentation/screens/dashboard_screen.dart';
 import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
-import 'package:crux/presentation/screens/hangboard/hangboard_workout_screen.dart';
+import 'package:crux/presentation/screens/hangboard/hangboard_workouts_screen.dart';
 import 'package:crux/presentation/screens/sign_in_screen.dart';
 import 'package:crux/presentation/screens/spotify_test_screen.dart';
 import 'package:crux/presentation/screens/stopwatch_screen.dart';
@@ -81,7 +81,8 @@ class MyApp extends StatelessWidget {
         '/dashboard_screen': (context) =>
             DashboardScreen(title: title, auth: auth),
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
-        '/hangboard_workout_screen': (context) => HangboardWorkoutScreen(
+        '/hangboard_workout_screen': (context) =>
+            HangboardWorkoutsScreen(
             title: title,
             auth: auth),
 //        '/countdown_timer_screen': (context) => WorkoutTimer(),

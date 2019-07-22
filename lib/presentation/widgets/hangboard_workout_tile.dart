@@ -1,19 +1,21 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
+import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/services/preferences.dart';
 import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'exercise_tile.dart';
 
 class HangboardWorkoutTile extends StatefulWidget {
-//  final AsyncSnapshot snapshot;
   final int index;
+  final HangboardWorkout hangboardWorkout;
 
   HangboardWorkoutTile({
-//    this.snapshot,
-    this.index,
-  }) : super();
+                         this.index,
+                         this.hangboardWorkout
+                       }) : super();
 
   @override
   State<StatefulWidget> createState() => _HangboardWorkoutTileState();
@@ -31,11 +33,11 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
 
   @override
   Widget build(BuildContext context) {
-    return workoutTile(widget.snapshot, widget.index);
+    return workoutTile();
   }
 
-  Widget workoutTile(AsyncSnapshot snapshot, int index) {
-    var workoutTitle = snapshot.data.documents[index].documentID;
+  Widget workoutTile() {
+    var workoutTitle = widget.hangboardWorkout.workoutTitle;
 
     return ExerciseTile(
       child: ListTile(
@@ -47,18 +49,21 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
           });
         },
         onTap: () {
-          if (_isEditing) {
+          if(_isEditing) {
             setState(() {
               _isEditing = false;
             });
           } else {
             Navigator.push(context, MaterialPageRoute(
               builder: (context) {
-                return ExercisePageView(
-                  title: workoutTitle,
-                  collectionReference: Firestore.instance
-                      .collection('hangboard/$workoutTitle/exercises'),
-                  workoutId: index.toString(),
+                return BlocProvider(
+                  bloc: WorkoutBloc(),
+                  //todo: make sure this works/is the right place to create
+                  child: ExercisePageView(
+                    title: workoutTitle,
+                    hangboardWorkout: widget.hangboardWorkout,
+                    workoutId: widget.index.toString(),
+                  ),
                 );
               },
             ));

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
@@ -10,100 +12,101 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HangboardWorkoutScreen extends StatefulWidget {
+class HangboardWorkoutsScreen extends StatefulWidget {
   final String title;
   final BaseAuth auth;
   final HangboardWorkoutsRepository firestoreHangboardWorkoutsRepository;
 
   @override
-  State<StatefulWidget> createState() => new _HangboardWorkoutScreenState();
+  State<StatefulWidget> createState() => new _HangboardWorkoutsScreenState();
 
-  HangboardWorkoutScreen(
+  HangboardWorkoutsScreen(
       {this.title, this.auth, this.firestoreHangboardWorkoutsRepository});
 }
 
-class _HangboardWorkoutScreenState extends State<HangboardWorkoutScreen> {
-  WorkoutBloc _workoutBloc;
-
+class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
+  HangboardParentBloc _hangboardParentBloc;
 
   @override
   void initState() {
-    _workoutBloc = WorkoutBloc();
+    _hangboardParentBloc = HangboardParentBloc();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder(
-      bloc:,
-      builder:,
-      child: Scaffold(
-        appBar:
-        SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
-        body: Stack(
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Text(
-                    'Your Hangboard Workouts:',
-                    style: Theme
-                        .of(context)
-                        .textTheme
-                        .title,
-                    textAlign: TextAlign.start,
-                  ),
-                ),
-                StreamBuilder<QuerySnapshot>(
-                  stream: Firestore.instance.collection('/hangboard')
-                      .snapshots(),
-                  builder: (scaffoldContext, snapshot) {
-                    switch(snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                      case ConnectionState.none:
-                        return Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: const Text('Retrieving workouts...'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      default:
-                        return Flexible(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: (snapshot.data.documents.length + 1),
-                            itemBuilder: (context, index) {
-                              if(index == snapshot.data.documents.length) {
-                                return addWorkoutButton(
-                                    scaffoldContext,
-                                    snapshot.data.hangboardWorkout);
-                              }
-                              return HangboardWorkoutTile(
-                                snapshot: snapshot,
-                                index: index,
-                              );
-                            },
-                          ),
-                        );
-                    }
-                  },
-                ),
-              ],
+    return Scaffold(
+      appBar:
+      SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: Text(
+              'Your Hangboard Workouts:',
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .title,
+              textAlign: TextAlign.start,
             ),
-          ],
-        ),
+          ),
+          BlocBuilder(
+            bloc: _workoutBloc,
+            builder: (context, HangboardWorkoutState workoutState) {
+              if(workoutState is HangboardWorkoutLoaded) {
+                return Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: (workoutState. + 1),
+                    itemBuilder: (context, index) {
+                      if(index == snapshot.data.documents.length) {
+                        return addWorkoutButton(
+                            scaffoldContext, snapshot.data.hangboardWorkout);
+                      }
+                      return HangboardWorkoutTile(
+                        snapshot: snapshot,
+                        index: index,
+                      );
+                    },
+                  ),
+                );
+              } else {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: const Text('Retrieving workouts...'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+          ),
+
+
+          StreamBuilder<QuerySnapshot>(
+            stream: Firestore.instance.collection('/hangboard').snapshots(),
+            builder: (scaffoldContext, snapshot) {
+              switch(snapshot.connectionState) {
+                case ConnectionState.waiting:
+                case ConnectionState.none:
+
+                default:
+              }
+            },
+          ),
+        ],
       ),
     );
   }
