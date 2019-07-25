@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
@@ -85,7 +84,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     _controller.addListener(() {
       setState(() {
         _currentPageValue = _controller.page;
-      });
+      }); //todo: make sure I get rid of this setState at some point
     });
 
   }
@@ -169,21 +168,21 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           });
         }
       },
-      child: exerciseStreamBuilder(),
+      child: exerciseBlocBuilder(),
     );
   }
 
-  Widget exerciseStreamBuilder() {
+  Widget exerciseBlocBuilder() {
     return BlocBuilder(
         bloc: _workoutBloc,
         builder: (context, hangboardWorkoutState) {
-          int documentsLength = 0;
+          int exerciseCount = 0;
           if(hangboardWorkoutState is HangboardWorkoutLoaded) {
             var exerciseList =
                 hangboardWorkoutState.hangboardWorkout.hangboardExerciseList;
-            documentsLength = exerciseList.length;
+            exerciseCount = exerciseList.length;
 
-            _pageCount = documentsLength + 1;
+            _pageCount = exerciseCount + 1;
 
             return Center(
               child: new Container(
@@ -195,7 +194,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
                   children: <Widget>[
                     PageView(
                       controller: _zoomOut ? _zoomController : _controller,
-                      children: createPageList(documentsLength, exerciseList),
+                      children: createPageList(exerciseList),
                     ),
                     dotsIndicator(),
                   ],
@@ -317,9 +316,10 @@ class _ExercisePageViewState extends State<ExercisePageView> {
                       icon: Icon(Icons.cancel),
                       onPressed: () {
                         //TODO: ask user for delete confirmation
-                        Firestore.instance
+                        /*Firestore.instance
                             .document(document.reference.path)
-                            .delete();
+                            .delete();*/
+                        //todo: implement delete dispatching
                       },
                     ),
                   ],

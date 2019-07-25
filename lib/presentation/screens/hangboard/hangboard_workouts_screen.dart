@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
+import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
@@ -29,7 +27,9 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
 
   @override
   void initState() {
-    _hangboardParentBloc = HangboardParentBloc();
+    _hangboardParentBloc = HangboardParentBloc(
+        hangboardWorkoutsRepository:
+        widget.firestoreHangboardWorkoutsRepository);
     super.initState();
   }
 
@@ -53,20 +53,24 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             ),
           ),
           BlocBuilder(
-            bloc: _workoutBloc,
-            builder: (context, HangboardWorkoutState workoutState) {
-              if(workoutState is HangboardWorkoutLoaded) {
+            bloc: _hangboardParentBloc,
+            builder: (context, HangboardParentState parentState) {
+              if(parentState is HangboardParentLoaded) {
+                var workoutList =
+                    parentState.hangboardParent.hangboardWorkoutList;
+
                 return Flexible(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: (workoutState. + 1),
+                    itemCount: (workoutList.length + 1),
                     itemBuilder: (context, index) {
-                      if(index == snapshot.data.documents.length) {
-                        return addWorkoutButton(
-                            scaffoldContext, snapshot.data.hangboardWorkout);
+                      if(index == workoutList.length) {
+                        //todo: this was scaffoldContext before, make sure context doesn't cause any bugs
+                        //todo: i don't think this makes sense - make sure to check back here on why i'm passing workout
+                        return addWorkoutButton(context, workoutList[index]);
                       }
                       return HangboardWorkoutTile(
-                        snapshot: snapshot,
+                        hangboardWorkout: workoutList[index],
                         index: index,
                       );
                     },
@@ -93,24 +97,23 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
               }
             },
           ),
-
-
-          StreamBuilder<QuerySnapshot>(
+          /*StreamBuilder<QuerySnapshot>(
             stream: Firestore.instance.collection('/hangboard').snapshots(),
             builder: (scaffoldContext, snapshot) {
-              switch(snapshot.connectionState) {
+              switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
                 case ConnectionState.none:
 
                 default:
               }
             },
-          ),
+          ),*/
         ],
       ),
     );
   }
 
+//todo: not sure if save is implemented yet, make sure that happens
   /*void saveWorkoutToFirebase(String workoutTitle,
                              BuildContext scaffoldContext) {
     CollectionReference collectionReference =

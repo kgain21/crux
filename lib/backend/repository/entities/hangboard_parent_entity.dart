@@ -1,12 +1,9 @@
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 
 class HangboardParentEntity {
-  final String workoutTitle;
   final List<HangboardWorkout> hangboardWorkoutList;
 
-  //TODO: I'm sure there's more that i'll need to add to this
   HangboardParentEntity(
-    this.workoutTitle,
     this.hangboardWorkoutList,
   );
 
@@ -27,21 +24,18 @@ class HangboardParentEntity {
 
   Map<String, Object> toJson() {
     return {
-      "workoutTitle": workoutTitle,
       "hangboardWorkoutList": hangboardWorkoutList,
     };
   }
 
   @override
   String toString() {
-    return 'HangboardParentEntity { workoutTitle: $workoutTitle, '
-        'hangboardWorkoutList: $hangboardWorkoutList, '
+    return 'HangboardParentEntity { hangboardWorkoutList: $hangboardWorkoutList, '
         '}';
   }
 
   static HangboardParentEntity fromJson(Map<String, Object> json) {
     return HangboardParentEntity(
-      json["workoutTitle"] as String,
       json["hangboardWorkoutList"] as List<HangboardWorkout>,
     );
   }

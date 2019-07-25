@@ -8,6 +8,10 @@ abstract class HangboardWorkoutEvent extends Equatable {
 }
 
 class LoadHangboardWorkout extends HangboardWorkoutEvent {
+  final String workoutTitle;
+
+  LoadHangboardWorkout({this.workoutTitle})
+      : super([workoutTitle]); //todo add extra shit
   @override
   String toString() => 'LoadHangboardWorkout';
 }

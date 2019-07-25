@@ -101,7 +101,7 @@ class HangboardExercise extends Equatable {
     );
   }
 
-  HangboardExercise fromEntity(HangboardExerciseEntity entity) {
+  static HangboardExercise fromEntity(HangboardExerciseEntity entity) {
     return HangboardExercise(
       entity.exerciseTitle,
       entity.depthMeasurementSystem,

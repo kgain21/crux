@@ -17,10 +17,9 @@ class FirestoreHangboardWorkoutsRepository
 
   const FirestoreHangboardWorkoutsRepository(this.firestore);
 
-
   /// Returns a list of exercises mapped from the given workout
   @override
-  Stream<List<HangboardExerciseEntity>> getExercises(String workoutTitle) {
+  Future<List<HangboardExerciseEntity>> getExercises(String workoutTitle) {
     return firestore
         .collection('$workoutType/$workoutTitle')
         .snapshots()
@@ -28,14 +27,15 @@ class FirestoreHangboardWorkoutsRepository
       return snapshot.documents.map((doc) {
         return HangboardExerciseEntity.fromJson(doc.data);
       }).toList();
-    });
+    }).first;
   }
 
   @override
   Future<void> addNewExercise(HangboardExercise hangboardExercise) {
     final hangboardExerciseEntity = hangboardExercise.toEntity();
-    return firestore.collection(workoutType).add(
-        hangboardExerciseEntity.toJson());
+    return firestore
+        .collection(workoutType)
+        .add(hangboardExerciseEntity.toJson());
   }
 
   @override
@@ -63,12 +63,12 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Stream<List<HangboardWorkoutEntity>> getWorkouts() {
+  Future<List<HangboardWorkoutEntity>> getWorkouts() {
     return firestore.collection(workoutType).snapshots().map((snapshot) {
       return snapshot.documents.map((doc) {
         return HangboardWorkoutEntity.fromJson(doc.data);
       }).toList();
-    });
+    }).first;
   }
 
   @override
