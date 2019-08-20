@@ -36,11 +36,15 @@ class HangboardWorkoutEntity {
         'hangboardExerciseList: $hangboardExerciseList, '
         '}';
   }
+//todo: left off here 7/26 - firestore repo get method doesn't match up with current
+  //todo: doc structure so I either need to change that or this entity
 
-  static HangboardWorkoutEntity fromJson(Map<String, Object> json) {
+  //todo: at least adding workoutTitle helped tiles show up, not sure about other error
+  //todo: also looks like exercisePageView doesn't have initialized Bloc, maybe try Bloc()..dispatch() like in workouts page
+  static HangboardWorkoutEntity fromData(Map<String, Object> json, List documents) {
     return HangboardWorkoutEntity(
       json["workoutTitle"] as String,
-      json["hangboardExerciseList"] as List<HangboardExercise>,
+      documents as List<HangboardExercise>,
     );
   }
 }

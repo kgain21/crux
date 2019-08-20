@@ -1,4 +1,5 @@
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
@@ -29,7 +30,9 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
   void initState() {
     _hangboardParentBloc = HangboardParentBloc(
         hangboardWorkoutsRepository:
-        widget.firestoreHangboardWorkoutsRepository);
+            widget.firestoreHangboardWorkoutsRepository)
+      ..dispatch(LoadHangboardParent());
+
     super.initState();
   }
 
@@ -37,7 +40,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
-      SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
+          SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -45,17 +48,14 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             padding: const EdgeInsets.only(top: 16.0),
             child: Text(
               'Your Hangboard Workouts:',
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .title,
+              style: Theme.of(context).textTheme.title,
               textAlign: TextAlign.start,
             ),
           ),
           BlocBuilder(
             bloc: _hangboardParentBloc,
             builder: (context, HangboardParentState parentState) {
-              if(parentState is HangboardParentLoaded) {
+              if (parentState is HangboardParentLoaded) {
                 var workoutList =
                     parentState.hangboardParent.hangboardWorkoutList;
 
@@ -64,10 +64,10 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     shrinkWrap: true,
                     itemCount: (workoutList.length + 1),
                     itemBuilder: (context, index) {
-                      if(index == workoutList.length) {
+                      if (index == workoutList.length) {
                         //todo: this was scaffoldContext before, make sure context doesn't cause any bugs
                         //todo: i don't think this makes sense - make sure to check back here on why i'm passing workout
-                        return addWorkoutButton(context, workoutList[index]);
+                        return addWorkoutButton(context);
                       }
                       return HangboardWorkoutTile(
                         hangboardWorkout: workoutList[index],
@@ -130,8 +130,8 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     });
   }*/
 
-  Future<void> _exerciseExistsAlert(BuildContext scaffoldContext,
-                                    String workoutTitle) async {
+  Future<void> _exerciseExistsAlert(
+      BuildContext scaffoldContext, String workoutTitle) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -164,9 +164,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                 FlatButton(
                   child: Text(
                     'Ok',
-                    style: TextStyle(color: Theme
-                        .of(context)
-                        .accentColor),
+                    style: TextStyle(color: Theme.of(context).accentColor),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -196,9 +194,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     Text(
                       'Workout Saved!',
                       style: TextStyle(
-                          color: Theme
-                              .of(scaffoldContext)
-                              .accentColor),
+                          color: Theme.of(scaffoldContext).accentColor),
                     ),
                   ],
                 ),
@@ -210,26 +206,22 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  Widget addWorkoutButton(BuildContext scaffoldContext,
-                          HangboardWorkout hangboardWorkout) {
+  Widget addWorkoutButton(
+      BuildContext scaffoldContext) {
     return ExerciseTile(
-      tileColor: Theme
-          .of(context)
-          .primaryColor,
+      tileColor: Theme.of(context).primaryColor,
       child: FlatButton(
-        color: Theme
-            .of(context)
-            .primaryColor,
+        color: Theme.of(context).primaryColor,
         onPressed: () {
-          addWorkoutDialog(scaffoldContext, hangboardWorkout);
+          addWorkoutDialog(scaffoldContext);
         },
         child: const Text('Add Workout'),
       ),
     );
   }
 
-  void addWorkoutDialog(BuildContext scaffoldContext,
-                        HangboardWorkout hangboardWorkout) {
+  void addWorkoutDialog(
+      BuildContext scaffoldContext) {
     showDialog(
       context: context,
       builder: (context) {
@@ -254,15 +246,15 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                 FlatButton(
                   child: Text(
                     'Ok',
-                    style: TextStyle(color: Theme
-                        .of(context)
-                        .accentColor),
+                    style: TextStyle(color: Theme.of(context).accentColor),
                   ),
                   onPressed: () {
+                    //todo:8/20 - got this page to display - needs to be a stream for dynamic add/delete though
+                    var hangboardWorkout = HangboardWorkout(controller.value.text, []);
                     widget.firestoreHangboardWorkoutsRepository
                         .addNewWorkout(hangboardWorkout)
                         .then((workoutAdded) {
-                      if(workoutAdded) {
+                      if (workoutAdded) {
                         exerciseSavedSnackbar(scaffoldContext);
                       } else {
                         _exerciseExistsAlert(

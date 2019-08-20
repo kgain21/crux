@@ -5,8 +5,7 @@ import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart';
 import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
-
-import 'hangboard_workouts_repository.dart';
+import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 
 class FirestoreHangboardWorkoutsRepository
     implements HangboardWorkoutsRepository {
@@ -64,12 +63,45 @@ class FirestoreHangboardWorkoutsRepository
 
   @override
   Future<List<HangboardWorkoutEntity>> getWorkouts() {
-    return firestore.collection(workoutType).snapshots().map((snapshot) {
-      return snapshot.documents.map((doc) {
-        return HangboardWorkoutEntity.fromJson(doc.data);
-      }).toList();
-    }).first;
+    var workouts = firestore
+        .collection(workoutType)
+        .snapshots()
+        .first
+        .then((hangboardCollection) async {
+      List<HangboardWorkoutEntity> workoutList = [];
+      for (var workout in hangboardCollection.documents) {
+        var exerciseCollection =
+            await workout.reference.collection("exercises").getDocuments();
+
+        HangboardWorkoutEntity hangboardWorkoutEntity =
+            HangboardWorkoutEntity.fromData(
+                workout.data,
+                exerciseCollection.documents.map((exercise) {
+                  return HangboardExercise.fromEntity(
+                      HangboardExerciseEntity.fromJson(exercise.data));
+                }).toList());
+        workoutList.add(hangboardWorkoutEntity);
+      }
+      return workoutList;
+    });
+
+     return workouts;
   }
+
+//  Future<List<HangboardWorkoutEntity>> getHangboardWorkoutList(
+//      QuerySnapshot snapshot) async {
+//
+//    }
+//
+//    return workoutList;
+//  }
+
+//  Future<HangboardWorkoutEntity> getHangboardWorkoutEntity(
+//      DocumentSnapshot workout) async {
+//
+//
+//    return hangboardWorkoutEntity;
+//  }
 
   @override
   Future<bool> addNewWorkout(HangboardWorkout hangboardWorkout) async {
@@ -81,14 +113,14 @@ class FirestoreHangboardWorkoutsRepository
       workoutRef = collectionReference.document(hangboardWorkout.workoutTitle);
 
       final doc = await workoutRef.get();
-      if(doc.exists)
+      if (doc.exists)
         // Can't add this workout name since it already exists. UI alert shown
         return false;
       else {
         workoutRef.setData(hangboardWorkoutEntity.toJson());
         return true;
       }
-    } catch(e) {
+    } catch (e) {
       print(e);
       return false;
     }
@@ -100,13 +132,13 @@ class FirestoreHangboardWorkoutsRepository
 
     try {
       CollectionReference collectionReference =
-      firestore.collection(workoutType);
+          firestore.collection(workoutType);
 
       var workoutRef =
-      collectionReference.document(hangboardWorkout.workoutTitle);
+          collectionReference.document(hangboardWorkout.workoutTitle);
       workoutRef.setData(hangboardWorkoutEntity.toJson());
       return true;
-    } catch(e) {
+    } catch (e) {
       print(e);
       return false;
     }

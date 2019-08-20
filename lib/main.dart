@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/auth.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/backend/services/preferences.dart';
@@ -81,8 +82,9 @@ class MyApp extends StatelessWidget {
         '/dashboard_screen': (context) =>
             DashboardScreen(title: title, auth: auth),
         '/stopwatch_screen': (context) => StopwatchScreen(title: title),
-        '/hangboard_workout_screen': (context) =>
-            HangboardWorkoutsScreen(
+        '/hangboard_workout_screen': (context) => HangboardWorkoutsScreen(
+            firestoreHangboardWorkoutsRepository:
+                FirestoreHangboardWorkoutsRepository(firestore),
             title: title,
             auth: auth),
 //        '/countdown_timer_screen': (context) => WorkoutTimer(),

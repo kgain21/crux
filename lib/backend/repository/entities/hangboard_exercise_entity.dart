@@ -8,7 +8,7 @@ class HangboardExerciseEntity {
   final double holdDepth; // formerly depth
   final int hangsPerSet;
   final int numberOfSets;
-  final double resistance;
+  final int resistance;
   final int breakDuration;
   final int repDuration; // Formerly timeOn
   final int restDuration; // Formerly timeOff
@@ -91,7 +91,7 @@ class HangboardExerciseEntity {
       json["holdDepth"] as double,
       json["hangsPerSet"] as int,
       json["numberOfSets"] as int,
-      json["resistance"] as double,
+      json["resistance"] as int,
       json["breakDuration"] as int,
       json["repDuration"] as int,
       json["restDuration"] as int,

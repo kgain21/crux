@@ -13,7 +13,7 @@ class HangboardExercise extends Equatable {
   final double holdDepth;
   final int hangsPerSet;
   final int numberOfSets;
-  final double resistance;
+  final int resistance;
   final int breakDuration;
   final int repDuration;
   final int restDuration;
@@ -43,7 +43,7 @@ class HangboardExercise extends Equatable {
                                double holdDepth,
                                int hangsPerSet,
                                int numberOfSets,
-                               double resistance,
+                               int resistance,
                                int breakDuration,
                                int repDuration,
                                int restDuration,

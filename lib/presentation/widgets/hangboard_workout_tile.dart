@@ -2,11 +2,12 @@ import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dar
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/services/preferences.dart';
 import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
+import 'package:crux/presentation/widgets/exercise_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'exercise_tile.dart';
+
 
 class HangboardWorkoutTile extends StatefulWidget {
   final int index;
