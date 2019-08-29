@@ -62,46 +62,34 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<List<HangboardWorkoutEntity>> getWorkouts() {
-    var workouts = firestore
+  Future<List<HangboardWorkoutEntity>> getWorkouts() async {
+    return firestore
         .collection(workoutType)
         .snapshots()
         .first
-        .then((hangboardCollection) async {
-      List<HangboardWorkoutEntity> workoutList = [];
-      for (var workout in hangboardCollection.documents) {
-        var exerciseCollection =
-            await workout.reference.collection("exercises").getDocuments();
-
-        HangboardWorkoutEntity hangboardWorkoutEntity =
-            HangboardWorkoutEntity.fromData(
-                workout.data,
-                exerciseCollection.documents.map((exercise) {
-                  return HangboardExercise.fromEntity(
-                      HangboardExerciseEntity.fromJson(exercise.data));
-                }).toList());
-        workoutList.add(hangboardWorkoutEntity);
-      }
-      return workoutList;
+        .then((hangboardCollection) {
+      return hangboardCollection.documents.map((workoutDocument) {
+        return HangboardWorkoutEntity.fromJson(workoutDocument.data);
+      }).toList();
     });
-
-     return workouts;
   }
 
-//  Future<List<HangboardWorkoutEntity>> getHangboardWorkoutList(
-//      QuerySnapshot snapshot) async {
-//
-//    }
-//
-//    return workoutList;
-//  }
+/*
 
-//  Future<HangboardWorkoutEntity> getHangboardWorkoutEntity(
-//      DocumentSnapshot workout) async {
-//
-//
-//    return hangboardWorkoutEntity;
-//  }
+        //todo: 8/21- reworking db, trying to send stream back to ui for dynamic updating-0
+
+        HangboardWorkoutEntity createHangboardWorkoutEntity(DocumentSnapshot
+        workout,
+        QuerySnapshot exercises)
+    {
+      return HangboardWorkoutEntity.fromData(
+          workout.data,
+          exercises.documents.map((exercise) {
+            HangboardExercise.fromEntity(
+                HangboardExerciseEntity.fromJson(exercise.data));
+          }).toList());
+    }
+*/
 
   @override
   Future<bool> addNewWorkout(HangboardWorkout hangboardWorkout) async {

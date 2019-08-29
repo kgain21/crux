@@ -1,12 +1,13 @@
-import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
+
 
 class HangboardWorkoutEntity {
   final String workoutTitle;
-  final List<HangboardExercise> hangboardExerciseList;
+
+//  final List<HangboardExercise> hangboardExerciseList;
 
   //TODO: I'm sure there's more that i'll need to add to this
   HangboardWorkoutEntity(this.workoutTitle,
-                         this.hangboardExerciseList,);
+                         /*this.hangboardExerciseList,*/);
 
 /*  @override
   int get hashCode =>
@@ -26,14 +27,14 @@ class HangboardWorkoutEntity {
   Map<String, Object> toJson() {
     return {
       "workoutTitle": workoutTitle,
-      "hangboardExerciseList": hangboardExerciseList,
+//      "hangboardExerciseList": hangboardExerciseList,
     };
   }
 
   @override
   String toString() {
     return 'HangboardWorkoutEntity { workoutTitle: $workoutTitle, '
-        'hangboardExerciseList: $hangboardExerciseList, '
+//        'hangboardExerciseList: $hangboardExerciseList, '
         '}';
   }
 //todo: left off here 7/26 - firestore repo get method doesn't match up with current
@@ -41,10 +42,10 @@ class HangboardWorkoutEntity {
 
   //todo: at least adding workoutTitle helped tiles show up, not sure about other error
   //todo: also looks like exercisePageView doesn't have initialized Bloc, maybe try Bloc()..dispatch() like in workouts page
-  static HangboardWorkoutEntity fromData(Map<String, Object> json, List documents) {
+  static HangboardWorkoutEntity fromJson(Map<String, Object> json) {
     return HangboardWorkoutEntity(
-      json["workoutTitle"] as String,
-      documents as List<HangboardExercise>,
+        json["workoutTitle"] as String
+//      json["hangboardExerciseList"] as List<HangboardExercise>
     );
   }
 }

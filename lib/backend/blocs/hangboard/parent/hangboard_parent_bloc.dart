@@ -7,7 +7,6 @@ import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:meta/meta.dart';
 
-
 class HangboardParentBloc
     extends Bloc<HangboardParentEvent, HangboardParentState> {
   final HangboardWorkoutsRepository hangboardWorkoutsRepository;
@@ -23,25 +22,53 @@ class HangboardParentBloc
     if (event is LoadHangboardParent) {
       yield* _mapLoadParentToState();
     }
+    if(event is UpdateHangboardParent) {
+      yield* _mapUpdateParentToState(event);
+    }
   }
 
   Stream<HangboardParentState> _mapLoadParentToState() async* {
     try {
-      final List<HangboardWorkoutEntity> hangboardWorkoutEntityList = await
-      hangboardWorkoutsRepository.getWorkouts();
+      List<HangboardWorkoutEntity> hangboardWorkoutEntityList =
+      await hangboardWorkoutsRepository.getWorkouts();
 
-      //todo: left off here - 7/24: think I got the mapping down. Had to change from
-      //todo: stream to future but don't know if it matters, I was just going to take the .first
-      //todo: anyways. Should look at the getExercises() usage as well and do the same there.
       yield HangboardParentLoaded(HangboardParent(hangboardWorkoutEntityList
           .map(HangboardWorkout.fromEntity)
-          .toList()));
+          .toList())
+      );
     } catch (_) {
       yield HangboardParentNotLoaded();
     }
   }
 
-  Stream<HangboardParentState> _mapAddWorkoutToState(event) {
+  Stream<HangboardParentState> _mapUpdateParentToState(
+      UpdateHangboardParent event) async* {
+    try {
+      bool workoutAdded = await hangboardWorkoutsRepository.addNewWorkout(
+          event.hangboardWorkout);
+
+      if(!workoutAdded) {
+        //todo: left off here 8/29
+        yield HangboardParentDuplicateWorkout(
+            event.hangboardWorkout, event.hangboardWorkout);
+      } else {
+        List<HangboardWorkoutEntity> hangboardWorkoutEntityList =
+        await hangboardWorkoutsRepository.getWorkouts();
+
+        yield HangboardParentWorkoutAdded(
+            HangboardParent(hangboardWorkoutEntityList
+                .map(HangboardWorkout.fromEntity)
+                .toList())
+        );
+      }
+    } catch(_) {
+      yield HangboardParentNotLoaded();
+    }
+  }
+
+  Stream<HangboardParentState> _mapAddWorkoutToState(AddHangboardParent event) {
+    //todo: 8/27 need to add one new workout to the list, should i just use the addWorkout method?
+    //todo: or update parent? still need to figure out.
     return null;
   }
 

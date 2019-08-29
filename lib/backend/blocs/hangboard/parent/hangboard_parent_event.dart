@@ -1,4 +1,5 @@
 import 'package:crux/backend/models/hangboard/hangboard_parent.dart';
+import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -22,13 +23,13 @@ class AddHangboardParent extends HangboardParentEvent {
       'AddHangboardParent { hangboardParent: $hangboardParent }';
 }
 
-class UpdateParent extends HangboardParentEvent {
-  final HangboardParent hangboardParent;
+class UpdateHangboardParent extends HangboardParentEvent {
+  final HangboardWorkout hangboardWorkout;
 
-  UpdateParent(this.hangboardParent) : super([hangboardParent]);
+  UpdateHangboardParent(this.hangboardWorkout) : super([hangboardWorkout]);
 
   @override
-  String toString() => 'UpdateParent { hangboardParent: $hangboardParent }';
+  String toString() => 'UpdateParent { hangboardParent: $hangboardWorkout }';
 }
 
 class DeleteParent extends HangboardParentEvent {

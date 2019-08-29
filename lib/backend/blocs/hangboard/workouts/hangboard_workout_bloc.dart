@@ -1,8 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_event.dart';
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
-import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
-import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:meta/meta.dart';
 
@@ -36,8 +34,8 @@ class WorkoutBloc extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
       final exerciseList = await firestoreHangboardWorkoutsRepository
           .getExercises(event.workoutTitle);
 
-      yield HangboardWorkoutLoaded(HangboardWorkout(event.workoutTitle,
-          exerciseList.map(HangboardExercise.fromEntity).toList()));
+//      yield HangboardWorkoutLoaded(HangboardWorkout(event.workoutTitle,
+//          exerciseList.map(HangboardExercise.fromEntity).toList()));
     } catch (_) {
       yield HangboardWorkoutNotLoaded();
     }

@@ -56,26 +56,16 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             bloc: _hangboardParentBloc,
             builder: (context, HangboardParentState parentState) {
               if (parentState is HangboardParentLoaded) {
-                var workoutList =
-                    parentState.hangboardParent.hangboardWorkoutList;
-
-                return Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: (workoutList.length + 1),
-                    itemBuilder: (context, index) {
-                      if (index == workoutList.length) {
-                        //todo: this was scaffoldContext before, make sure context doesn't cause any bugs
-                        //todo: i don't think this makes sense - make sure to check back here on why i'm passing workout
-                        return addWorkoutButton(context);
-                      }
-                      return HangboardWorkoutTile(
-                        hangboardWorkout: workoutList[index],
-                        index: index,
-                      );
-                    },
-                  ),
-                );
+                return workoutListBuilder(
+                    parentState.hangboardParent.hangboardWorkoutList);
+              } else if(parentState is HangboardParentWorkoutAdded) {
+                exerciseSavedSnackbar(context);
+                return workoutListBuilder(
+                    parentState.hangboardParent.hangboardWorkoutList);
+              } else if(parentState is HangboardParentDuplicateWorkout) {
+                _exerciseExistsAlert(context, widget.title);
+                return workoutListBuilder(
+                    parentState.hangboardParent.hangboardWorkoutList);
               } else {
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -97,18 +87,27 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
               }
             },
           ),
-          /*StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection('/hangboard').snapshots(),
-            builder: (scaffoldContext, snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                case ConnectionState.none:
-
-                default:
-              }
-            },
-          ),*/
         ],
+      ),
+    );
+  }
+
+  Flexible workoutListBuilder(List<HangboardWorkout> workoutList) {
+    return Flexible(
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: (workoutList.length + 1),
+        itemBuilder: (context, index) {
+          if(index == workoutList.length) {
+            //todo: this was scaffoldContext before, make sure context doesn't cause any bugs
+            //todo: i don't think this makes sense - make sure to check back here on why i'm passing workout
+            return addWorkoutButton(workoutList, context);
+          }
+          return HangboardWorkoutTile(
+            hangboardWorkout: workoutList[index],
+            index: index,
+          );
+        },
       ),
     );
   }
@@ -206,22 +205,22 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  Widget addWorkoutButton(
-      BuildContext scaffoldContext) {
+  Widget addWorkoutButton(List<HangboardWorkout> hangboardWorkoutList,
+                          BuildContext scaffoldContext) {
     return ExerciseTile(
       tileColor: Theme.of(context).primaryColor,
       child: FlatButton(
         color: Theme.of(context).primaryColor,
         onPressed: () {
-          addWorkoutDialog(scaffoldContext);
+          addWorkoutDialog(hangboardWorkoutList, scaffoldContext);
         },
         child: const Text('Add Workout'),
       ),
     );
   }
 
-  void addWorkoutDialog(
-      BuildContext scaffoldContext) {
+  void addWorkoutDialog(List<HangboardWorkout> hangboardWorkoutList,
+                        BuildContext scaffoldContext) {
     showDialog(
       context: context,
       builder: (context) {
@@ -249,9 +248,12 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     style: TextStyle(color: Theme.of(context).accentColor),
                   ),
                   onPressed: () {
-                    //todo:8/20 - got this page to display - needs to be a stream for dynamic add/delete though
-                    var hangboardWorkout = HangboardWorkout(controller.value.text, []);
-                    widget.firestoreHangboardWorkoutsRepository
+                    var hangboardWorkout =
+                    HangboardWorkout(controller.value.text);
+//                    hangboardWorkoutList.add(hangboardWorkout);
+                    _hangboardParentBloc
+                        .dispatch(UpdateHangboardParent(hangboardWorkout));
+                    /*widget.firestoreHangboardWorkoutsRepository
                         .addNewWorkout(hangboardWorkout)
                         .then((workoutAdded) {
                       if (workoutAdded) {
@@ -260,7 +262,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                         _exerciseExistsAlert(
                             scaffoldContext, hangboardWorkout.workoutTitle);
                       }
-                    });
+                    });*/ //todo: how do i notify if it already exists now?
                     /*saveWorkoutToFirebase(
                         controller.text, scaffoldContext);*/
                     Navigator.of(context).pop();

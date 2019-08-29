@@ -20,12 +20,14 @@ class ShakeCurve extends Curve {
 class ExercisePageView extends StatefulWidget {
   final String title;
   final HangboardWorkout hangboardWorkout;
+  final List<HangboardExercise> hangboardExerciseList;
   final workoutId;
 
   @override
   State createState() => _ExercisePageViewState();
 
-  ExercisePageView({this.title, this.hangboardWorkout, this.workoutId});
+  ExercisePageView(
+      {this.title, this.hangboardWorkout, this.workoutId, this.hangboardExerciseList});
 }
 
 class _ExercisePageViewState extends State<ExercisePageView> {
@@ -178,9 +180,9 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         builder: (context, hangboardWorkoutState) {
           int exerciseCount = 0;
           if(hangboardWorkoutState is HangboardWorkoutLoaded) {
-            var exerciseList =
-                hangboardWorkoutState.hangboardWorkout.hangboardExerciseList;
-            exerciseCount = exerciseList.length;
+//            var exerciseList =
+//                hangboardWorkoutState.hangboardWorkout.hangboardExerciseList;
+            exerciseCount = widget.hangboardExerciseList.length;
 
             _pageCount = exerciseCount + 1;
 
@@ -194,14 +196,16 @@ class _ExercisePageViewState extends State<ExercisePageView> {
                   children: <Widget>[
                     PageView(
                       controller: _zoomOut ? _zoomController : _controller,
-                      children: createPageList(exerciseList),
+                      children: createPageList(widget.hangboardExerciseList),
                     ),
                     dotsIndicator(),
                   ],
                 ),
               ),
             );
-          }
+          } else {
+            return Center();
+          } //just making it happy here- double check
         });
   }
 
