@@ -39,8 +39,7 @@ class FirestoreHangboardWorkoutsRepository
 
   @override
   Future<void> updateExercise(HangboardExercise hangboardExercise) {
-    /*//todo: should I have a get method that the ui calls and then decides to add or update?
-    //Todo: dispatch to add/update event and have it decide in the bloc?
+    /*
     String hangboardExerciseId = createHangboardExerciseId(hangboardExercise);
     var exerciseRef = firestore.collection(workoutType).document(hangboardExerciseId);
     exerciseRef.get().then((doc) {
@@ -73,23 +72,6 @@ class FirestoreHangboardWorkoutsRepository
       }).toList();
     });
   }
-
-/*
-
-        //todo: 8/21- reworking db, trying to send stream back to ui for dynamic updating-0
-
-        HangboardWorkoutEntity createHangboardWorkoutEntity(DocumentSnapshot
-        workout,
-        QuerySnapshot exercises)
-    {
-      return HangboardWorkoutEntity.fromData(
-          workout.data,
-          exercises.documents.map((exercise) {
-            HangboardExercise.fromEntity(
-                HangboardExerciseEntity.fromJson(exercise.data));
-          }).toList());
-    }
-*/
 
   @override
   Future<bool> addNewWorkout(HangboardWorkout hangboardWorkout) async {
@@ -135,9 +117,7 @@ class FirestoreHangboardWorkoutsRepository
   @override
   Future<void> deleteWorkout(HangboardWorkout hangboardWorkout) {
     final hangboardWorkoutEntity = hangboardWorkout.toEntity();
-
     return firestore.collection(workoutType).getDocuments().then((snapshot) {
-      snapshot.documents.forEach((document) => document.reference.delete());
       firestore
           .document('$workoutType/${hangboardWorkoutEntity.workoutTitle}')
           .delete();

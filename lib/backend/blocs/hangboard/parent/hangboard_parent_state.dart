@@ -55,3 +55,17 @@ class HangboardParentWorkoutAdded extends HangboardParentState {
         '}';
   }
 }
+
+class HangboardParentWorkoutDeleted extends HangboardParentState {
+  final HangboardParent hangboardParent;
+
+  HangboardParentWorkoutDeleted(this.hangboardParent,)
+      : super([hangboardParent]);
+
+  @override
+  String toString() {
+    return 'HangboardParentWorkoutDeleted: {'
+        'hangboardParent: ${hangboardParent.toString()}'
+        '}';
+  }
+}

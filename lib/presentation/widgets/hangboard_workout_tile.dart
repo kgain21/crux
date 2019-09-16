@@ -1,22 +1,20 @@
-import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
+import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_event.dart';
+import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/services/preferences.dart';
-import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
-
 class HangboardWorkoutTile extends StatefulWidget {
   final int index;
   final HangboardWorkout hangboardWorkout;
 
-  HangboardWorkoutTile({
-                         this.index,
-                         this.hangboardWorkout
-                       }) : super();
+  HangboardWorkoutTile({this.index, this.hangboardWorkout}) : super();
 
   @override
   State<StatefulWidget> createState() => _HangboardWorkoutTileState();
@@ -24,57 +22,49 @@ class HangboardWorkoutTile extends StatefulWidget {
 
 class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
   final Icon _arrowIcon = Icon(Icons.chevron_right);
-  bool _isEditing;
+  HangboardParentBloc _hangboardParentBloc;
+  HangboardWorkoutTileBloc _hangboardWorkoutTileBloc;
 
   @override
   void initState() {
     super.initState();
-    _isEditing = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return workoutTile();
-  }
+    _hangboardParentBloc = BlocProvider.of<HangboardParentBloc>(context);
 
-  Widget workoutTile() {
+    _hangboardWorkoutTileBloc = HangboardWorkoutTileBloc();
+
     var workoutTitle = widget.hangboardWorkout.workoutTitle;
 
-    return ExerciseTile(
-      child: ListTile(
-        title: Text(workoutTitle),
-        trailing: !_isEditing ? _arrowIcon : interactiveCloseIcon(workoutTitle),
-        onLongPress: () {
-          setState(() {
-            _isEditing = true;
-          });
-        },
-        onTap: () {
-          if(_isEditing) {
-            setState(() {
-              _isEditing = false;
-            });
-          } else {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) {
-                return BlocProvider(
-                  bloc: WorkoutBloc(),
-                  //todo: make sure this works/is the right place to create
-                  child: ExercisePageView(
-                    title: workoutTitle,
-                    hangboardWorkout: widget.hangboardWorkout,
-                    workoutId: widget.index.toString(),
-                  ),
-                );
+    return BlocBuilder(
+        bloc: _hangboardWorkoutTileBloc,
+        builder: (context, HangboardWorkoutTileState state) {
+          return ExerciseTile(
+            child: ListTile(
+              title: Text(workoutTitle),
+              trailing: !state.isEditing
+                  ? _arrowIcon
+                  : interactiveCloseIcon(workoutTitle),
+              onLongPress: () {
+                _hangboardWorkoutTileBloc
+                    .dispatch(HangboardWorkoutTileLongPressed(true));
               },
-            ));
-          }
-        },
-      ),
-    );
+              onTap: () {
+                if(state.isEditing) {
+                  _hangboardWorkoutTileBloc
+                      .dispatch(HangboardWorkoutTileTapped(false));
+                } else {
+                  // todo: navigator push route -- need workout info passed in to do that
+                }
+              },
+            ),
+          );
+        });
   }
 
-  Widget interactiveCloseIcon(var workoutTitle) {
+  Widget interactiveCloseIcon(String workoutTitle) {
     return GestureDetector(
       child: Icon(Icons.close),
       onTap: () {
@@ -97,20 +87,15 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                       child: Text('Delete'),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        // https://firebase.google.com/docs/firestore/solutions/delete-collections
-                        /*collectionRef.getDocuments().then((snapshot) {
-                          snapshot.documents.forEach(
-                              (document) => document.reference.delete());
-                          Firestore.instance
-                              .document('hangboard/$workoutTitle')
-                              .delete();
-                        });*/
+                        _hangboardParentBloc.dispatch(
+                            DeleteWorkoutFromHangboardParent(
+                                widget.hangboardWorkout));
 
                         /// Clear out sharedPrefs with workout deletion
                         /*SharedPreferences.getInstance().then((preferences) {
                           preferences.getKeys().remove(workoutTitle);
                         });*/
-                        //todo: pass in bloc and dispatch to delete here
+
                         Preferences().removeTimerPreferences(workoutTitle);
                       },
                     )
@@ -129,9 +114,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                     ),
                   ));
             });
-        setState(() {
-          _isEditing = false;
-        });
+        _hangboardWorkoutTileBloc.dispatch(HangboardWorkoutTileTapped(false));
       },
     );
   }

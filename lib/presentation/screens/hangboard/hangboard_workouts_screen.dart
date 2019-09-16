@@ -1,11 +1,13 @@
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
+import 'package:crux/backend/models/hangboard/hangboard_parent.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/presentation/shared_layouts/app_bar.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
+import 'package:crux/presentation/widgets/generic_widgets.dart';
 import 'package:crux/presentation/widgets/hangboard_workout_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -52,56 +54,75 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
               textAlign: TextAlign.start,
             ),
           ),
-          BlocBuilder(
-            bloc: _hangboardParentBloc,
-            builder: (context, HangboardParentState parentState) {
-              if (parentState is HangboardParentLoaded) {
-                return workoutListBuilder(
-                    parentState.hangboardParent.hangboardWorkoutList);
-              } else if(parentState is HangboardParentWorkoutAdded) {
-                exerciseSavedSnackbar(context);
-                return workoutListBuilder(
-                    parentState.hangboardParent.hangboardWorkoutList);
-              } else if(parentState is HangboardParentDuplicateWorkout) {
-                _exerciseExistsAlert(context, widget.title);
-                return workoutListBuilder(
-                    parentState.hangboardParent.hangboardWorkoutList);
-              } else {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text('Retrieving workouts...'),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-            },
+          BlocProvider(
+            builder: (context) => _hangboardParentBloc,
+            child: BlocListener<HangboardParentBloc, HangboardParentState>(
+              listener: (context, state) {
+                if(state is HangboardParentDuplicateWorkout) {
+                  _workoutExistsAlert(
+                      state.hangboardWorkout.workoutTitle, context);
+                } else if(state is HangboardParentWorkoutAdded) {
+                  GenericWidgets.createGenericSnackbar(
+                      context, 'Workout added!');
+                } else if(state is HangboardParentWorkoutDeleted) {
+                  GenericWidgets.createGenericSnackbar(
+                      context, 'Workout deleted!');
+                }
+//                TODO: This method may be useful in the future -> executes callback once build is completed
+//                  WidgetsBinding.instance.addPostFrameCallback((_) => GenericWidgets.createGenericSnackbar(context, 'Workout Deleted!'));
+              },
+              child: BlocBuilder(
+                bloc: _hangboardParentBloc,
+                builder: (context, HangboardParentState parentState) {
+                  if(parentState is HangboardParentLoaded) {
+                    return workoutListBuilder(parentState.hangboardParent);
+                  } else if(parentState is HangboardParentWorkoutAdded) {
+                    return workoutListBuilder(parentState.hangboardParent);
+                  } else if(parentState is HangboardParentDuplicateWorkout) {
+                    return workoutListBuilder(parentState.hangboardParent);
+                  } else if(parentState is HangboardParentWorkoutDeleted) {
+                    return workoutListBuilder(parentState.hangboardParent);
+                  } else {
+                    return _retrievingWorkoutsSpinner();
+                  }
+                },
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Flexible workoutListBuilder(List<HangboardWorkout> workoutList) {
+  Padding _retrievingWorkoutsSpinner() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: const Text('Retrieving workouts...'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Flexible workoutListBuilder(HangboardParent hangboardParent) {
+    var workoutList = hangboardParent.hangboardWorkoutList;
     return Flexible(
       child: ListView.builder(
         shrinkWrap: true,
         itemCount: (workoutList.length + 1),
         itemBuilder: (context, index) {
           if(index == workoutList.length) {
-            //todo: this was scaffoldContext before, make sure context doesn't cause any bugs
-            //todo: i don't think this makes sense - make sure to check back here on why i'm passing workout
-            return addWorkoutButton(workoutList, context);
+            return addWorkoutButton(hangboardParent);
           }
           return HangboardWorkoutTile(
             hangboardWorkout: workoutList[index],
@@ -112,27 +133,27 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-//todo: not sure if save is implemented yet, make sure that happens
-  /*void saveWorkoutToFirebase(String workoutTitle,
-                             BuildContext scaffoldContext) {
-    CollectionReference collectionReference =
-    Firestore.instance.collection('hangboard');
+  Widget addWorkoutButton(HangboardParent hangboardParent) {
+    return ExerciseTile(
+      tileColor: Theme
+          .of(context)
+          .primaryColor,
+      child: FlatButton(
+        color: Theme
+            .of(context)
+            .primaryColor,
+        onPressed: () {
+          _addWorkoutDialog(hangboardParent);
+        },
+        child: const Text('Add Workout'),
+      ),
+    );
+  }
 
-    var workoutRef = collectionReference.document(workoutTitle);
-    workoutRef.get().then((doc) {
-      if(doc.exists) {
-        _exerciseExistsAlert(scaffoldContext, workoutTitle);
-      } else {
-        workoutRef.setData(Map());
-        exerciseSavedSnackbar(scaffoldContext);
-      }
-    });
-  }*/
-
-  Future<void> _exerciseExistsAlert(
-      BuildContext scaffoldContext, String workoutTitle) async {
+  Future<void> _workoutExistsAlert(String workoutTitle,
+                                   BuildContext scaffoldContext) async {
     return showDialog<void>(
-      context: context,
+      context: scaffoldContext,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -165,9 +186,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     'Ok',
                     style: TextStyle(color: Theme.of(context).accentColor),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
@@ -177,50 +196,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  void exerciseSavedSnackbar(BuildContext scaffoldContext) {
-    Scaffold.of(scaffoldContext).showSnackBar(
-      SnackBar(
-        duration: Duration(seconds: 3),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Workout Saved!',
-                      style: TextStyle(
-                          color: Theme.of(scaffoldContext).accentColor),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget addWorkoutButton(List<HangboardWorkout> hangboardWorkoutList,
-                          BuildContext scaffoldContext) {
-    return ExerciseTile(
-      tileColor: Theme.of(context).primaryColor,
-      child: FlatButton(
-        color: Theme.of(context).primaryColor,
-        onPressed: () {
-          addWorkoutDialog(hangboardWorkoutList, scaffoldContext);
-        },
-        child: const Text('Add Workout'),
-      ),
-    );
-  }
-
-  void addWorkoutDialog(List<HangboardWorkout> hangboardWorkoutList,
-                        BuildContext scaffoldContext) {
+  void _addWorkoutDialog(HangboardParent hangboardParent) {
     showDialog(
       context: context,
       builder: (context) {
@@ -238,9 +214,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     'Cancel',
                     style: TextStyle(color: Colors.black54),
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
                 FlatButton(
                   child: Text(
@@ -250,22 +224,9 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                   onPressed: () {
                     var hangboardWorkout =
                     HangboardWorkout(controller.value.text);
-//                    hangboardWorkoutList.add(hangboardWorkout);
-                    _hangboardParentBloc
-                        .dispatch(UpdateHangboardParent(hangboardWorkout));
-                    /*widget.firestoreHangboardWorkoutsRepository
-                        .addNewWorkout(hangboardWorkout)
-                        .then((workoutAdded) {
-                      if (workoutAdded) {
-                        exerciseSavedSnackbar(scaffoldContext);
-                      } else {
-                        _exerciseExistsAlert(
-                            scaffoldContext, hangboardWorkout.workoutTitle);
-                      }
-                    });*/ //todo: how do i notify if it already exists now?
-                    /*saveWorkoutToFirebase(
-                        controller.text, scaffoldContext);*/
                     Navigator.of(context).pop();
+                    _hangboardParentBloc.dispatch(AddWorkoutToHangboardParent(
+                        hangboardParent, hangboardWorkout));
                   },
                 ),
               ],

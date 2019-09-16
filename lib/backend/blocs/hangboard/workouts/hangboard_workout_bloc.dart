@@ -53,3 +53,4 @@ class WorkoutBloc extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
     return null;
   }
 }
+

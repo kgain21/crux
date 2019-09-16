@@ -5,10 +5,6 @@ import 'package:meta/meta.dart';
 @immutable
 abstract class HangboardWorkoutState extends Equatable {
   HangboardWorkoutState([List props = const []]) : super(props);
-//todo: also need to update workout event names
-
-//todo: also havent done exercise_page_view yet
-
 }
 
 class HangboardWorkoutLoading extends HangboardWorkoutState {

@@ -21,9 +21,10 @@ class HangboardParentBloc
       HangboardParentEvent event) async* {
     if (event is LoadHangboardParent) {
       yield* _mapLoadParentToState();
-    }
-    if(event is UpdateHangboardParent) {
-      yield* _mapUpdateParentToState(event);
+    } else if(event is AddWorkoutToHangboardParent) {
+      yield* _mapAddWorkoutToHangboardParent(event);
+    } else if(event is DeleteWorkoutFromHangboardParent) {
+      yield* _mapDeleteWorkoutToState(event);
     }
   }
 
@@ -34,46 +35,57 @@ class HangboardParentBloc
 
       yield HangboardParentLoaded(HangboardParent(hangboardWorkoutEntityList
           .map(HangboardWorkout.fromEntity)
-          .toList())
-      );
-    } catch (_) {
+          .toList()));
+    } catch(e) {
+      print(e);
       yield HangboardParentNotLoaded();
     }
   }
 
-  Stream<HangboardParentState> _mapUpdateParentToState(
-      UpdateHangboardParent event) async* {
+  Stream<HangboardParentState> _mapAddWorkoutToHangboardParent(
+      AddWorkoutToHangboardParent event) async* {
     try {
-      bool workoutAdded = await hangboardWorkoutsRepository.addNewWorkout(
-          event.hangboardWorkout);
+      bool workoutAdded = await hangboardWorkoutsRepository
+          .addNewWorkout(event.hangboardWorkout);
 
       if(!workoutAdded) {
-        //todo: left off here 8/29
         yield HangboardParentDuplicateWorkout(
-            event.hangboardWorkout, event.hangboardWorkout);
+            event.hangboardWorkout, event.hangboardParent);
       } else {
         List<HangboardWorkoutEntity> hangboardWorkoutEntityList =
         await hangboardWorkoutsRepository.getWorkouts();
 
-        yield HangboardParentWorkoutAdded(
-            HangboardParent(hangboardWorkoutEntityList
+        yield HangboardParentWorkoutAdded(HangboardParent(
+            hangboardWorkoutEntityList
                 .map(HangboardWorkout.fromEntity)
-                .toList())
-        );
+                .toList()));
       }
-    } catch(_) {
+    } catch(e) {
+      print(e);
       yield HangboardParentNotLoaded();
     }
   }
 
   Stream<HangboardParentState> _mapAddWorkoutToState(AddHangboardParent event) {
-    //todo: 8/27 need to add one new workout to the list, should i just use the addWorkout method?
-    //todo: or update parent? still need to figure out.
     return null;
   }
 
-  Stream<HangboardParentState> _mapDeleteWorkoutToState(event) {
-    return null;
+  Stream<HangboardParentState> _mapDeleteWorkoutToState(
+      DeleteWorkoutFromHangboardParent event) async* {
+    try {
+      await hangboardWorkoutsRepository.deleteWorkout(event.hangboardWorkout);
+
+      List<HangboardWorkoutEntity> hangboardWorkoutEntityList =
+      await hangboardWorkoutsRepository.getWorkouts();
+
+      yield HangboardParentWorkoutDeleted(HangboardParent(
+          hangboardWorkoutEntityList
+              .map(HangboardWorkout.fromEntity)
+              .toList()));
+    } catch(e) {
+      print(e);
+      yield HangboardParentNotLoaded(); //todo: don't think i want to load nothing - create new state
+    }
   }
 
   Stream<HangboardParentState> _mapUpdateWorkoutToState(event) {

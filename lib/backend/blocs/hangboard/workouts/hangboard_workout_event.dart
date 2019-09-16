@@ -72,3 +72,23 @@ class ClearWorkoutPreferences extends HangboardWorkoutEvent {
   String toString() =>
       'ClearWorkoutPreferences { hangboardWorkout: $hangboardWorkout }';
 }
+
+class DeleteButtonTap extends HangboardWorkoutEvent {
+  final HangboardWorkout hangboardWorkout;
+
+  DeleteButtonTap(this.hangboardWorkout) : super([hangboardWorkout]);
+
+  @override
+  String toString() =>
+      'DeleteButtonTap { hangboardWorkout: $hangboardWorkout }';
+}
+
+class ExerciseTileLongPress extends HangboardWorkoutEvent {
+  final HangboardWorkout hangboardWorkout;
+
+  ExerciseTileLongPress(this.hangboardWorkout) : super([hangboardWorkout]);
+
+  @override
+  String toString() =>
+      'ExerciseTileLongPress { hangboardWorkout: $hangboardWorkout }';
+}
