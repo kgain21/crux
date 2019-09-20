@@ -4,7 +4,9 @@ import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_
 import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_event.dart';
 import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/preferences.dart';
+import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
 import 'package:crux/presentation/widgets/exercise_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,8 +15,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class HangboardWorkoutTile extends StatefulWidget {
   final int index;
   final HangboardWorkout hangboardWorkout;
+  final HangboardWorkoutsRepository firestoreHangboardWorkoutsRepository;
 
-  HangboardWorkoutTile({this.index, this.hangboardWorkout}) : super();
+  HangboardWorkoutTile({this.index,
+                         this.hangboardWorkout,
+                         this.firestoreHangboardWorkoutsRepository})
+      : super();
 
   @override
   State<StatefulWidget> createState() => _HangboardWorkoutTileState();
@@ -43,28 +49,35 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
         builder: (context, HangboardWorkoutTileState state) {
           return ExerciseTile(
             child: ListTile(
-              title: Text(workoutTitle),
-              trailing: !state.isEditing
-                  ? _arrowIcon
-                  : interactiveCloseIcon(workoutTitle),
-              onLongPress: () {
-                _hangboardWorkoutTileBloc
-                    .dispatch(HangboardWorkoutTileLongPressed(true));
-              },
-              onTap: () {
-                if(state.isEditing) {
+                title: Text(workoutTitle),
+                trailing:
+                !state.isEditing ? _arrowIcon : interactiveCloseIcon(),
+                onLongPress: () {
                   _hangboardWorkoutTileBloc
-                      .dispatch(HangboardWorkoutTileTapped(false));
-                } else {
-                  // todo: navigator push route -- need workout info passed in to do that
-                }
-              },
-            ),
+                      .dispatch(HangboardWorkoutTileLongPressed(true));
+                },
+                onTap: () {
+                  if(state.isEditing) {
+                    _hangboardWorkoutTileBloc
+                        .dispatch(HangboardWorkoutTileTapped(false));
+                  } else {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ExercisePageView(
+                                hangboardWorkout: widget.hangboardWorkout,
+                                firestoreHangboardWorkoutsRepository:
+                                widget.firestoreHangboardWorkoutsRepository,
+                              ),
+                        ));
+                  }
+                }),
           );
         });
   }
 
-  Widget interactiveCloseIcon(String workoutTitle) {
+  Widget interactiveCloseIcon() {
     return GestureDetector(
       child: Icon(Icons.close),
       onTap: () {
@@ -96,7 +109,8 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                           preferences.getKeys().remove(workoutTitle);
                         });*/
 
-                        Preferences().removeTimerPreferences(workoutTitle);
+                        Preferences().removeTimerPreferences(
+                            widget.hangboardWorkout.workoutTitle);
                       },
                     )
                   ],
@@ -106,7 +120,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                       children: [
                         TextSpan(text: 'Are you sure you want to delete '),
                         TextSpan(
-                          text: '$workoutTitle?\n\n',
+                          text: '${widget.hangboardWorkout.workoutTitle}?\n\n',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         TextSpan(text: 'All exercises will be lost.'),

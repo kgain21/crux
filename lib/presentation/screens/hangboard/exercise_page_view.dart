@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/presentation/widgets/dots_indicator.dart';
 import 'package:crux/presentation/widgets/exercise_form.dart';
 import 'package:crux/presentation/widgets/hangboard_page_2.dart';
@@ -18,16 +18,15 @@ class ShakeCurve extends Curve {
 }
 
 class ExercisePageView extends StatefulWidget {
-  final String title;
   final HangboardWorkout hangboardWorkout;
-  final List<HangboardExercise> hangboardExerciseList;
-  final workoutId;
+  final FirestoreHangboardWorkoutsRepository
+  firestoreHangboardWorkoutsRepository;
 
   @override
   State createState() => _ExercisePageViewState();
 
   ExercisePageView(
-      {this.title, this.hangboardWorkout, this.workoutId, this.hangboardExerciseList});
+      {this.hangboardWorkout, this.firestoreHangboardWorkoutsRepository});
 }
 
 class _ExercisePageViewState extends State<ExercisePageView> {
@@ -50,8 +49,9 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   bool _exerciseFinished;
   bool _preferencesClearedFlag;
 
-  WorkoutBloc _workoutBloc;
+  HangboardWorkoutBloc _hangboardExerciseBloc;
 
+//todo: left off here 9/18 -> build out workoutBloc (cant dispatch exercise below)
   /* bool _handlePageNotification(ScrollNotification notification,
                                PageController leader, PageController follower) {
     if (notification.depth == 0 && notification is ScrollUpdateNotification) {
@@ -88,59 +88,20 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         _currentPageValue = _controller.page;
       }); //todo: make sure I get rid of this setState at some point
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
+    _hangboardExerciseBloc = HangboardWorkoutBloc(
+        firestoreHangboardWorkoutsRepository:
+        widget.firestoreHangboardWorkoutsRepository);
+//        hangboardWorkout: widget.hangboardWorkout)
+//      ..dispatch(LoadHangboardWorkout());
     return Scaffold(
       appBar: AppBar(
         elevation: 8.0,
-        title: Text(widget.title),
-        actions: <Widget>[
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              //TODO: switch statement for more menuButtons
-              if(value == 'reset workout') {
-                SharedPreferences.getInstance().then((preferences) {
-                  preferences.getKeys().forEach((key) {
-                    if(key.contains(widget.title)) preferences.remove(key);
-                  });
-                  setState(() {
-                    _preferencesClearedFlag = !_preferencesClearedFlag;
-                  });
-                });
-              } else if(value == 'clear sharedPreferences') {
-                SharedPreferences.getInstance().then((preferences) {
-                  preferences.clear();
-                });
-              } else {
-                SharedPreferences.getInstance().then((preferences) {
-                  print('----------------------------------------------------');
-                  preferences.getKeys().forEach(
-                          (key) => print('$key: ${preferences.get(key)}\n'));
-                  print('----------------------------------------------------');
-                });
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return <PopupMenuItem<String>>[
-                new PopupMenuItem(
-                  child: new Text('Reset Workout'),
-                  value: 'reset workout',
-                ),
-                new PopupMenuItem(
-                  child: new Text('Clear SharedPreferences'),
-                  value: 'clear sharedPreferences',
-                ),
-                new PopupMenuItem(
-                  child: new Text('Print SharedPreferences'),
-                  value: 'print sharedPreferences',
-                ),
-              ];
-            },
-          )
-        ],
+        title: Text(widget.hangboardWorkout.workoutTitle),
+        actions: <Widget>[buildPopupMenuButton()],
         //TODO: Add action menu that allows you to reset all exercises (clear sharedPrefs)
       ),
       body: exercisePageView(),
@@ -157,7 +118,6 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   Widget exercisePageView() {
     return GestureDetector(
       onLongPress: () {
-
         setState(() {
           _zoomOut = true;
           print('editing');
@@ -176,36 +136,39 @@ class _ExercisePageViewState extends State<ExercisePageView> {
 
   Widget exerciseBlocBuilder() {
     return BlocBuilder(
-        bloc: _workoutBloc,
+        bloc: _hangboardExerciseBloc,
         builder: (context, hangboardWorkoutState) {
           int exerciseCount = 0;
-          if(hangboardWorkoutState is HangboardWorkoutLoaded) {
+//          if (hangboardWorkoutState is HangboardWorkoutLoaded) {
 //            var exerciseList =
 //                hangboardWorkoutState.hangboardWorkout.hangboardExerciseList;
-            exerciseCount = widget.hangboardExerciseList.length;
+          var exerciseList = widget.hangboardWorkout.hangboardExerciseList ??
+              [];
+          exerciseCount = exerciseList.length;
 
-            _pageCount = exerciseCount + 1;
+          _pageCount = exerciseCount + 1;
 
-            return Center(
-              child: new Container(
-                color: Theme
-                    .of(context)
-                    .canvasColor,
-                /*Dark*/
-                child: Stack(
-                  children: <Widget>[
-                    PageView(
-                      controller: _zoomOut ? _zoomController : _controller,
-                      children: createPageList(widget.hangboardExerciseList),
-                    ),
-                    dotsIndicator(),
-                  ],
-                ),
+          return Center(
+            child: new Container(
+              color: Theme
+                  .of(context)
+                  .canvasColor,
+              /*Dark*/
+              child: Stack(
+                children: <Widget>[
+                  PageView(
+                    controller: _zoomOut ? _zoomController : _controller,
+                    children: createPageList(
+                        exerciseList),
+                  ),
+                  dotsIndicator(),
+                ],
               ),
-            );
-          } else {
-            return Center();
-          } //just making it happy here- double check
+            ),
+          );
+//          } else {
+//            return Center();
+//          } //just making it happy here- double check
         });
   }
 
@@ -257,7 +220,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               context,
               MaterialPageRoute(builder: (context) {
                 return ExerciseForm(
-                  workoutTitle: widget.title,
+                  workoutTitle: widget.hangboardWorkout.workoutTitle,
                 );
               }),
             );
@@ -282,7 +245,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
       return Transform(
         transform: Matrix4.identity()..rotateX(_currentPageValue - index),
         child: HangboardPage(
-          workoutTitle: widget.title,
+          workoutTitle: widget.hangboardWorkout.workoutTitle,
           index: index,
           nextPageCallback: nextPageCallback,
           hangboardExercise: hangboardExercise,
@@ -293,7 +256,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         transform: Matrix4.identity()
           ..rotateY(_currentPageValue - index),
         child: HangboardPage(
-          workoutTitle: widget.title,
+          workoutTitle: widget.hangboardWorkout.workoutTitle,
           index: index,
           nextPageCallback: nextPageCallback,
           hangboardExercise: hangboardExercise,
@@ -304,7 +267,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     return Stack(
       children: <Widget>[
         HangboardPage(
-          workoutTitle: widget.title,
+          workoutTitle: widget.hangboardWorkout.workoutTitle,
           index: index,
           nextPageCallback: nextPageCallback,
           hangboardExercise: hangboardExercise,
@@ -358,6 +321,53 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           ),
         ),
       ),
+    );
+  }
+
+  PopupMenuButton<String> buildPopupMenuButton() {
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        //TODO: switch statement for more menuButtons
+        if(value == 'reset workout') {
+          SharedPreferences.getInstance().then((preferences) {
+            preferences.getKeys().forEach((key) {
+              if(key.contains(widget.hangboardWorkout.workoutTitle))
+                preferences.remove(key);
+            });
+            setState(() {
+              _preferencesClearedFlag = !_preferencesClearedFlag;
+            });
+          });
+        } else if(value == 'clear sharedPreferences') {
+          SharedPreferences.getInstance().then((preferences) {
+            preferences.clear();
+          });
+        } else {
+          SharedPreferences.getInstance().then((preferences) {
+            print('----------------------------------------------------');
+            preferences
+                .getKeys()
+                .forEach((key) => print('$key: ${preferences.get(key)}\n'));
+            print('----------------------------------------------------');
+          });
+        }
+      },
+      itemBuilder: (BuildContext context) {
+        return <PopupMenuItem<String>>[
+          new PopupMenuItem(
+            child: new Text('Reset Workout'),
+            value: 'reset workout',
+          ),
+          new PopupMenuItem(
+            child: new Text('Clear SharedPreferences'),
+            value: 'clear sharedPreferences',
+          ),
+          new PopupMenuItem(
+            child: new Text('Print SharedPreferences'),
+            value: 'print sharedPreferences',
+          ),
+        ];
+      },
     );
   }
 

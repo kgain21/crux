@@ -2,17 +2,18 @@ import 'package:bloc/bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_event.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
 import 'package:crux/backend/blocs/timer/timer_event.dart';
+import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:meta/meta.dart';
 
 class HangboardExerciseBloc
     extends Bloc<HangboardExerciseEvent, HangboardExerciseState> {
   final FirestoreHangboardWorkoutsRepository firestore;
-  final String workoutTitle;
+  final HangboardWorkout hangboardWorkout;
 
   HangboardExerciseBloc({
                           @required this.firestore,
-                          this.workoutTitle,
+                          this.hangboardWorkout,
                         });
 
   @override

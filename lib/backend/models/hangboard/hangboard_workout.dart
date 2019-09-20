@@ -1,32 +1,34 @@
 import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 
+import 'hangboard_exercise.dart';
+
 class HangboardWorkout {
   final String workoutTitle;
 
-//  final List<HangboardExercise> hangboardExerciseList;
+  final List<HangboardExercise> hangboardExerciseList;
 
   HangboardWorkout(this.workoutTitle,
-                   //    this.hangboardExerciseList,
+                   this.hangboardExerciseList,
                    );
 
   @override
   String toString() {
     return 'HangboardWorkout { workoutTitle: $workoutTitle, '
-//        'hangboardExerciseList: $hangboardExerciseList '
+        'hangboardExerciseList: $hangboardExerciseList '
         '}';
   }
 
   HangboardWorkoutEntity toEntity() {
     return HangboardWorkoutEntity(
       workoutTitle,
-//      hangboardExerciseList,
+      hangboardExerciseList,
     );
   }
 
   static HangboardWorkout fromEntity(HangboardWorkoutEntity entity) {
     return HangboardWorkout(
       entity.workoutTitle,
-//      entity.hangboardExerciseList,
+      entity.hangboardExerciseList,
     );
   }
 }

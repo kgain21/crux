@@ -1,6 +1,7 @@
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_parent.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
@@ -30,11 +31,6 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
 
   @override
   void initState() {
-    _hangboardParentBloc = HangboardParentBloc(
-        hangboardWorkoutsRepository:
-            widget.firestoreHangboardWorkoutsRepository)
-      ..dispatch(LoadHangboardParent());
-
     super.initState();
   }
 
@@ -54,8 +50,15 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
               textAlign: TextAlign.start,
             ),
           ),
-          BlocProvider(
-            builder: (context) => _hangboardParentBloc,
+          BlocProvider<HangboardParentBloc>(
+            builder: (context) {
+              _hangboardParentBloc = HangboardParentBloc(
+                  hangboardWorkoutsRepository:
+                  widget.firestoreHangboardWorkoutsRepository)
+                ..dispatch(LoadHangboardParent());
+
+              return _hangboardParentBloc;
+            },
             child: BlocListener<HangboardParentBloc, HangboardParentState>(
               listener: (context, state) {
                 if(state is HangboardParentDuplicateWorkout) {
@@ -127,6 +130,8 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
           return HangboardWorkoutTile(
             hangboardWorkout: workoutList[index],
             index: index,
+            firestoreHangboardWorkoutsRepository:
+            widget.firestoreHangboardWorkoutsRepository,
           );
         },
       ),
@@ -223,7 +228,8 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                   ),
                   onPressed: () {
                     var hangboardWorkout =
-                    HangboardWorkout(controller.value.text);
+                    HangboardWorkout(
+                        controller.value.text, <HangboardExercise>[]);
                     Navigator.of(context).pop();
                     _hangboardParentBloc.dispatch(AddWorkoutToHangboardParent(
                         hangboardParent, hangboardWorkout));

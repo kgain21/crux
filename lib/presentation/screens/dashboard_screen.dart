@@ -18,17 +18,22 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   //todo: this map should be passed in given the day ->
-  final Map<String, List<String>> screenMap = {
+  final Map<String, List<Object>> screenMap = {
 //    'Profile': null,
-    'Warmup': ['/warmup_screen', 'assets/images/stretching-01.jpg'],
+    'Warmup': [
+      '/warmup_screen', 'assets/images/stretching-01.jpg', Color(0xFF42b983)],
     'Hangboard': [
       '/hangboard_workout_screen',
-      'assets/images/hangboard-01.jpg'
+      'assets/images/hangboard-01.jpg', Color(0xFF22a2c9)
     ],
-    'Campus': ['/campus_screen', 'assets/images/campus-board-01.jpg'],
+    'Campus': [
+      '/campus_screen', 'assets/images/campus-board-01.jpg', Color(0xFFFF6666)],
     'Weight Lifting': [
       '/weight_lifting_screen',
-      'assets/images/weightlifting-01.jpg'
+      'assets/images/weightlifting-01.jpg',
+      Color(0xFFc08b30),
+      Color(0xFFe96900),
+
     ],
 //    'ARC Training': null /*'/arc_training_workout_screen'*/,
 //    '4 x 4s': null,
@@ -74,7 +79,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: Text(
-                'Title Filler',
+                '${widget.username.split(' ')[0]}\'s Profile',
                 style: TextStyle(fontSize: 25.0),
               ),
             ),
@@ -117,18 +122,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Container(
                   alignment: Alignment.bottomLeft,
                   decoration: new BoxDecoration(
+                    color: screenMap.values.elementAt(index)[2],
                     borderRadius: BorderRadius.all(Radius.circular(6.0)),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        blurRadius: 4.0,
+                        blurRadius: 1.0,
                       )
                     ],
-                    image: new DecorationImage(
+                    /*image: new DecorationImage(
                       fit: BoxFit.fill,
                       image: new AssetImage(
                         screenMap.values.elementAt(index)[1],
                       ),
-                    ),
+                    ),*/
                   ),
                   constraints: BoxConstraints(
                     minWidth: MediaQuery.of(context).size.width / 2.0,
@@ -138,6 +144,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       screenMapKeys[index],
+//                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),

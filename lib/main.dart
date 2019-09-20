@@ -64,7 +64,8 @@ class MyApp extends StatelessWidget {
         bottomAppBarColor: Color(0xFFe2f1f8),
         secondaryHeaderColor: Color(0xFF009624),
 //        accentColor: Color(0xAF76ff03),
-        accentColor: Color(0xFF64dd17),
+//        accentColor: Color(0xFF64dd17),
+        accentColor: Color(0xFF42b983),
         bottomAppBarTheme: BottomAppBarTheme(
           color: Color(0xFFcfd8dc),
         ),

@@ -4,12 +4,13 @@ import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.da
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:meta/meta.dart';
 
-class WorkoutBloc extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
+class HangboardWorkoutBloc
+    extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
 
   final FirestoreHangboardWorkoutsRepository
   firestoreHangboardWorkoutsRepository;
 
-  WorkoutBloc({@required this.firestoreHangboardWorkoutsRepository});
+  HangboardWorkoutBloc({@required this.firestoreHangboardWorkoutsRepository});
 
   @override
   HangboardWorkoutState get initialState => HangboardWorkoutLoading();
@@ -31,8 +32,8 @@ class WorkoutBloc extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
   Stream<HangboardWorkoutState> _mapLoadWorkoutToState(
       LoadHangboardWorkout event) async* {
     try {
-      final exerciseList = await firestoreHangboardWorkoutsRepository
-          .getExercises(event.workoutTitle);
+//      final exerciseList = await firestoreHangboardWorkoutsRepository
+//          .getExercises(event.workoutTitle);
 
 //      yield HangboardWorkoutLoaded(HangboardWorkout(event.workoutTitle,
 //          exerciseList.map(HangboardExercise.fromEntity).toList()));
