@@ -1,7 +1,6 @@
 import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
-import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart';
-
 
 // TODO: Recommended to not use static method only classes --
 // https://dart.dev/guides/language/effective-dart/design#avoid-defining-a-class-that-contains-only-static-members
@@ -94,26 +93,26 @@ class StringFormatUtils {
     return decimal.toString();
   }
 
-  static String createHangboardExerciseId(
-      HangboardExerciseEntity hangboardExerciseEntity) {
-    String exerciseId =
-        '${hangboardExerciseEntity.numberOfHands.toString()} handed';
+  static String createHangboardExerciseTitle(
+      HangboardExercise hangboardExercise) {
+    String exerciseTitle = '${hangboardExercise.numberOfHands
+        .toString()} handed';
 
-    if(hangboardExerciseEntity.holdDepth == null) {
-      if(hangboardExerciseEntity.fingerConfiguration == null ||
-          hangboardExerciseEntity.fingerConfiguration == '') {
-        exerciseId += ' ${hangboardExerciseEntity.holdType}';
+    if(hangboardExercise.holdDepth == null) {
+      if(hangboardExercise.fingerConfiguration == null ||
+          hangboardExercise.fingerConfiguration == '') {
+        exerciseTitle += ' ${hangboardExercise.holdType}';
       } else {
-        exerciseId +=
-        ' ${hangboardExerciseEntity
-            .fingerConfiguration} ${hangboardExerciseEntity.holdType}';
+        exerciseTitle +=
+        ' ${hangboardExercise.fingerConfiguration} ${hangboardExercise
+            .holdType}';
       }
     } else {
-      exerciseId +=
-      ' ${hangboardExerciseEntity.holdDepth}${hangboardExerciseEntity
-          .depthMeasurementSystem} ${hangboardExerciseEntity
-          .fingerConfiguration} ${hangboardExerciseEntity.holdType}';
+      exerciseTitle +=
+      ' ${hangboardExercise.holdDepth}${hangboardExercise
+          .depthMeasurementSystem} ${hangboardExercise
+          .fingerConfiguration} ${hangboardExercise.holdType}';
     }
-    return exerciseId;
+    return exerciseTitle;
   }
 }

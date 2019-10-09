@@ -1,14 +1,29 @@
-import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-abstract class HangboardWorkoutTileState extends Equatable {
+class HangboardWorkoutTileState {
   final bool isEditing;
 
-  HangboardWorkoutTileState(this.isEditing, [List props = const []])
-      : super(props);
-}
+  HangboardWorkoutTileState({@required this.isEditing});
 
+  HangboardWorkoutTileState update({bool isEditing}) {
+    return copyWith(isEditing: isEditing);
+  }
+
+  HangboardWorkoutTileState copyWith({bool isEditing}) {
+    return HangboardWorkoutTileState(
+      isEditing: isEditing ?? this.isEditing,
+    );
+  }
+
+  @override
+  String toString() {
+    return '''LoginState {
+      isEditing: $isEditing
+    }''';
+  }
+}
+/*
 class HangboardWorkoutTileInitial extends HangboardWorkoutTileState {
   final bool isEditing;
 
@@ -28,4 +43,4 @@ class HangboardWorkoutTileEditing extends HangboardWorkoutTileState {
 
   @override
   String toString() => 'HangboardWorkoutTileEditing';
-}
+}*/

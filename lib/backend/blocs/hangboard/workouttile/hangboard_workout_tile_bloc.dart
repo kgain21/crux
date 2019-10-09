@@ -6,7 +6,7 @@ class HangboardWorkoutTileBloc
     extends Bloc<HangboardWorkoutTileEvent, HangboardWorkoutTileState> {
   @override
   HangboardWorkoutTileState get initialState =>
-      HangboardWorkoutTileInitial(false);
+      HangboardWorkoutTileState(isEditing: false);
 
   @override
   Stream<HangboardWorkoutTileState> mapEventToState(
@@ -21,17 +21,15 @@ class HangboardWorkoutTileBloc
   }
 
   Stream<HangboardWorkoutTileState> _mapDeleteButtonTapped(event) async* {
-    //dispatch to workout delete from tile ui directly
-//    workoutBloc.dispatch(event)
-    yield null; /*HangboardWorkoutTileInitial(false);*/
+    yield null;
   }
 
   Stream<HangboardWorkoutTileState> _mapExerciseTileLongPressed(event) async* {
-    yield HangboardWorkoutTileEditing(true);
+    yield currentState.update(isEditing: true);
   }
 
   Stream<HangboardWorkoutTileState> _mapHangboardWorkoutTileTapped(
       event) async* {
-    yield HangboardWorkoutTileInitial(false);
+    yield currentState.update(isEditing: false);
   }
 }

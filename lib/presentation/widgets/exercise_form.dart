@@ -1,21 +1,26 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_event.dart';
+import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_state.dart';
 import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
+import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/presentation//widgets/local_unit_picker_tile.dart';
 import 'package:crux/utils/string_format_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ExerciseForm extends StatefulWidget {
   final String workoutTitle;
+  final FirestoreHangboardWorkoutsRepository
+  firestoreHangboardWorkoutsRepository;
 
-  ExerciseForm({
-    this.workoutTitle,
-  });
+  ExerciseForm({this.firestoreHangboardWorkoutsRepository, this.workoutTitle});
 
   @override
   State createState() => new _ExerciseFormState();
@@ -35,7 +40,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
   String _depthMeasurementSystem;
   String _resistanceMeasurementSystem;
-  int _numberOfHands;
+  bool _isTwoHandsSelected;
   Hold _hold;
   FingerConfiguration _fingerConfiguration;
   double _depth;
@@ -50,11 +55,13 @@ class _ExerciseFormState extends State<ExerciseForm> {
   bool _hangProtocolSelected;
   bool _autoValidate;
 
+  ExerciseFormBloc _exerciseFormBloc;
+
   @override
   void initState() {
     super.initState();
 
-    _numberOfHands = 2;
+//    _isTwoHandsSelected = true;
     _holdSelected = false;
     _depthMeasurementSystem = 'mm';
     _resistanceMeasurementSystem = 'kg';
@@ -64,6 +71,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
   @override
   Widget build(BuildContext context) {
+    _exerciseFormBloc = ExerciseFormBloc(
+        firestoreHangboardWorkoutsRepository: widget
+            .firestoreHangboardWorkoutsRepository); //todo: dependency inject this
     return Scaffold(
       appBar: new AppBar(
         title: Text('Create a new exercise'),
@@ -75,47 +85,52 @@ class _ExerciseFormState extends State<ExerciseForm> {
           ),
         ],
       ),
-      body: Builder(
-        builder: (scaffoldContext) => Form(
-              key: formKey,
-              /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
-            TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
-            https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
-            TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
-             */
-              child: exerciseFormWidget(scaffoldContext),
-            ),
+      body: BlocBuilder(
+        bloc: _exerciseFormBloc,
+        builder: (context, exerciseFormState) {
+          return Builder(
+            builder: (scaffoldContext) =>
+                Form(
+                  key: formKey,
+                  /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
+              TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
+              https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
+              TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
+               */
+                  child: ListView(
+                    children: <Widget>[
+                      UnitPickerTile(
+                          resistanceCallback: updateResistanceMeasurement,
+                          depthCallback: updateDepthMeasurement,
+                          initialDepthMeasurement: _depthMeasurementSystem,
+                          initialResistanceMeasurement:
+                          _resistanceMeasurementSystem),
+                      numberOfHandsTile(exerciseFormState),
+                      holdDropdownTile(exerciseFormState),
+                      (_holdSelected &&
+                          (_hold == Hold.POCKET || _hold == Hold.OPEN_HAND))
+                          ? fingerConfigurationDropdownTile(
+                          exerciseFormState, _hold)
+                          : null,
+                      (_holdSelected &&
+                          (_hold != Hold.JUGS &&
+                              _hold != Hold.SLOPER &&
+                              _hold != Hold.PINCH))
+                          ? depthTile(exerciseFormState)
+                          : null,
+                      hangDurationTile(exerciseFormState),
+                      // hangProtocolTile(),
+                      hangsPerSetTile(exerciseFormState),
+                      timeBetweenSetsTile(exerciseFormState),
+                      numberOfSetsTile(exerciseFormState),
+                      resistanceTile(exerciseFormState),
+                      saveButton(exerciseFormState, scaffoldContext)
+                    ].where(notNull).toList(),
+                  ),
+                ),
+          );
+        },
       ),
-    );
-  }
-
-  Widget exerciseFormWidget(BuildContext scaffoldContext) {
-    return ListView(
-      children: <Widget>[
-        UnitPickerTile(
-            resistanceCallback: updateResistanceMeasurement,
-            depthCallback: updateDepthMeasurement,
-            initialDepthMeasurement: _depthMeasurementSystem,
-            initialResistanceMeasurement: _resistanceMeasurementSystem),
-        numberOfHandsTile(),
-        holdDropdownTile(),
-        (_holdSelected && (_hold == Hold.POCKET || _hold == Hold.OPEN_HAND))
-            ? fingerConfigurationDropdownTile(_hold)
-            : null,
-        (_holdSelected &&
-                (_hold != Hold.JUGS &&
-                    _hold != Hold.SLOPER &&
-                    _hold != Hold.PINCH))
-            ? depthTile()
-            : null,
-        hangDurationTile(),
-        // hangProtocolTile(),
-        hangsPerSetTile(),
-        timeBetweenSetsTile(),
-        numberOfSetsTile(),
-        resistanceTile(),
-        saveButton(scaffoldContext)
-      ].where(notNull).toList(),
     );
   }
 
@@ -136,7 +151,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     });
   }
 
-  Widget numberOfHandsTile() {
+  //todo: left off here 10/8 - not sure why this isn't rebuilding the radio button correctly, maybe move on to other tiles and then come back
+  Widget numberOfHandsTile(ExerciseFormState exerciseFormState) {
     return new Card(
       child: ListTile(
         key: PageStorageKey('numberOfHandsTile'),
@@ -145,24 +161,22 @@ class _ExerciseFormState extends State<ExerciseForm> {
             Flexible(
               child: RadioListTile(
                 title: Text('One hand'),
-                value: 1,
-                groupValue: _numberOfHands,
+                value: false,
+                groupValue: exerciseFormState.isTwoHandsSelected,
                 onChanged: (value) {
-                  setState(() {
-                    _numberOfHands = value;
-                  });
+                  _exerciseFormBloc.dispatch(
+                      NumberOfHandsChanged(isTwoHandsSelected: value));
                 },
               ),
             ),
             Flexible(
               child: RadioListTile(
                   title: Text('Two hands'),
-                  value: 2,
-                  groupValue: _numberOfHands,
+                  value: true,
+                  groupValue: exerciseFormState.isTwoHandsSelected,
                   onChanged: (value) {
-                    setState(() {
-                      _numberOfHands = value;
-                    });
+                    _exerciseFormBloc.dispatch(
+                        NumberOfHandsChanged(isTwoHandsSelected: value));
                   }),
             ),
           ],
@@ -171,7 +185,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget holdDropdownTile() {
+  Widget holdDropdownTile(ExerciseFormState exerciseFormState) {
     return new Card(
       child: new ListTile(
         leading: Icon(
@@ -183,12 +197,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
             hint: Text(
               'Choose a hold',
             ),
-            value: _hold,
+            value: exerciseFormState.holdSelected,
             onChanged: (value) {
-              setState(() {
-                _hold = value;
-                _holdSelected = true;
-              });
+              _exerciseFormBloc.dispatch(HoldChanged(hold: value));
             },
             items: Hold.values.map((Hold hold) {
               return new DropdownMenuItem<Hold>(
@@ -204,7 +215,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget fingerConfigurationDropdownTile(Hold hold) {
+  Widget fingerConfigurationDropdownTile(ExerciseFormState exerciseFormState,
+                                         Hold hold) {
     return new Card(
       child: new ListTile(
         leading: Icon(
@@ -217,20 +229,28 @@ class _ExerciseFormState extends State<ExerciseForm> {
             hint: Text(
               'Choose a finger configuration',
             ),
-            value: _fingerConfiguration,
+            value: exerciseFormState.fingerConfigurationSelected,
             onChanged: (value) {
-              setState(() {
-                _fingerConfiguration = value;
-              });
+              _exerciseFormBloc.dispatch(
+                  FingerConfigurationChanged(fingerConfiguration: value));
             },
-            items: mapFingerConfigurations(hold),
+            items: exerciseFormState.availableFingerConfigurations
+                .map((fingerConfiguration) {
+              return DropdownMenuItem(
+                child: new Text(
+                  StringFormatUtils.formatFingerConfiguration(
+                      fingerConfiguration),
+                ),
+                value: fingerConfiguration,
+              );
+            }).toList(),
           ),
         ),
       ),
     );
   }
 
-  Widget depthTile() {
+  Widget depthTile(ExerciseFormState exerciseFormState) {
     return new Card(
       child: ListTile(
         title: Padding(
@@ -253,7 +273,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget hangDurationTile() {
+  Widget hangDurationTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
@@ -307,7 +327,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget hangProtocolTile() {
+  Widget hangProtocolTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: new CheckboxListTile(
         key: PageStorageKey('hangProtocolTile'),
@@ -322,7 +342,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget hangsPerSetTile() {
+  Widget hangsPerSetTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('hangsPerSetTile'),
@@ -348,7 +368,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget timeBetweenSetsTile() {
+  Widget timeBetweenSetsTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('timeBetweenSetsTile'),
@@ -374,7 +394,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget numberOfSetsTile() {
+  Widget numberOfSetsTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('numberOfSetsTile'),
@@ -400,7 +420,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget resistanceTile() {
+  Widget resistanceTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('resistanceTile'),
@@ -432,12 +452,16 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget saveButton(BuildContext scaffoldContext) {
+  Widget saveButton(ExerciseFormState exerciseFormState,
+                    BuildContext scaffoldContext) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: RaisedButton(
         onPressed: () {
           saveTileFields(scaffoldContext);
+//          newExerciseFormBloc.dispatch(
+//            ExerciseFormSaved()
+//          );
         },
         child: Text('Save Set'),
       ),
@@ -462,9 +486,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
   void saveTileFields(BuildContext scaffoldContext) {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
+//      bloc.dispatch(createHangboardExerciseFromFields());
     } else {
       setState(() => _autoValidate = true);
     }
+  }
+
+  HangboardExercise createHangboardExerciseFromFields() {
+//    return HangboardExercise('', depthController.)
   }
 
   /*void saveHangboardWorkoutToFirebase(BuildContext scaffoldContext) {
@@ -679,7 +708,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
       numberOfSetsController.clear();
       resistanceController.clear();
       timeOnController.clear();
-      _numberOfHands = 2;
+      _isTwoHandsSelected = true;
       _holdSelected = false;
       //TODO: don't think nulls work here
       _fingerConfiguration = null;
