@@ -18,15 +18,16 @@ dependencies:
 
   meta: ^1.1.6
 
-  firebase_core: ^0.2.5+1
-  cloud_firestore: ^0.7.3
-  firebase_auth: ^0.5.20
-  firebase_analytics: ^0.3.3
-  google_sign_in: ^3.0.5
+  firebase_core: ^0.4.0+9
+  cloud_firestore: ^0.12.9+5
+  firebase_auth: ^0.14.0+5
+  firebase_analytics: ^5.0.2
+  google_sign_in: ^4.0.7
 
   collection: ^1.14.11
 
-  flutter_calendar: ^0.0.8
+  #  flutter_calendar: ^0.0.8
+  table_calendar: ^2.0.2
   shared_preferences: ^0.4.3
 
   bloc: ^0.15.0

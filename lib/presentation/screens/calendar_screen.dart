@@ -1,7 +1,7 @@
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_calendar/flutter_calendar.dart';
+//import 'package:flutter_calendar/flutter_calendar.dart';
 
 class CalendarScreen extends StatefulWidget {
   final BaseAuth auth;
@@ -35,8 +35,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       child: Card(
         elevation: 2.5,
         child: Material(
-          child: new Calendar(
-            /*dayBuilder: (context, dateTime) {
+          /*child: new Calendar(
+            */ /*dayBuilder: (context, dateTime) {
                     if(dateTime.day == DateTime.now().day) {
                       calendarTile(true);//TODO: need to put this in it's own widget to have selected property
                     }
@@ -54,19 +54,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ),
                       ),
                     );
-                  },*/
+                  },*/ /*
             isExpandable: true,
             onSelectedRangeChange: (range) =>
                 print("Range is ${range.item1}, ${range.item2}"),
             onDateSelected: (date) {
-              /* FocusScope.of(context).requestFocus(_focusNode);
+              */ /* FocusScope.of(context).requestFocus(_focusNode);
                     _focusNode.addListener(() {
                       if(!_focusNode.hasFocus)
                         this._overlayEntry.remove();
-                    });*/
+                    });*/ /*
               handleNewDate(date);
             },
-          ),
+          ),*/
         ),
       ),
     );

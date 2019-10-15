@@ -7,14 +7,15 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class Auth implements BaseAuth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = new GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   Future<String> createUserWithEmailAndPassword(
       String email, String password) async {
-    final FirebaseUser user = await _firebaseAuth
+    /*final FirebaseUser user = await _firebaseAuth
         .createUserWithEmailAndPassword(email: email, password: password);
-    return user.uid;
+    return user.uid;*/
+    return null;
   }
 
   @override
@@ -26,22 +27,33 @@ class Auth implements BaseAuth {
   @override
   Future<String> signInWithEmailAndPassword(
       String email, String password) async {
-    final FirebaseUser user = await _firebaseAuth.signInWithEmailAndPassword(
+    /*final FirebaseUser user = await _firebaseAuth.signInWithEmailAndPassword(
         email: email, password: password);
-    return user.uid;
+    return user.uid;*/
+    return null;
   }
 
   @override
   Future<FirebaseUser> signInWithGoogleEmailAndPassword() async {
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    try {
+      final GoogleSignInAccount googleSignInAccount =
+      await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+      await googleSignInAccount.authentication;
 
-    final FirebaseUser user = await _firebaseAuth.signInWithGoogle(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    return user;
+      final AuthCredential credential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken,
+      );
+
+      final AuthResult authResult =
+      await _firebaseAuth.signInWithCredential(credential);
+
+      return authResult.user;
+    } catch(e) {
+      print(e);
+      return null;
+    }
   }
 
   @override

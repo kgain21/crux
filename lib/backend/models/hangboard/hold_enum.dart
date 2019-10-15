@@ -3,7 +3,7 @@ enum Hold {
   HALF_CRIMP,
   JUGS,
   OPEN_HAND,
-  PINCH,
+  PINCH, //TODO: wide/narrow?
   POCKET,
   SLOPER,
 }

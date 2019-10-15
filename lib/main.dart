@@ -20,6 +20,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
+  /// Needed to add this since there's an await in main()
+  WidgetsFlutterBinding.ensureInitialized();
+
   /// Global vars
   final BaseAuth auth = new Auth();
   final String title = 'Crux';
