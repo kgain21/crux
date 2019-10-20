@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 class ExerciseFormState extends Equatable {
   final bool isFingerConfigurationVisible;
   final bool isTimeBetweenSetsVisible;
+  final bool isDepthVisible;
 
   final bool isTwoHandsSelected;
   final Hold holdSelected;
@@ -14,64 +15,72 @@ class ExerciseFormState extends Equatable {
 
   final List<FingerConfiguration> availableFingerConfigurations;
 
-  /// \/ These need to be validated, ^ these don't (turn them into some other state field)
+  final bool autoValidate;
 
-  final bool isDepthValid;
-  final bool isTimeOffValid;
-  final bool isTimeOnValid;
-  final bool isHangsPerSetValid;
-  final bool isTimeBetweenSetsValid;
-  final bool isNumberOfSetsValid;
-  final bool isResistanceValid;
+  final double depth;
+  final int timeOff;
+  final int timeOn;
+  final int hangsPerSet;
+  final int timeBetweenSets;
+  final int numberOfSets;
+  final int resistance;
 
   ExerciseFormState({
+                      this.isDepthVisible,
+                      this.autoValidate,
     this.isFingerConfigurationVisible,
     this.isTimeBetweenSetsVisible,
     this.isTwoHandsSelected,
     this.holdSelected,
     this.availableFingerConfigurations,
     this.fingerConfigurationSelected,
-    this.isDepthValid,
-    this.isTimeOffValid,
-    this.isTimeOnValid,
-    this.isHangsPerSetValid,
-    this.isTimeBetweenSetsValid,
-    this.isNumberOfSetsValid,
-    this.isResistanceValid,
+                      this.depth,
+                      this.timeOff,
+                      this.timeOn,
+                      this.hangsPerSet,
+                      this.timeBetweenSets,
+                      this.numberOfSets,
+                      this.resistance,
   }) : super([
-          isFingerConfigurationVisible,
-          isTimeBetweenSetsVisible,
-          isTwoHandsSelected,
-          holdSelected,
-          availableFingerConfigurations,
-          fingerConfigurationSelected,
-          isDepthValid,
-          isTimeOffValid,
-          isTimeOnValid,
-          isHangsPerSetValid,
-          isTimeBetweenSetsValid,
-          isNumberOfSetsValid,
-          isResistanceValid,
+    isDepthVisible,
+    autoValidate,
+    isFingerConfigurationVisible,
+    isTimeBetweenSetsVisible,
+    isTwoHandsSelected,
+    holdSelected,
+    availableFingerConfigurations,
+    fingerConfigurationSelected,
+    depth,
+    timeOff,
+    timeOn,
+    hangsPerSet,
+    timeBetweenSets,
+    numberOfSets,
+    resistance,
         ]);
 
   factory ExerciseFormState.initial() {
     return ExerciseFormState(
+        isDepthVisible: false,
+        autoValidate: false,
         availableFingerConfigurations: FingerConfiguration.values,
         isFingerConfigurationVisible: false,
         isTimeBetweenSetsVisible: true,
         isTwoHandsSelected: true,
         holdSelected: null,
         fingerConfigurationSelected: null,
-        isDepthValid: true,
-        isTimeOffValid: true,
-        isTimeOnValid: true,
-        isHangsPerSetValid: true,
-        isTimeBetweenSetsValid: true,
-        isNumberOfSetsValid: true,
-        isResistanceValid: true);
+        depth: null,
+        timeOff: null,
+        timeOn: null,
+        hangsPerSet: null,
+        timeBetweenSets: null,
+        numberOfSets: null,
+        resistance: null);
   }
 
   ExerciseFormState update({
+                             bool isDepthVisible,
+                             bool autoValidate,
     List<FingerConfiguration> availableFingerConfigurations,
     bool isDepthMeasurementSystemValid,
     bool isResistanceMeasurementSystemValid,
@@ -79,15 +88,17 @@ class ExerciseFormState extends Equatable {
     Hold holdSelected,
     FingerConfiguration fingerConfigurationSelected,
     bool isFingerConfigurationVisible,
-    bool isDepthValid,
-    bool isTimeOffValid,
-    bool isTimeOnValid,
-    bool isHangsPerSetValid,
-    bool isTimeBetweenSetsValid,
-    bool isNumberOfSetsValid,
-    bool isResistanceValid,
+                             double depth,
+                             int timeOff,
+                             int timeOn,
+                             int hangsPerSet,
+                             int timeBetweenSets,
+                             int numberOfSets,
+                             int resistance,
   }) {
     return copyWith(
+      isDepthVisible: isDepthVisible,
+      autoValidate: autoValidate,
       availableFingerConfigurations: availableFingerConfigurations,
       isDepthMeasurementSystemValid: isDepthMeasurementSystemValid,
       isResistanceMeasurementSystemValid: isResistanceMeasurementSystemValid,
@@ -95,13 +106,13 @@ class ExerciseFormState extends Equatable {
       holdSelected: holdSelected,
       fingerConfigurationSelected: fingerConfigurationSelected,
       isFingerConfigurationVisible: isFingerConfigurationVisible,
-      isDepthValid: isDepthValid,
-      isTimeOffValid: isTimeOffValid,
-      isTimeOnValid: isTimeOnValid,
-      isHangsPerSetValid: isHangsPerSetValid,
-      isTimeBetweenSetsValid: isTimeBetweenSetsValid,
-      isNumberOfSetsValid: isNumberOfSetsValid,
-      isResistanceValid: isResistanceValid,
+      depth: depth,
+      timeOff: timeOff,
+      timeOn: timeOn,
+      hangsPerSet: hangsPerSet,
+      timeBetweenSets: timeBetweenSets,
+      numberOfSets: numberOfSets,
+      resistance: resistance,
     );
   }
 
@@ -111,15 +122,17 @@ class ExerciseFormState extends Equatable {
 //      isTwoHandsSelected &&
 //      holdSelected &&
 //      fingerConfigurationSelected &&
-      isDepthValid &&
-      isTimeOffValid &&
-      isTimeOnValid &&
-      isHangsPerSetValid &&
-      isTimeBetweenSetsValid &&
-      isNumberOfSetsValid &&
-      isResistanceValid;
+          null != depth &&
+          null != timeOff &&
+          null != timeOn &&
+          null != hangsPerSet &&
+          null != timeBetweenSets &&
+          null != numberOfSets &&
+          null != resistance;
 
   ExerciseFormState copyWith({
+                               bool isDepthVisible,
+                               bool autoValidate,
     List<FingerConfiguration> availableFingerConfigurations,
     bool isDepthMeasurementSystemValid,
     bool isResistanceMeasurementSystemValid,
@@ -127,33 +140,34 @@ class ExerciseFormState extends Equatable {
     Hold holdSelected,
     FingerConfiguration fingerConfigurationSelected,
     bool isFingerConfigurationVisible,
-    bool isDepthValid,
-    bool isTimeOffValid,
-    bool isTimeOnValid,
-    bool isHangsPerSetValid,
-    bool isTimeBetweenSetsValid,
-    bool isNumberOfSetsValid,
-    bool isResistanceValid,
+                               double depth,
+                               int timeOff,
+                               int timeOn,
+                               int hangsPerSet,
+                               int timeBetweenSets,
+                               int numberOfSets,
+                               int resistance,
   }) {
     return ExerciseFormState(
+      isDepthVisible: isDepthVisible ?? this.isDepthVisible,
+      autoValidate: autoValidate ?? this.autoValidate,
       availableFingerConfigurations:
-          availableFingerConfigurations ?? this.availableFingerConfigurations,
+      availableFingerConfigurations ?? this.availableFingerConfigurations,
       isFingerConfigurationVisible:
-          isFingerConfigurationVisible ?? this.isFingerConfigurationVisible,
+      isFingerConfigurationVisible ?? this.isFingerConfigurationVisible,
       isTimeBetweenSetsVisible:
-          isTimeBetweenSetsVisible ?? this.isTimeBetweenSetsVisible,
+      isTimeBetweenSetsVisible ?? this.isTimeBetweenSetsVisible,
       isTwoHandsSelected: isTwoHandsSelected ?? this.isTwoHandsSelected,
       holdSelected: holdSelected ?? this.holdSelected,
       fingerConfigurationSelected:
-          fingerConfigurationSelected ?? this.fingerConfigurationSelected,
-      isDepthValid: isDepthValid ?? this.isDepthValid,
-      isTimeOffValid: isTimeOffValid ?? this.isTimeOffValid,
-      isTimeOnValid: isTimeOnValid ?? this.isTimeOnValid,
-      isHangsPerSetValid: isHangsPerSetValid ?? this.isHangsPerSetValid,
-      isTimeBetweenSetsValid:
-          isTimeBetweenSetsValid ?? this.isTimeBetweenSetsValid,
-      isNumberOfSetsValid: isNumberOfSetsValid ?? this.isNumberOfSetsValid,
-      isResistanceValid: isResistanceValid ?? this.isResistanceValid,
+      fingerConfigurationSelected ?? this.fingerConfigurationSelected,
+      depth: depth ?? this.depth,
+      timeOff: timeOff ?? this.timeOff,
+      timeOn: timeOn ?? this.timeOn,
+      hangsPerSet: hangsPerSet ?? this.hangsPerSet,
+      timeBetweenSets: timeBetweenSets ?? this.timeBetweenSets,
+      numberOfSets: numberOfSets ?? this.numberOfSets,
+      resistance: resistance ?? this.resistance,
     );
   }
 
@@ -161,18 +175,19 @@ class ExerciseFormState extends Equatable {
   @override
   String toString() {
     return '''NewExerciseFormState {
+    autoValidate: $autoValidate,
       isDepthMeasurementSystemValid: $isFingerConfigurationVisible, 
       isResistanceMeasurementSystemValid $isTimeBetweenSetsVisible,
       isNumberOfHandsValid $isTwoHandsSelected,
       isHoldValid $holdSelected,
       isFingerConfigurationValid $fingerConfigurationSelected,
-      isDepthValid $isDepthValid,
-      isTimeOffValid $isTimeOffValid,
-      isTimeOnValid $isTimeOnValid,
-      isHangsPerSetValid $isHangsPerSetValid,
-      isTimeBetweenSetsValid $isTimeBetweenSetsValid,
-      isNumberOfSetsValid $isNumberOfSetsValid,
-      isResistanceValid $isResistanceValid,
+      isDepthValid $depth,
+      isTimeOffValid $timeOff,
+      isTimeOnValid $timeOn,
+      isHangsPerSetValid $hangsPerSet,
+      isTimeBetweenSetsValid $timeBetweenSets,
+      isNumberOfSetsValid $numberOfSets,
+      isResistanceValid $resistance,
     }''';
   }
 }

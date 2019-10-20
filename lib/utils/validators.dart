@@ -25,13 +25,19 @@ class Validators {
   }
 
   /// Depth must be positive
-  static isDepthValid(int depth) {
-    return depth > 0;
+  static isDepthValid(String depth) {
+
   }
 
   /// Any time field must be positive
-  static isValidTime(int seconds) {
-    return seconds > 0;
+  static isValidTime(String seconds) {
+    bool isSecondsValid = false;
+    int secondsValue = int.tryParse(seconds);
+
+    if(null != secondsValue) {
+      isSecondsValid = secondsValue > 0;
+    }
+    return isSecondsValid;
   }
 
   /// Number of hangs in a set must be positive

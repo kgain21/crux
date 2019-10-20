@@ -4,7 +4,6 @@ import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_state.da
 import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
-import 'package:crux/utils/validators.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -28,7 +27,8 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
       return (event is NumberOfHandsChanged ||
           event is HoldChanged ||
           event is FingerConfigurationChanged ||
-          event is HoldChanged);
+          event is HoldChanged ||
+          event is ExerciseFormSaved);
     });
 
     /// Debounce any field with a text box to delay validation
@@ -40,7 +40,7 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
           event is TimeBetweenSetsChanged ||
           event is NumberOfSetsChanged ||
           event is ResistanceChanged);
-    }).debounceTime(Duration(milliseconds: 300));
+    }).debounceTime(Duration(milliseconds: 500));
 
     return super
         .transformEvents(nonDebounceStream.mergeWith([debounceStream]), next);
@@ -83,19 +83,29 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
     List<FingerConfiguration> availableFingerConfigurations =
         FingerConfiguration.values;
     bool isFingerConfigurationVisible = false;
+    bool isDepthVisible = true;
 
     if(hold == Hold.POCKET) {
-      availableFingerConfigurations = FingerConfiguration.values.sublist(0, 6);
+      availableFingerConfigurations = FingerConfiguration.values.sublist(0, 7);
       isFingerConfigurationVisible = true;
+      isDepthVisible = false;
     } else if(hold == Hold.OPEN_HAND) {
       availableFingerConfigurations = FingerConfiguration.values.sublist(4);
       isFingerConfigurationVisible = true;
+    } else if(hold == Hold.SLOPER) {
+      isDepthVisible = false;
+    } else if(hold == Hold.PINCH) {
+      isDepthVisible = false;
+    } else if(hold == Hold.JUGS) {
+      isDepthVisible = false;
     }
 
     yield currentState.update(
-        holdSelected: hold,
-        isFingerConfigurationVisible: isFingerConfigurationVisible,
-        availableFingerConfigurations: availableFingerConfigurations);
+      holdSelected: hold,
+      isFingerConfigurationVisible: isFingerConfigurationVisible,
+      availableFingerConfigurations: availableFingerConfigurations,
+      isDepthVisible: isDepthVisible,
+    );
   }
 
   Stream<ExerciseFormState> _mapFingerConfigurationChangedToState(
@@ -103,45 +113,81 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
     yield currentState.update(fingerConfigurationSelected: fingerConfiguration);
   }
 
-  Stream<ExerciseFormState> _mapDepthChangedToState(int depth) async* {
-    yield currentState.update(isDepthValid: Validators.isDepthValid(depth));
+  Stream<ExerciseFormState> _mapDepthChangedToState(String depth) async* {
+    double depthValue = double.tryParse(depth);
+    depthValue = (null != depthValue && depthValue > 0) ? depthValue : null;
+
+    yield currentState.update(
+      depth: depthValue,
+    );
   }
 
-  Stream<ExerciseFormState> _mapTimeOffChangedToState(int timeOff) async* {
-    yield currentState.update(isTimeOffValid: Validators.isValidTime(timeOff));
+  Stream<ExerciseFormState> _mapTimeOffChangedToState(String timeOff) async* {
+    int timeOffValue = int.tryParse(timeOff);
+    timeOffValue =
+    (null != timeOffValue && timeOffValue > 0) ? timeOffValue : null;
+
+    yield currentState.update(
+      timeOff: timeOffValue,
+    );
   }
 
-  Stream<ExerciseFormState> _mapTimeOnChangedToState(int timeOn) async* {
-    yield currentState.update(isTimeOnValid: Validators.isValidTime(timeOn));
+  Stream<ExerciseFormState> _mapTimeOnChangedToState(String timeOn) async* {
+    int timeOnValue = int.tryParse(timeOn);
+    timeOnValue = (null != timeOnValue && timeOnValue > 0) ? timeOnValue : null;
+
+    yield currentState.update(
+      timeOn: timeOnValue,
+    );
   }
 
   Stream<ExerciseFormState> _mapHangsPerSetChangedToState(
-      int hangsPerSet) async* {
-    yield currentState.update(
-        isHangsPerSetValid: Validators.isValidHangsPerSet(hangsPerSet));
+      String hangsPerSet) async* {
+    int hangsPerSetValue = int.tryParse(hangsPerSet);
+
+    hangsPerSetValue = (null != hangsPerSetValue && hangsPerSetValue > 0)
+        ? hangsPerSetValue
+        : null;
+
+    yield currentState.update(hangsPerSet: hangsPerSetValue);
   }
 
   Stream<ExerciseFormState> _mapTimeBetweenSetsChangedToState(
-      int timeBetweenSets) async* {
+      String timeBetweenSets) async* {
+    int timeBetweenSetsValue = int.tryParse(timeBetweenSets);
+    timeBetweenSetsValue =
+    (null != timeBetweenSetsValue && timeBetweenSetsValue > 0)
+        ? timeBetweenSetsValue
+        : null;
+
     yield currentState.update(
-        isTimeBetweenSetsValid: Validators.isValidTime(timeBetweenSets));
+      timeBetweenSets: timeBetweenSetsValue,
+    );
   }
 
   Stream<ExerciseFormState> _mapNumberOfSetsChangedToState(
-      int numberOfSets) async* {
+      String numberOfSets) async* {
+    int numberOfSetsValue = int.tryParse(numberOfSets);
+    numberOfSetsValue = (null != numberOfSetsValue && numberOfSetsValue > 0)
+        ? numberOfSetsValue
+        : null;
+
     yield currentState.update(
-        isNumberOfSetsValid: Validators.isValidNumberOfSets(numberOfSets));
+      numberOfSets: numberOfSetsValue,
+    );
   }
 
   Stream<ExerciseFormState> _mapResistanceChangedToState(
-      int resistance) async* {
+      String resistance) async* {
+    int resistanceValue = int.tryParse(resistance);
+    resistanceValue = (null != resistanceValue) ? resistanceValue : null;
+
     yield currentState.update(
-        isResistanceValid: Validators.isValidResistance(resistance));
+      resistance: resistanceValue,
+    );
   }
 
   Stream<ExerciseFormState> _mapExerciseFormSavedToState() async* {
-    yield currentState.update(
-//      showContinueEditingPrompt: true
-    );
+    yield currentState.update(autoValidate: true);
   }
 }

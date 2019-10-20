@@ -8,7 +8,7 @@ import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
-import 'package:crux/presentation//widgets/local_unit_picker_tile.dart';
+import 'package:crux/frontend//widgets/local_unit_picker_tile.dart';
 import 'package:crux/utils/string_format_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +60,10 @@ class _ExerciseFormState extends State<ExerciseForm> {
   @override
   void initState() {
     super.initState();
-
+    _exerciseFormBloc = /* BlocProvider.of<ExerciseFormBloc>(context);*/
+    ExerciseFormBloc(
+        firestoreHangboardWorkoutsRepository:
+        widget.firestoreHangboardWorkoutsRepository);
 //    _isTwoHandsSelected = true;
 //    _holdSelected = false;
 //    _depthMeasurementSystem = 'mm';
@@ -85,12 +88,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
         isPopulated /*&& !exerciseFormState.isSubmitting*/;
   }
 
-//todo: left off here 10/10 - clicking on form field resets form - i think it's creating a new bloc and resetting to initial state
   @override
   Widget build(BuildContext context) {
-    _exerciseFormBloc = ExerciseFormBloc(
-        firestoreHangboardWorkoutsRepository: widget
-            .firestoreHangboardWorkoutsRepository); //todo: dependency inject this
     return Scaffold(
       appBar: new AppBar(
         title: Text('Create a new exercise'),
@@ -120,20 +119,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
 //                      resistanceCallback: updateResistanceMeasurement,
 //                      depthCallback: updateDepthMeasurement,
                           initialDepthMeasurement: 'mm',
-                          initialResistanceMeasurement:
-                          'kg'),
+                          initialResistanceMeasurement: 'kg'),
                       numberOfHandsTile(exerciseFormState),
                       holdDropdownTile(exerciseFormState),
                       ((exerciseFormState.holdSelected == Hold.POCKET ||
                           exerciseFormState.holdSelected == Hold.OPEN_HAND))
-                          ? fingerConfigurationDropdownTile(
-                          exerciseFormState)
+                          ? fingerConfigurationDropdownTile(exerciseFormState)
                           : null,
-                      ((exerciseFormState.holdSelected != Hold.JUGS &&
-                          exerciseFormState.holdSelected != Hold.SLOPER &&
-                          exerciseFormState.holdSelected != Hold.PINCH))
-                          ? depthTile(exerciseFormState)
-                          : null,
+                      depthTile(exerciseFormState),
                       hangDurationTile(exerciseFormState),
                       // hangProtocolTile(),
                       hangsPerSetTile(exerciseFormState),
@@ -167,7 +160,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
 //    });
 //  }
 
-  //todo: left off here 10/8 - not sure why this isn't rebuilding the radio button correctly, maybe move on to other tiles and then come back
   Widget numberOfHandsTile(ExerciseFormState exerciseFormState) {
     return new Card(
       child: ListTile(
@@ -266,29 +258,34 @@ class _ExerciseFormState extends State<ExerciseForm> {
   }
 
   Widget depthTile(ExerciseFormState exerciseFormState) {
+    if(!exerciseFormState.isDepthVisible) {
+//      depthController.clear();
+//      _exerciseFormBloc.dispatch(DepthChanged(depth: null));
+      return null;
+    }
     return new Card(
       child: ListTile(
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
             controller: depthController,
-            autovalidate: true,
-            validator: (_) {
-              return !exerciseFormState.isDepthValid ? 'Invalid Depth' : null;
+            autovalidate: exerciseFormState.autoValidate,
+            validator: (value) {
+              return (null == exerciseFormState.depth ||
+                  null == double.tryParse(value))
+                  ? 'Invalid Depth'
+                  : null;
             },
-//            onSaved: (value) {
-//              _depth = double.parse(value);
-//            },
             onChanged: (value) {
-              _exerciseFormBloc.dispatch(
-                  DepthChanged(depth: int.tryParse(value)));
+              _exerciseFormBloc.dispatch(DepthChanged(depth: value));
             },
             decoration: InputDecoration(
               icon: Icon(Icons.keyboard_tab),
-//              labelText: 'Depth (${exerciseFormState.depthMeasurementSelected})',
+              labelText:
+              'Depth', /* (${exerciseFormState.depthMeasurementSelected})*/
             ),
             keyboardType:
-                TextInputType.numberWithOptions(signed: true, decimal: true),
+            TextInputType.numberWithOptions(signed: true, decimal: true),
           ),
         ),
       ),
@@ -307,16 +304,16 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
                 child: TextFormField(
                   controller: timeOnController,
-                  autovalidate: true,
+                  autovalidate: exerciseFormState.autoValidate,
                   validator: (value) {
-                    return hangboardFieldValidator(value);
+                    return (null == value ||
+                        null == exerciseFormState.timeOn ||
+                        int.tryParse(value) != exerciseFormState.timeOn)
+                        ? 'Invalid Time On'
+                        : null;
                   },
-//                  onSaved: (value) {
-//                    _timeOn = int.tryParse(value);
-//                  },
                   onChanged: (value) {
-                    _exerciseFormBloc.dispatch(
-                        TimeOnChanged(timeOn: int.tryParse(value)));
+                    _exerciseFormBloc.dispatch(TimeOnChanged(timeOn: value));
                   },
                   decoration: InputDecoration(
                     labelText: 'Time On (sec)',
@@ -331,18 +328,15 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
                 child: TextFormField(
                   controller: timeOffController,
-                  autovalidate: true,
+                  autovalidate: exerciseFormState.autoValidate,
                   validator: (value) {
-                    return hangboardFieldValidator(value);
+                    return (null == exerciseFormState.timeOff ||
+                        null == int.tryParse(value))
+                        ? 'Invalid Time Off'
+                        : null;
                   },
-                  /*onSaved: (value) {
-                    setState(() {
-                      _timeOff = int.tryParse(value);
-                    });
-                  },*/
                   onChanged: (value) {
-                    _exerciseFormBloc.dispatch(
-                        TimeOffChanged(timeOff: int.tryParse(value)));
+                    _exerciseFormBloc.dispatch(TimeOffChanged(timeOff: value));
                   },
                   decoration: InputDecoration(
                     labelText: 'Time Off (sec)',
@@ -375,21 +369,20 @@ class _ExerciseFormState extends State<ExerciseForm> {
   Widget hangsPerSetTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
-        key: PageStorageKey<String>('hangsPerSetTile'),
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
             controller: hangsPerSetController,
-            autovalidate: true,
+            autovalidate: exerciseFormState.autoValidate,
             validator: (value) {
-              return hangboardFieldValidator(value);
+              return (null == exerciseFormState.hangsPerSet ||
+                  null == int.tryParse(value))
+                  ? 'Invalid Hangs Per Set'
+                  : null;
             },
-//            onSaved: (value) {
-//              _hangsPerSet = int.tryParse(value);
-//            },
             onChanged: (value) {
-              _exerciseFormBloc.dispatch(
-                  HangsPerSetChanged(hangsPerSet: int.tryParse(value)));
+              _exerciseFormBloc
+                  .dispatch(HangsPerSetChanged(hangsPerSet: value));
             },
             decoration: InputDecoration(
               labelText: 'Hangs per set',
@@ -405,21 +398,20 @@ class _ExerciseFormState extends State<ExerciseForm> {
   Widget timeBetweenSetsTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
-        key: PageStorageKey<String>('timeBetweenSetsTile'),
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
             controller: timeBetweenSetsController,
-            autovalidate: true,
+            autovalidate: exerciseFormState.autoValidate,
             validator: (value) {
-              return hangboardFieldValidator(value);
+              return (null == exerciseFormState.timeBetweenSets ||
+                  null == int.tryParse(value))
+                  ? 'Invalid Time Between Sets'
+                  : null;
             },
-//            onSaved: (value) {
-//              _timeBetweenSets = int.tryParse(value);
-//            },
             onChanged: (value) {
-              _exerciseFormBloc.dispatch(
-                  TimeBetweenSetsChanged(timeBetweenSets: int.tryParse(value)));
+              _exerciseFormBloc
+                  .dispatch(TimeBetweenSetsChanged(timeBetweenSets: value));
             },
             decoration: InputDecoration(
               icon: Icon(Icons.watch_later),
@@ -440,16 +432,16 @@ class _ExerciseFormState extends State<ExerciseForm> {
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
             controller: numberOfSetsController,
-            autovalidate: true,
+            autovalidate: exerciseFormState.autoValidate,
             validator: (value) {
-              return hangboardFieldValidator(value);
+              return (null == exerciseFormState.numberOfSets ||
+                  null == int.tryParse(value))
+                  ? 'Invalid Number of Sets'
+                  : null;
             },
-            /*onSaved: (value) {
-              _numberOfSets = int.tryParse(value);
-            },*/
             onChanged: (value) {
-              _exerciseFormBloc.dispatch(
-                  NumberOfSetsChanged(numberOfSets: int.tryParse(value)));
+              _exerciseFormBloc
+                  .dispatch(NumberOfSetsChanged(numberOfSets: value));
             },
             decoration: InputDecoration(
               labelText: 'Number of sets',
@@ -470,26 +462,19 @@ class _ExerciseFormState extends State<ExerciseForm> {
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
             controller: resistanceController,
-            autovalidate: true,
+            autovalidate: exerciseFormState.autoValidate,
             validator: (value) {
-              var intValue = int.tryParse(value);
-              if (intValue == null) {
-                return 'Please enter a number.';
-              }
-              if (intValue.isNaN) return 'Please enter a real number.';
-              return null;
+              return (null == exerciseFormState.resistance ||
+                  null == int.tryParse(value))
+                  ? 'Invalid Resistance'
+                  : null;
             },
-            /*onSaved: (value) {
-              _resistance = int.tryParse(value);
-              //TODO: Need negative resistance too
-            },*/
             onChanged: (value) {
-              _exerciseFormBloc.dispatch(
-                  ResistanceChanged(resistance: int.tryParse(value)));
+              _exerciseFormBloc.dispatch(ResistanceChanged(resistance: value));
             },
             decoration: InputDecoration(
               icon: Icon(Icons.fitness_center),
-//              labelText: 'Resistance ($_resistanceMeasurementSystem)',
+              labelText: 'Resistance ', /*($_resistanceMeasurementSystem)*/
             ),
             keyboardType: TextInputType.numberWithOptions(),
           ),
@@ -505,9 +490,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
       child: RaisedButton(
         onPressed: () {
           saveTileFields(scaffoldContext);
-//          newExerciseFormBloc.dispatch(
-//            ExerciseFormSaved()
-//          );
         },
         child: Text('Save Set'),
       ),
@@ -532,9 +514,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
   void saveTileFields(BuildContext scaffoldContext) {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
-//      bloc.dispatch(createHangboardExerciseFromFields());
     } else {
-//      setState(() => _autoValidate = true);
+      _exerciseFormBloc.dispatch(ExerciseFormSaved());
     }
   }
 

@@ -1,7 +1,7 @@
 /*
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/presentation/widgets/exercise_tile.dart';
-import 'package:crux/presentation/widgets/workout_timer.dart';
+import 'package:crux/frontend/widgets/exercise_tile.dart';
+import 'package:crux/frontend/widgets/workout_timer.dart';
 import 'package:crux/utils/string_format_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

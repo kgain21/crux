@@ -6,8 +6,8 @@ import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/preferences.dart';
-import 'package:crux/presentation/screens/hangboard/exercise_page_view.dart';
-import 'package:crux/presentation/widgets/exercise_tile.dart';
+import 'package:crux/frontend/screens/hangboard/exercise_page_view.dart';
+import 'package:crux/frontend/widgets/exercise_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

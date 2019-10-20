@@ -4,9 +4,9 @@ import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dar
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
-import 'package:crux/presentation/widgets/dots_indicator.dart';
-import 'package:crux/presentation/widgets/exercise_form.dart';
-import 'package:crux/presentation/widgets/hangboard_page_2.dart';
+import 'package:crux/frontend/widgets/dots_indicator.dart';
+import 'package:crux/frontend/widgets/exercise_form.dart';
+import 'package:crux/frontend/widgets/hangboard_page_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -92,6 +92,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
 
   @override
   Widget build(BuildContext context) {
+    //todo: need to move this to initstate/ BlocProvider.of<HangboardWorkoutBloc>(context);
     _hangboardExerciseBloc = HangboardWorkoutBloc(
         firestoreHangboardWorkoutsRepository:
         widget.firestoreHangboardWorkoutsRepository);
@@ -221,6 +222,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               MaterialPageRoute(builder: (context) {
                 return ExerciseForm(
                   workoutTitle: widget.hangboardWorkout.workoutTitle,
+                  firestoreHangboardWorkoutsRepository: widget
+                      .firestoreHangboardWorkoutsRepository,
                 );
               }),
             );

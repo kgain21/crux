@@ -1,6 +1,6 @@
 import 'package:crux/backend/services/base_auth.dart';
-import 'package:crux/presentation/screens/calendar_screen.dart';
-import 'package:crux/presentation/shared_layouts/app_bar.dart';
+import 'package:crux/frontend/screens/calendar_screen.dart';
+import 'package:crux/frontend/shared_layouts/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 

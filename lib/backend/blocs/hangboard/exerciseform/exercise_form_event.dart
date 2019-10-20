@@ -40,7 +40,7 @@ class FingerConfigurationChanged extends ExerciseFormEvent {
 }
 
 class DepthChanged extends ExerciseFormEvent {
-  final int depth;
+  final String depth;
 
   DepthChanged({@required this.depth}) : super([depth]);
 
@@ -49,7 +49,7 @@ class DepthChanged extends ExerciseFormEvent {
 }
 
 class TimeOffChanged extends ExerciseFormEvent {
-  final int timeOff;
+  final String timeOff;
 
   TimeOffChanged({@required this.timeOff}) : super([timeOff]);
 
@@ -58,7 +58,7 @@ class TimeOffChanged extends ExerciseFormEvent {
 }
 
 class TimeOnChanged extends ExerciseFormEvent {
-  final int timeOn;
+  final String timeOn;
 
   TimeOnChanged({@required this.timeOn}) : super([timeOn]);
 
@@ -67,7 +67,7 @@ class TimeOnChanged extends ExerciseFormEvent {
 }
 
 class HangsPerSetChanged extends ExerciseFormEvent {
-  final int hangsPerSet;
+  final String hangsPerSet;
 
   HangsPerSetChanged({@required this.hangsPerSet}) : super([hangsPerSet]);
 
@@ -76,7 +76,7 @@ class HangsPerSetChanged extends ExerciseFormEvent {
 }
 
 class TimeBetweenSetsChanged extends ExerciseFormEvent {
-  final int timeBetweenSets;
+  final String timeBetweenSets;
 
   TimeBetweenSetsChanged({@required this.timeBetweenSets})
       : super([timeBetweenSets]);
@@ -87,7 +87,7 @@ class TimeBetweenSetsChanged extends ExerciseFormEvent {
 }
 
 class NumberOfSetsChanged extends ExerciseFormEvent {
-  final int numberOfSets;
+  final String numberOfSets;
 
   NumberOfSetsChanged({@required this.numberOfSets}) : super([numberOfSets]);
 
@@ -96,7 +96,7 @@ class NumberOfSetsChanged extends ExerciseFormEvent {
 }
 
 class ResistanceChanged extends ExerciseFormEvent {
-  final int resistance;
+  final String resistance;
 
   ResistanceChanged({@required this.resistance}) : super([resistance]);
 
@@ -109,8 +109,6 @@ class ExerciseFormSaved extends ExerciseFormEvent {
   ExerciseFormSaved();
 
   @override
-  String toString() {
-    // TODO: implement toString
-    return super.toString();
-  }
+  String toString() => 'ExerciseFormSaved';
+
 }
