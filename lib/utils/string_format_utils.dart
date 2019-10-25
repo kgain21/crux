@@ -1,5 +1,4 @@
 import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
-import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
 
 // TODO: Recommended to not use static method only classes --
@@ -38,10 +37,10 @@ class StringFormatUtils {
     }
   }
 
-  /// Formatter for the different [FingerConfiguration]s I have available. This basically just
-  /// takes the enum form and makes it a better looking String for the dropdown.
+  /// Formatter for the different [FingerConfigurations] available. Takes the
+  /// enum form and makes it a better looking String for the dropdown.
   static String formatFingerConfiguration(
-      FingerConfiguration fingerConfiguration) {
+      FingerConfigurations fingerConfiguration) {
     if (fingerConfiguration != null) {
       var fingerConfigurationArray =
           fingerConfiguration.toString().substring(20).split('_');
@@ -58,11 +57,11 @@ class StringFormatUtils {
     return '';
   }
 
-  /// Formatter for the different [Holds] I have available. This basically just
-  /// takes the enum form and makes it a better looking String for the dropdown.
-  static String formatHold(Hold hold) {
+  /// Formatter for the different [Holds] I have available. Takes the
+  /// enum form and makes it a better looking String for the dropdown.
+  static String formatHold(Holds hold) {
     if (hold != null) {
-      var holdArray = hold.toString().substring(5).split('_');
+      var holdArray = hold.toString().substring(6).split('_');
       String formattedHold = '';
       for (int i = 0; i < holdArray.length; i++) {
         formattedHold = formattedHold +
@@ -93,25 +92,21 @@ class StringFormatUtils {
     return decimal.toString();
   }
 
-  static String createHangboardExerciseTitle(
-      HangboardExercise hangboardExercise) {
-    String exerciseTitle = '${hangboardExercise.numberOfHands
-        .toString()} handed';
+  static String createHangboardExerciseTitle(int numberOfHands, double depth,
+                                             String fingerConfiguration,
+                                             String hold,
+                                             String depthMeasurementSystem) {
+    String exerciseTitle = '${numberOfHands.toString()} handed';
 
-    if(hangboardExercise.holdDepth == null) {
-      if(hangboardExercise.fingerConfiguration == null ||
-          hangboardExercise.fingerConfiguration == '') {
-        exerciseTitle += ' ${hangboardExercise.holdType}';
+    if(depth == null) {
+      if(fingerConfiguration == null || fingerConfiguration == '') {
+        exerciseTitle += ' $hold';
       } else {
-        exerciseTitle +=
-        ' ${hangboardExercise.fingerConfiguration} ${hangboardExercise
-            .holdType}';
+        exerciseTitle += ' $fingerConfiguration $hold';
       }
     } else {
       exerciseTitle +=
-      ' ${hangboardExercise.holdDepth}${hangboardExercise
-          .depthMeasurementSystem} ${hangboardExercise
-          .fingerConfiguration} ${hangboardExercise.holdType}';
+      ' $depth$depthMeasurementSystem $fingerConfiguration $hold';
     }
     return exerciseTitle;
   }

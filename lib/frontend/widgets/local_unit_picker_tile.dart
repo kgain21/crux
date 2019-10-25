@@ -1,3 +1,4 @@
+import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -5,32 +6,16 @@ import 'package:flutter/widgets.dart';
 /// This may need to be a more central user config - for now it is just used
 /// on the [hangboard] workout creator screen.
 class UnitPickerTile extends StatefulWidget {
-  final Function depthCallback;
-  final Function resistanceCallback;
-  final String initialDepthMeasurement;
-  final String initialResistanceMeasurement;
+  final parentState;
+  final parentBloc;
 
-  UnitPickerTile(
-      {this.depthCallback,
-      this.resistanceCallback,
-      this.initialDepthMeasurement,
-      this.initialResistanceMeasurement});
+  UnitPickerTile({this.parentBloc, this.parentState});
 
   @override
   State createState() => _UnitPickerTileState();
 }
 
 class _UnitPickerTileState extends State<UnitPickerTile> {
-  String _depthMeasurementSystem;
-  String _resistanceMeasurementSystem;
-
-  @override
-  void initState() {
-    super.initState();
-    _depthMeasurementSystem = widget.initialDepthMeasurement;
-    _resistanceMeasurementSystem = widget.initialResistanceMeasurement;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -70,13 +55,11 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: _depthMeasurementSystem,
+                groupValue: widget.parentState.depthMeasurementSystem,
                 value: 'mm',
                 onChanged: (value) {
-                  setState(() {
-                    _depthMeasurementSystem = value;
-                  });
-                  widget.depthCallback(value);
+                  widget.parentBloc.dispatch(DepthMeasurementSystemChanged(
+                      depthMeasurementSystem: value));
                 },
               ),
               new RadioListTile(
@@ -86,13 +69,11 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: _depthMeasurementSystem,
+                groupValue: widget.parentState.depthMeasurementSystem,
                 value: 'in',
                 onChanged: (value) {
-                  setState(() {
-                    _depthMeasurementSystem = value;
-                  });
-                  widget.depthCallback(value);
+                  widget.parentBloc.dispatch(DepthMeasurementSystemChanged(
+                      depthMeasurementSystem: value));
                 },
               ),
             ],
@@ -115,13 +96,11 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: _resistanceMeasurementSystem,
+                groupValue: widget.parentState.resistanceMeasurementSystem,
                 value: 'kg',
                 onChanged: (value) {
-                  setState(() {
-                    _resistanceMeasurementSystem = value;
-                  });
-                  widget.resistanceCallback(value);
+                  widget.parentBloc.dispatch(ResistanceMeasurementSystemChanged(
+                      resistanceMeasurementSystem: value));
                 },
               ),
               new RadioListTile(
@@ -131,13 +110,11 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: _resistanceMeasurementSystem,
+                groupValue: widget.parentState.resistanceMeasurementSystem,
                 value: 'lb',
                 onChanged: (value) {
-                  setState(() {
-                    _resistanceMeasurementSystem = value;
-                  });
-                  widget.resistanceCallback(value);
+                  widget.parentBloc.dispatch(ResistanceMeasurementSystemChanged(
+                      resistanceMeasurementSystem: value));
                 },
               ),
             ],

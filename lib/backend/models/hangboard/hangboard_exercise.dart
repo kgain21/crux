@@ -23,15 +23,15 @@ class HangboardExercise extends Equatable {
                     this.resistanceMeasurementSystem,
                     this.numberOfHands,
                     this.holdType,
-                    this.fingerConfiguration,
                     this.holdDepth,
                     this.hangsPerSet,
                     this.numberOfSets,
-                    this.resistance,
-                    this.breakDuration,
                     this.repDuration,
-                    this.restDuration,);
-
+                    this.restDuration, {
+                      this.fingerConfiguration,
+                      this.breakDuration,
+                      this.resistance,
+                    });
 
   HangboardExercise copyWith({
                                String exerciseTitle,
@@ -54,14 +54,14 @@ class HangboardExercise extends Equatable {
       resistanceMeasurementSystem,
       numberOfHands,
       holdType,
-      fingerConfiguration,
       holdDepth,
       hangsPerSet,
       numberOfSets,
-      resistance,
-      breakDuration,
       repDuration,
       restDuration,
+      fingerConfiguration: fingerConfiguration,
+      breakDuration: breakDuration,
+      resistance: resistance,
     );
   }
 
@@ -108,14 +108,14 @@ class HangboardExercise extends Equatable {
       entity.resistanceMeasurementSystem,
       entity.numberOfHands,
       entity.holdType,
-      entity.fingerConfiguration,
       entity.holdDepth,
       entity.hangsPerSet,
       entity.numberOfSets,
-      entity.resistance,
-      entity.breakDuration,
       entity.repDuration,
       entity.restDuration,
+      fingerConfiguration: entity.fingerConfiguration,
+      breakDuration: entity.breakDuration,
+      resistance: entity.resistance,
     );
   }
 }

@@ -2,16 +2,20 @@ import 'package:bloc/bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_event.dart';
 import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_state.dart';
 import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
+import 'package:crux/utils/string_format_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
   final FirestoreHangboardWorkoutsRepository
       firestoreHangboardWorkoutsRepository;
+  final String workoutTitle;
 
-  ExerciseFormBloc({@required this.firestoreHangboardWorkoutsRepository});
+  ExerciseFormBloc({@required this.firestoreHangboardWorkoutsRepository,
+                     @required this.workoutTitle});
 
   @override
   ExerciseFormState get initialState => ExerciseFormState.initial();
@@ -28,7 +32,10 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
           event is HoldChanged ||
           event is FingerConfigurationChanged ||
           event is HoldChanged ||
-          event is ExerciseFormSaved);
+          event is InvalidExerciseFormSaved ||
+          event is ValidExerciseFormSaved ||
+          event is ResistanceMeasurementSystemChanged ||
+          event is DepthMeasurementSystemChanged);
     });
 
     /// Debounce any field with a text box to delay validation
@@ -48,8 +55,14 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
 
   @override
   Stream<ExerciseFormState> mapEventToState(ExerciseFormEvent event) async* {
-    if(event is NumberOfHandsChanged) {
-      yield* _mapNumberOfHandsChangedToState(event.isTwoHandsSelected);
+    if(event is ResistanceMeasurementSystemChanged) {
+      yield* _mapResistanceMeasurementSystemChangedToState(
+          event.resistanceMeasurementSystem);
+    } else if(event is DepthMeasurementSystemChanged) {
+      yield* _mapDepthMeasurementSystemChangedToState(
+          event.depthMeasurementSystem);
+    } else if(event is NumberOfHandsChanged) {
+      yield* _mapNumberOfHandsChangedToState(event.numberOfHandsSelected);
     } else if(event is HoldChanged) {
       yield* _mapHoldChangedToState(event.hold);
     } else if(event is FingerConfigurationChanged) {
@@ -68,40 +81,56 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
       yield* _mapNumberOfSetsChangedToState(event.numberOfSets);
     } else if(event is ResistanceChanged) {
       yield* _mapResistanceChangedToState(event.resistance);
-    } else if(event is ExerciseFormSaved) {
-      yield* _mapExerciseFormSavedToState();
+    } else if(event is InvalidExerciseFormSaved) {
+      yield* _mapInvalidExerciseFormSavedToState();
+    } else if(event is ValidExerciseFormSaved) {
+      yield* _mapValidExerciseFormSavedToState();
     }
-    //todo: one more for form submission that passes all fields and creates exercise obj^
+  }
+
+  Stream<ExerciseFormState> _mapResistanceMeasurementSystemChangedToState(
+      String resistanceMeasurementSystem) async* {
+    yield currentState.update(
+        resistanceMeasurementSystem: resistanceMeasurementSystem);
+  }
+
+  Stream<ExerciseFormState> _mapDepthMeasurementSystemChangedToState(
+      String depthMeasurementSystem) async* {
+    yield currentState.update(depthMeasurementSystem: depthMeasurementSystem);
   }
 
   Stream<ExerciseFormState> _mapNumberOfHandsChangedToState(
-      bool isTwoHandsSelected) async* {
-    yield currentState.update(isTwoHandsSelected: isTwoHandsSelected);
+      int numberOfHandsSelected) async* {
+    yield currentState.update(numberOfHandsSelected: numberOfHandsSelected);
   }
 
-  Stream<ExerciseFormState> _mapHoldChangedToState(Hold hold) async* {
-    List<FingerConfiguration> availableFingerConfigurations =
-        FingerConfiguration.values;
+  Stream<ExerciseFormState> _mapHoldChangedToState(Holds hold) async* {
+    List<FingerConfigurations> availableFingerConfigurations =
+        FingerConfigurations.values;
     bool isFingerConfigurationVisible = false;
     bool isDepthVisible = true;
 
-    if(hold == Hold.POCKET) {
-      availableFingerConfigurations = FingerConfiguration.values.sublist(0, 7);
+    if(hold == Holds.POCKET) {
+      availableFingerConfigurations = FingerConfigurations.values.sublist(0, 7);
       isFingerConfigurationVisible = true;
       isDepthVisible = false;
-    } else if(hold == Hold.OPEN_HAND) {
-      availableFingerConfigurations = FingerConfiguration.values.sublist(4);
+    } else if(hold == Holds.OPEN_HAND) {
+      availableFingerConfigurations = FingerConfigurations.values.sublist(4);
       isFingerConfigurationVisible = true;
-    } else if(hold == Hold.SLOPER) {
+    } else if(hold == Holds.SLOPER) {
       isDepthVisible = false;
-    } else if(hold == Hold.PINCH) {
+    } else if(hold == Holds.WIDE_PINCH) {
       isDepthVisible = false;
-    } else if(hold == Hold.JUGS) {
+    } else if(hold == Holds.MEDIUM_PINCH) {
+      isDepthVisible = false;
+    } else if(hold == Holds.NARROW_PINCH) {
+      isDepthVisible = false;
+    } else if(hold == Holds.JUGS) {
       isDepthVisible = false;
     }
 
     yield currentState.update(
-      holdSelected: hold,
+      hold: hold,
       isFingerConfigurationVisible: isFingerConfigurationVisible,
       availableFingerConfigurations: availableFingerConfigurations,
       isDepthVisible: isDepthVisible,
@@ -109,8 +138,8 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
   }
 
   Stream<ExerciseFormState> _mapFingerConfigurationChangedToState(
-      FingerConfiguration fingerConfiguration) async* {
-    yield currentState.update(fingerConfigurationSelected: fingerConfiguration);
+      FingerConfigurations fingerConfiguration) async* {
+    yield currentState.update(fingerConfiguration: fingerConfiguration);
   }
 
   Stream<ExerciseFormState> _mapDepthChangedToState(String depth) async* {
@@ -187,7 +216,40 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
     );
   }
 
-  Stream<ExerciseFormState> _mapExerciseFormSavedToState() async* {
+  Stream<ExerciseFormState> _mapInvalidExerciseFormSavedToState() async* {
+    yield currentState.update(autoValidate: true);
+  }
+
+  Stream<ExerciseFormState> _mapValidExerciseFormSavedToState() async* {
+    var formattedFingerConfiguration =
+    StringFormatUtils.formatFingerConfiguration(
+        currentState.fingerConfiguration);
+    var formattedHold = StringFormatUtils.formatHold(currentState.hold);
+    var numberOfHandsSelected = currentState.numberOfHandsSelected;
+    var depthMeasurementSystem = currentState.depthMeasurementSystem;
+    var depth = currentState.depth;
+
+    firestoreHangboardWorkoutsRepository.addNewExercise(workoutTitle,
+        HangboardExercise(
+            StringFormatUtils.createHangboardExerciseTitle(
+              numberOfHandsSelected,
+              depth,
+              formattedFingerConfiguration,
+              formattedHold,
+              depthMeasurementSystem,
+            ),
+            depthMeasurementSystem,
+            currentState.resistanceMeasurementSystem,
+            numberOfHandsSelected,
+            formattedHold,
+            depth,
+            currentState.hangsPerSet,
+            currentState.numberOfSets,
+            currentState.timeOn,
+            currentState.timeOff,
+            fingerConfiguration: formattedFingerConfiguration,
+            breakDuration: currentState.timeBetweenSets,
+            resistance: currentState.resistance));
     yield currentState.update(autoValidate: true);
   }
 }

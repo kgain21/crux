@@ -8,19 +8,42 @@ abstract class ExerciseFormEvent extends Equatable {
   ExerciseFormEvent([List props = const []]) : super(props);
 }
 
-class NumberOfHandsChanged extends ExerciseFormEvent {
-  final bool isTwoHandsSelected;
+class ResistanceMeasurementSystemChanged extends ExerciseFormEvent {
+  final String resistanceMeasurementSystem;
 
-  NumberOfHandsChanged({@required this.isTwoHandsSelected})
-      : super([isTwoHandsSelected]);
+  ResistanceMeasurementSystemChanged(
+      {@required this.resistanceMeasurementSystem})
+      : super([resistanceMeasurementSystem]);
 
   @override
   String toString() =>
-      'NumberOfHandsChanged { numberOfHands: $isTwoHandsSelected }';
+      'ResistanceMeasurementSystemChanged { resistanceMeasurementSystem: $resistanceMeasurementSystem }';
+}
+
+class DepthMeasurementSystemChanged extends ExerciseFormEvent {
+  final String depthMeasurementSystem;
+
+  DepthMeasurementSystemChanged({@required this.depthMeasurementSystem})
+      : super([depthMeasurementSystem]);
+
+  @override
+  String toString() =>
+      'DepthMeasurementSystemChanged { depthMeasurementSystem: $depthMeasurementSystem }';
+}
+
+class NumberOfHandsChanged extends ExerciseFormEvent {
+  final int numberOfHandsSelected;
+
+  NumberOfHandsChanged({@required this.numberOfHandsSelected})
+      : super([numberOfHandsSelected]);
+
+  @override
+  String toString() =>
+      'NumberOfHandsChanged { numberOfHands: $numberOfHandsSelected }';
 }
 
 class HoldChanged extends ExerciseFormEvent {
-  final Hold hold;
+  final Holds hold;
 
   HoldChanged({@required this.hold}) : super([hold]);
 
@@ -29,7 +52,7 @@ class HoldChanged extends ExerciseFormEvent {
 }
 
 class FingerConfigurationChanged extends ExerciseFormEvent {
-  final FingerConfiguration fingerConfiguration;
+  final FingerConfigurations fingerConfiguration;
 
   FingerConfigurationChanged({@required this.fingerConfiguration})
       : super([fingerConfiguration]);
@@ -104,11 +127,16 @@ class ResistanceChanged extends ExerciseFormEvent {
   String toString() => 'ResistanceChanged { resistance: $resistance }';
 }
 
-class ExerciseFormSaved extends ExerciseFormEvent {
-
-  ExerciseFormSaved();
+class InvalidExerciseFormSaved extends ExerciseFormEvent {
+  InvalidExerciseFormSaved();
 
   @override
-  String toString() => 'ExerciseFormSaved';
+  String toString() => 'InvalidExerciseFormSaved';
+}
 
+class ValidExerciseFormSaved extends ExerciseFormEvent {
+  ValidExerciseFormSaved();
+
+  @override
+  String toString() => 'ValidExerciseFormSaved';
 }

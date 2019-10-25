@@ -30,10 +30,12 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<void> addNewExercise(HangboardExercise hangboardExercise) {
+  Future<void> addNewExercise(String workoutTitle,
+                              HangboardExercise hangboardExercise) {
     final hangboardExerciseEntity = hangboardExercise.toEntity();
     return firestore
-        .collection(workoutType)
+        .collection(
+        '$workoutType/$workoutTitle/${hangboardExercise.exerciseTitle}')
         .add(hangboardExerciseEntity.toJson());
   }
 

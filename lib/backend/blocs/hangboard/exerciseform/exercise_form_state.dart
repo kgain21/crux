@@ -6,17 +6,18 @@ import 'package:meta/meta.dart';
 @immutable
 class ExerciseFormState extends Equatable {
   final bool isFingerConfigurationVisible;
+  final List<FingerConfigurations> availableFingerConfigurations;
   final bool isTimeBetweenSetsVisible;
   final bool isDepthVisible;
 
-  final bool isTwoHandsSelected;
-  final Hold holdSelected;
-  final FingerConfiguration fingerConfigurationSelected;
-
-  final List<FingerConfiguration> availableFingerConfigurations;
+  final FingerConfigurations fingerConfiguration;
 
   final bool autoValidate;
 
+  final String depthMeasurementSystem;
+  final String resistanceMeasurementSystem;
+  final int numberOfHandsSelected;
+  final Holds hold;
   final double depth;
   final int timeOff;
   final int timeOn;
@@ -26,14 +27,16 @@ class ExerciseFormState extends Equatable {
   final int resistance;
 
   ExerciseFormState({
+                      this.depthMeasurementSystem,
+                      this.resistanceMeasurementSystem,
                       this.isDepthVisible,
                       this.autoValidate,
     this.isFingerConfigurationVisible,
     this.isTimeBetweenSetsVisible,
-    this.isTwoHandsSelected,
-    this.holdSelected,
+                      this.numberOfHandsSelected,
+                      this.hold,
     this.availableFingerConfigurations,
-    this.fingerConfigurationSelected,
+                      this.fingerConfiguration,
                       this.depth,
                       this.timeOff,
                       this.timeOn,
@@ -42,14 +45,16 @@ class ExerciseFormState extends Equatable {
                       this.numberOfSets,
                       this.resistance,
   }) : super([
+    depthMeasurementSystem,
+    resistanceMeasurementSystem,
     isDepthVisible,
     autoValidate,
     isFingerConfigurationVisible,
     isTimeBetweenSetsVisible,
-    isTwoHandsSelected,
-    holdSelected,
+    numberOfHandsSelected,
+    hold,
     availableFingerConfigurations,
-    fingerConfigurationSelected,
+    fingerConfiguration,
     depth,
     timeOff,
     timeOn,
@@ -61,14 +66,16 @@ class ExerciseFormState extends Equatable {
 
   factory ExerciseFormState.initial() {
     return ExerciseFormState(
+        depthMeasurementSystem: 'mm',
+        resistanceMeasurementSystem: 'kg',
         isDepthVisible: false,
         autoValidate: false,
-        availableFingerConfigurations: FingerConfiguration.values,
+        availableFingerConfigurations: FingerConfigurations.values,
         isFingerConfigurationVisible: false,
         isTimeBetweenSetsVisible: true,
-        isTwoHandsSelected: true,
-        holdSelected: null,
-        fingerConfigurationSelected: null,
+        numberOfHandsSelected: 2,
+        hold: null,
+        fingerConfiguration: null,
         depth: null,
         timeOff: null,
         timeOn: null,
@@ -79,14 +86,17 @@ class ExerciseFormState extends Equatable {
   }
 
   ExerciseFormState update({
+                             String depthMeasurementSystem,
+                             String resistanceMeasurementSystem,
                              bool isDepthVisible,
                              bool autoValidate,
-    List<FingerConfiguration> availableFingerConfigurations,
+                             List<
+                                 FingerConfigurations> availableFingerConfigurations,
     bool isDepthMeasurementSystemValid,
     bool isResistanceMeasurementSystemValid,
-    bool isTwoHandsSelected,
-    Hold holdSelected,
-    FingerConfiguration fingerConfigurationSelected,
+                             int numberOfHandsSelected,
+                             Holds hold,
+                             FingerConfigurations fingerConfiguration,
     bool isFingerConfigurationVisible,
                              double depth,
                              int timeOff,
@@ -97,14 +107,16 @@ class ExerciseFormState extends Equatable {
                              int resistance,
   }) {
     return copyWith(
+      depthMeasurementSystem: depthMeasurementSystem,
+      resistanceMeasurementSystem: resistanceMeasurementSystem,
       isDepthVisible: isDepthVisible,
       autoValidate: autoValidate,
       availableFingerConfigurations: availableFingerConfigurations,
       isDepthMeasurementSystemValid: isDepthMeasurementSystemValid,
       isResistanceMeasurementSystemValid: isResistanceMeasurementSystemValid,
-      isTwoHandsSelected: isTwoHandsSelected,
-      holdSelected: holdSelected,
-      fingerConfigurationSelected: fingerConfigurationSelected,
+      numberOfHandsSelected: numberOfHandsSelected,
+      hold: hold,
+      fingerConfiguration: fingerConfiguration,
       isFingerConfigurationVisible: isFingerConfigurationVisible,
       depth: depth,
       timeOff: timeOff,
@@ -131,14 +143,17 @@ class ExerciseFormState extends Equatable {
           null != resistance;
 
   ExerciseFormState copyWith({
+                               String depthMeasurementSystem,
+                               String resistanceMeasurementSystem,
                                bool isDepthVisible,
                                bool autoValidate,
-    List<FingerConfiguration> availableFingerConfigurations,
+                               List<
+                                   FingerConfigurations> availableFingerConfigurations,
     bool isDepthMeasurementSystemValid,
     bool isResistanceMeasurementSystemValid,
-    bool isTwoHandsSelected,
-    Hold holdSelected,
-    FingerConfiguration fingerConfigurationSelected,
+                               int numberOfHandsSelected,
+                               Holds hold,
+                               FingerConfigurations fingerConfiguration,
     bool isFingerConfigurationVisible,
                                double depth,
                                int timeOff,
@@ -149,6 +164,10 @@ class ExerciseFormState extends Equatable {
                                int resistance,
   }) {
     return ExerciseFormState(
+      depthMeasurementSystem:
+      depthMeasurementSystem ?? this.depthMeasurementSystem,
+      resistanceMeasurementSystem:
+      resistanceMeasurementSystem ?? this.resistanceMeasurementSystem,
       isDepthVisible: isDepthVisible ?? this.isDepthVisible,
       autoValidate: autoValidate ?? this.autoValidate,
       availableFingerConfigurations:
@@ -157,10 +176,10 @@ class ExerciseFormState extends Equatable {
       isFingerConfigurationVisible ?? this.isFingerConfigurationVisible,
       isTimeBetweenSetsVisible:
       isTimeBetweenSetsVisible ?? this.isTimeBetweenSetsVisible,
-      isTwoHandsSelected: isTwoHandsSelected ?? this.isTwoHandsSelected,
-      holdSelected: holdSelected ?? this.holdSelected,
-      fingerConfigurationSelected:
-      fingerConfigurationSelected ?? this.fingerConfigurationSelected,
+      numberOfHandsSelected: numberOfHandsSelected ??
+          this.numberOfHandsSelected,
+      hold: hold ?? this.hold,
+      fingerConfiguration: fingerConfiguration ?? this.fingerConfiguration,
       depth: depth ?? this.depth,
       timeOff: timeOff ?? this.timeOff,
       timeOn: timeOn ?? this.timeOn,
@@ -178,9 +197,9 @@ class ExerciseFormState extends Equatable {
     autoValidate: $autoValidate,
       isDepthMeasurementSystemValid: $isFingerConfigurationVisible, 
       isResistanceMeasurementSystemValid $isTimeBetweenSetsVisible,
-      isNumberOfHandsValid $isTwoHandsSelected,
-      isHoldValid $holdSelected,
-      isFingerConfigurationValid $fingerConfigurationSelected,
+      isNumberOfHandsValid $numberOfHandsSelected,
+      isHoldValid $hold,
+      isFingerConfigurationValid $fingerConfiguration,
       isDepthValid $depth,
       isTimeOffValid $timeOff,
       isTimeOnValid $timeOn,

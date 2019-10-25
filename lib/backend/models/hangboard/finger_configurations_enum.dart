@@ -1,4 +1,4 @@
-enum FingerConfiguration {
+enum FingerConfigurations {
   INDEX,
   MIDDLE,
   RING,

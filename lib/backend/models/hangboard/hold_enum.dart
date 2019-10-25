@@ -1,9 +1,11 @@
-enum Hold {
+enum Holds {
   FULL_CRIMP,
   HALF_CRIMP,
   JUGS,
   OPEN_HAND,
-  PINCH, //TODO: wide/narrow?
+  WIDE_PINCH,
+  MEDIUM_PINCH,
+  NARROW_PINCH,
   POCKET,
   SLOPER,
 }
