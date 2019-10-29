@@ -30,13 +30,16 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<void> addNewExercise(String workoutTitle,
-                              HangboardExercise hangboardExercise) {
+  Future<void> addNewExercise(
+      String workoutTitle, HangboardExercise hangboardExercise) async {
     final hangboardExerciseEntity = hangboardExercise.toEntity();
-    return firestore
+    var parentWorkout = await getWorkoutByWorkoutTitle(workoutTitle);
+    parentWorkout.hangboardExerciseEntityList.add(hangboardExerciseEntity);
+    return updateWorkout(HangboardWorkout.fromEntity(parentWorkout));
+    /*return firestore
         .collection(
-        '$workoutType/$workoutTitle/${hangboardExercise.exerciseTitle}')
-        .add(hangboardExerciseEntity.toJson());
+            '$workoutType/$workoutTitle/${hangboardExercise.exerciseTitle}')
+        .add(hangboardExerciseEntity.toJson());*/
   }
 
   @override
@@ -63,15 +66,35 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<List<HangboardWorkoutEntity>> getWorkouts() async {
+  Future<List<HangboardWorkout>> getWorkouts() async {
+    return firestore
+        .collection(workoutType)
+        .snapshots()
+        .first
+        .then((hangboardCollection) => hangboardCollection.documents
+            .map((workoutDocument) => HangboardWorkout.fromEntity(
+                HangboardWorkoutEntity.fromJson(workoutDocument.data)))
+            .toList())
+        .catchError((error) {
+      print(error);
+      return Future.error(error);
+    });
+  }
+
+//  @override
+  Future<HangboardWorkoutEntity> getWorkoutByWorkoutTitle(
+      String workoutTitle) async {
     return firestore
         .collection(workoutType)
         .snapshots()
         .first
         .then((hangboardCollection) {
-      return hangboardCollection.documents.map((workoutDocument) {
-        return HangboardWorkoutEntity.fromJson(workoutDocument.data);
-      }).toList();
+      return HangboardWorkoutEntity.fromJson(hangboardCollection.documents
+          .firstWhere((document) => workoutTitle == document.documentID)
+          .data);
+    }).catchError((error) {
+      print(error);
+      return Future.error(error);
     });
   }
 
@@ -99,8 +122,9 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<bool> updateWorkout(HangboardWorkout hangboardWorkout) async {
-    final hangboardWorkoutEntity = hangboardWorkout.toEntity();
+  Future<bool> updateWorkout(
+      HangboardWorkout hangboardWorkout) async {
+//    final hangboardWorkoutEntity = hangboardWorkout.toEntity();
 
     try {
       CollectionReference collectionReference =
@@ -108,7 +132,7 @@ class FirestoreHangboardWorkoutsRepository
 
       var workoutRef =
           collectionReference.document(hangboardWorkout.workoutTitle);
-      workoutRef.setData(hangboardWorkoutEntity.toJson());
+      workoutRef.setData(hangboardWorkout.toEntity().toJson());
       return true;
     } catch (e) {
       print(e);

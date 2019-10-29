@@ -1,5 +1,6 @@
 import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart';
 import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 @immutable

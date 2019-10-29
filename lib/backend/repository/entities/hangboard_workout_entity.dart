@@ -1,11 +1,18 @@
-import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 
+import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'hangboard_workout_entity.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class HangboardWorkoutEntity {
   final String workoutTitle;
-  final List<dynamic> hangboardExerciseList;
+  final List<HangboardExerciseEntity> hangboardExerciseEntityList;
 
-  HangboardWorkoutEntity(this.workoutTitle,
-                         this.hangboardExerciseList,);
+  HangboardWorkoutEntity(
+    this.workoutTitle,
+    this.hangboardExerciseEntityList,
+  );
 
 /*  @override
   int get hashCode =>
@@ -22,25 +29,28 @@ class HangboardWorkoutEntity {
               id == other.id;
   */
 
-  Map<String, Object> toJson() {
-    return {
-      "workoutTitle": workoutTitle,
-      "hangboardExerciseList": hangboardExerciseList,
-    };
-  }
+/*  Map<String, Object> toJson() => {
+        "workoutTitle": workoutTitle,
+        "hangboardExerciseEntityList": hangboardExerciseEntityList,
+//            .map((entity) => entity.toJson()),
+      };*/
 
   @override
   String toString() {
     return 'HangboardWorkoutEntity { workoutTitle: $workoutTitle, '
-        'hangboardExerciseList: $hangboardExerciseList '
+        'hangboardExerciseList: $hangboardExerciseEntityList '
         '}';
   }
 
-  static HangboardWorkoutEntity fromJson(Map<String, dynamic> json) {
-    return HangboardWorkoutEntity(
-        json["workoutTitle"] as String,
-        List<HangboardExercise>.from(json["hangboardExerciseList"]));
-    //todo: may need to revisit this - works for now passing [] at workout creation but may not after exercises have been populated
+  factory HangboardWorkoutEntity.fromJson(Map<String, dynamic> json) => _$HangboardWorkoutEntityFromJson(json);
 
-  }
+  Map<String, dynamic> toJson() => _$HangboardWorkoutEntityToJson(this);
+
+ /* static HangboardWorkoutEntity fromJson(Map<String, dynamic> json) {
+    return HangboardWorkoutEntity(
+      json["workoutTitle"] as String,
+      List<HangboardExerciseEntity>.from(json["hangboardExerciseEntityList"] ??
+          [] as List<HangboardExerciseEntity>),
+    );
+  }*/
 }

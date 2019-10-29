@@ -1,10 +1,15 @@
-import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+import 'hangboard_workout_entity.dart';
+
+part 'hangboard_parent_entity.g.dart';
+
+@JsonSerializable()
 class HangboardParentEntity {
-  final List<HangboardWorkout> hangboardWorkoutList;
+  final List<HangboardWorkoutEntity> hangboardWorkoutEntityList;
 
   HangboardParentEntity(
-    this.hangboardWorkoutList,
+    this.hangboardWorkoutEntityList,
   );
 
 /*  @override
@@ -22,21 +27,26 @@ class HangboardParentEntity {
               id == other.id;
   */
 
-  Map<String, Object> toJson() {
+  /*Map<String, Object> toJson() {
     return {
       "hangboardWorkoutList": hangboardWorkoutList,
     };
-  }
+  }*/
+
+  factory HangboardParentEntity.fromJson(Map<String, dynamic> json) => _$HangboardParentEntityFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HangboardParentEntityToJson(this);
+
 
   @override
   String toString() {
-    return 'HangboardParentEntity { hangboardWorkoutList: $hangboardWorkoutList, '
+    return 'HangboardParentEntity { hangboardWorkoutEntityList: $hangboardWorkoutEntityList, '
         '}';
   }
 
-  static HangboardParentEntity fromJson(Map<String, Object> json) {
+/*static HangboardParentEntity fromJson(Map<String, Object> json) {
     return HangboardParentEntity(
       json["hangboardWorkoutList"] as List<HangboardWorkout>,
     );
-  }
+  }*/
 }

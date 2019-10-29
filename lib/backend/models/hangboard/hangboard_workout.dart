@@ -7,9 +7,10 @@ class HangboardWorkout {
 
   final List<HangboardExercise> hangboardExerciseList;
 
-  HangboardWorkout(this.workoutTitle,
-                   this.hangboardExerciseList,
-                   );
+  HangboardWorkout(
+    this.workoutTitle,
+    this.hangboardExerciseList,
+  );
 
   @override
   String toString() {
@@ -21,14 +22,15 @@ class HangboardWorkout {
   HangboardWorkoutEntity toEntity() {
     return HangboardWorkoutEntity(
       workoutTitle,
-      hangboardExerciseList,
+      hangboardExerciseList.map((exercise) => exercise.toEntity()).toList(),
     );
   }
 
   static HangboardWorkout fromEntity(HangboardWorkoutEntity entity) {
     return HangboardWorkout(
       entity.workoutTitle,
-      entity.hangboardExerciseList,
+      entity.hangboardExerciseEntityList
+          .map((entity) => HangboardExercise.fromEntity(entity)).toList(),
     );
   }
 }

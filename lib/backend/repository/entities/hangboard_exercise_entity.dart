@@ -1,3 +1,9 @@
+
+import 'package:json_annotation/json_annotation.dart';
+
+part 'hangboard_exercise_entity.g.dart';
+
+@JsonSerializable()
 class HangboardExerciseEntity {
   final String exerciseTitle;
   final String depthMeasurementSystem;
@@ -31,8 +37,7 @@ class HangboardExerciseEntity {
   @override
   int get hashCode =>
       complete.hashCode ^ task.hashCode ^ note.hashCode ^ id.hashCode;
-//todo: 7/12 - is the equality of exercises going to save me? state won't rebuild if the exercises are the same
-//todo: so I might still be able to trigger off the exercisebloc for timers
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -44,7 +49,7 @@ class HangboardExerciseEntity {
               id == other.id;
   */
 
-  Map<String, Object> toJson() {
+  /*Map<String, Object> toJson() {
     return {
       "exerciseTitle": exerciseTitle,
       "depthMeasurementSystem": depthMeasurementSystem,
@@ -60,7 +65,11 @@ class HangboardExerciseEntity {
       "repDuration": repDuration,
       "restDuration": restDuration,
     };
-  }
+  }*/
+
+  Map<String, dynamic> toJson() => _$HangboardExerciseEntityToJson(this);
+
+  factory HangboardExerciseEntity.fromJson(Map<String, dynamic> json) => _$HangboardExerciseEntityFromJson(json);
 
   @override
   String toString() {
@@ -80,7 +89,7 @@ class HangboardExerciseEntity {
         '}';
   }
 
-  static HangboardExerciseEntity fromJson(Map<String, Object> json) {
+  /*static HangboardExerciseEntity fromJson(Map<String, Object> json) {
     return HangboardExerciseEntity(
       json["exerciseTitle"] as String,
       json["depthMeasurementSystem"] as String,
@@ -96,5 +105,5 @@ class HangboardExerciseEntity {
       json["repDuration"] as int,
       json["restDuration"] as int,
     );
-  }
+  }*/
 }

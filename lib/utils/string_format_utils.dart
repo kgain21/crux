@@ -43,7 +43,7 @@ class StringFormatUtils {
       FingerConfigurations fingerConfiguration) {
     if (fingerConfiguration != null) {
       var fingerConfigurationArray =
-          fingerConfiguration.toString().substring(20).split('_');
+          fingerConfiguration.toString().substring(21).split('_');
       String formattedConfiguration = '';
       for (int i = 0; i < fingerConfigurationArray.length; i++) {
         formattedConfiguration = formattedConfiguration +

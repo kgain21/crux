@@ -16,13 +16,15 @@ class HangboardParent {
 
   HangboardParentEntity toEntity() {
     return HangboardParentEntity(
-      hangboardWorkoutList,
+      hangboardWorkoutList.map((workout) => workout.toEntity()).toList(),
     );
   }
 
   static HangboardParent fromEntity(HangboardParentEntity entity) {
     return HangboardParent(
-      entity.hangboardWorkoutList,
+      entity.hangboardWorkoutEntityList
+          .map((workoutEntity) => HangboardWorkout.fromEntity(workoutEntity))
+          .toList(),
     );
   }
 }
