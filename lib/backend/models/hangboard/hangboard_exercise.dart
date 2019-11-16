@@ -1,6 +1,5 @@
 import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart';
 import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -32,7 +31,20 @@ class HangboardExercise extends Equatable {
                       this.fingerConfiguration,
                       this.breakDuration,
                       this.resistance,
-                    });
+                    }) : super([
+    exerciseTitle,
+    depthMeasurementSystem,
+    resistanceMeasurementSystem,
+    numberOfHands,
+    holdType,
+    holdDepth,
+    hangsPerSet,
+    numberOfSets,
+    repDuration,
+    restDuration,
+    fingerConfiguration,
+    breakDuration,
+  ]);
 
   HangboardExercise copyWith({
                                String exerciseTitle,
@@ -50,19 +62,19 @@ class HangboardExercise extends Equatable {
                                int restDuration,
                              }) {
     return HangboardExercise(
-      exerciseTitle,
-      depthMeasurementSystem,
-      resistanceMeasurementSystem,
-      numberOfHands,
-      holdType,
-      holdDepth,
-      hangsPerSet,
-      numberOfSets,
-      repDuration,
-      restDuration,
-      fingerConfiguration: fingerConfiguration,
-      breakDuration: breakDuration,
-      resistance: resistance,
+      exerciseTitle ?? this.exerciseTitle,
+      depthMeasurementSystem ?? this.depthMeasurementSystem,
+      resistanceMeasurementSystem ?? this.resistanceMeasurementSystem,
+      numberOfHands ?? this.numberOfHands,
+      holdType ?? this.holdType,
+      holdDepth ?? this.holdDepth,
+      hangsPerSet ?? this.hangsPerSet,
+      numberOfSets ?? this.numberOfSets,
+      repDuration ?? this.repDuration,
+      restDuration ?? this.restDuration,
+      fingerConfiguration: fingerConfiguration ?? this.fingerConfiguration,
+      breakDuration: breakDuration ?? this.breakDuration,
+      resistance: resistance ?? this.resistance,
     );
   }
 

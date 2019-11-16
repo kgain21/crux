@@ -76,10 +76,19 @@ class FirestoreHangboardWorkoutsRepository
                 HangboardWorkoutEntity.fromJson(workoutDocument.data)))
             .toList())
         .catchError((error) {
-      print(error);
+      print('Failed retrieving workouts from firestore:  $error');
       return Future.error(error);
     });
   }
+
+  /*Future<HangboardParent> getHangboardParent() async {
+    return firestore
+        .collection(workoutType)
+        .snapshots()
+        .first
+        .then((hangboardCollection) => HangboardParent.fromEntity(
+        HangboardParentEntity.fromJson(hangboardCollection.documents)));
+  }*/
 
 //  @override
   Future<HangboardWorkoutEntity> getWorkoutByWorkoutTitle(
@@ -122,8 +131,7 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<bool> updateWorkout(
-      HangboardWorkout hangboardWorkout) async {
+  Future<bool> updateWorkout(HangboardWorkout hangboardWorkout) async {
 //    final hangboardWorkoutEntity = hangboardWorkout.toEntity();
 
     try {

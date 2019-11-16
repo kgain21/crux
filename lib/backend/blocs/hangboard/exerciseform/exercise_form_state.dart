@@ -176,8 +176,8 @@ class ExerciseFormState extends Equatable {
       isFingerConfigurationVisible ?? this.isFingerConfigurationVisible,
       isTimeBetweenSetsVisible:
       isTimeBetweenSetsVisible ?? this.isTimeBetweenSetsVisible,
-      numberOfHandsSelected: numberOfHandsSelected ??
-          this.numberOfHandsSelected,
+      numberOfHandsSelected:
+      numberOfHandsSelected ?? this.numberOfHandsSelected,
       hold: hold ?? this.hold,
       fingerConfiguration: fingerConfiguration ?? this.fingerConfiguration,
       depth: depth ?? this.depth,

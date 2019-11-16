@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'hangboard_exercise_entity.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(anyMap: true)
 class HangboardExerciseEntity {
   final String exerciseTitle;
   final String depthMeasurementSystem;
@@ -69,7 +69,8 @@ class HangboardExerciseEntity {
 
   Map<String, dynamic> toJson() => _$HangboardExerciseEntityToJson(this);
 
-  factory HangboardExerciseEntity.fromJson(Map<String, dynamic> json) => _$HangboardExerciseEntityFromJson(json);
+  factory HangboardExerciseEntity.fromJson(Map json) =>
+      _$HangboardExerciseEntityFromJson(json);
 
   @override
   String toString() {

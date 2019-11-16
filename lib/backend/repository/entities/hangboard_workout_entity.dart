@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'hangboard_workout_entity.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, anyMap: true)
 class HangboardWorkoutEntity {
   final String workoutTitle;
   final List<HangboardExerciseEntity> hangboardExerciseEntityList;
@@ -42,7 +42,8 @@ class HangboardWorkoutEntity {
         '}';
   }
 
-  factory HangboardWorkoutEntity.fromJson(Map<String, dynamic> json) => _$HangboardWorkoutEntityFromJson(json);
+  factory HangboardWorkoutEntity.fromJson(Map json) =>
+      _$HangboardWorkoutEntityFromJson(json);
 
   Map<String, dynamic> toJson() => _$HangboardWorkoutEntityToJson(this);
 

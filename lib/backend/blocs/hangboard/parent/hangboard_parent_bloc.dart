@@ -3,7 +3,6 @@ import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart'
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_parent.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
-import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:meta/meta.dart';
 
@@ -33,7 +32,7 @@ class HangboardParentBloc
       yield HangboardParentLoaded(
           HangboardParent(await hangboardWorkoutsRepository.getWorkouts()));
     } catch (e) {
-      print(e);
+      print('Failed to load list of hangboard workouts: $e');
       yield HangboardParentNotLoaded();
     }
   }

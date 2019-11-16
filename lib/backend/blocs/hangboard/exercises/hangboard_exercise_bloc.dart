@@ -2,19 +2,28 @@ import 'package:bloc/bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_event.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
 import 'package:crux/backend/blocs/timer/timer_event.dart';
-import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:meta/meta.dart';
 
 class HangboardExerciseBloc
     extends Bloc<HangboardExerciseEvent, HangboardExerciseState> {
   final FirestoreHangboardWorkoutsRepository firestore;
-  final HangboardWorkout hangboardWorkout;
+  final HangboardExercise hangboardExercise;
 
   HangboardExerciseBloc({
                           @required this.firestore,
-                          this.hangboardWorkout,
+                          this.hangboardExercise,
                         });
+
+  /* /// SINGLETON
+  static final HangboardExerciseBloc _hangboardExerciseBloc = HangboardExerciseBloc._internal();
+
+  factory HangboardExerciseBloc() {
+    return _hangboardExerciseBloc;
+  }
+
+  HangboardExerciseBloc._internal();*/
 
   @override
   HangboardExerciseState get initialState => HangboardExerciseLoading();
@@ -22,10 +31,6 @@ class HangboardExerciseBloc
   @override
   Stream<HangboardExerciseState> mapEventToState(
       HangboardExerciseEvent event) async* {
-    /* switch (event.runtimeType) {
-      case LoadHangboardExercise:
-        yield* _mapLoadHangboardExerciseToState(event);
-    }*/
     if(event is LoadHangboardExercise) {
       yield* _mapLoadHangboardExerciseToState(event);
     } else if(event is AddHangboardExercise) {
@@ -83,9 +88,7 @@ class HangboardExerciseBloc
   Stream<HangboardExerciseState> _mapHangboardExerciseCompleteToState(event) {
     return null;
   }*/
-//todo: left off here 7/14 -> still working my way up, think i may be done with hbpage(???)
-  //todo; maybe looking to go through workout level now
-  //todo: go through timer and work up to double check though
+
   Stream<HangboardExerciseState> _mapClearHangboardExercisePreferencesToState(
       event) async* {
     yield null;
@@ -106,13 +109,13 @@ class HangboardExerciseBloc
   Stream<HangboardExerciseState> _mapIncreaseNumberOfSetsButtonPressedToState(
       IncreaseNumberOfSetsButtonPressed event) async* {
     yield HangboardExerciseLoaded(
-        event.exercise.copyWith(hangsPerSet: event.exercise.numberOfSets + 1));
+        event.exercise.copyWith(numberOfSets: event.exercise.numberOfSets + 1));
   }
 
   Stream<HangboardExerciseState> _mapDecreaseNumberOfSetsButtonPressedToState(
       DecreaseNumberOfSetsButtonPressed event) async* {
     yield HangboardExerciseLoaded(
-        event.exercise.copyWith(hangsPerSet: event.exercise.numberOfSets - 1));
+        event.exercise.copyWith(numberOfSets: event.exercise.numberOfSets - 1));
   }
 
   Stream<HangboardExerciseState> _mapRepButtonPressedToState(
@@ -135,28 +138,28 @@ class HangboardExerciseBloc
       if(reps > 0) {
         yield HangboardExerciseLoaded(event.exercise
             .copyWith(hangsPerSet: event.exercise.hangsPerSet - 1));
-        event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise));
+        event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, true));
       } else {
-        event.timerBloc.dispatch(ReplaceWithBreakTimer(event.exercise));
+        event.timerBloc.dispatch(ReplaceWithBreakTimer(event.exercise, true));
       }
     } else {
       /// Break timer completing
       if(sets > 0) {
         yield HangboardExerciseLoaded(event.exercise
             .copyWith(hangsPerSet: event.exercise.hangsPerSet - 1));
-        event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise));
+        event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, true));
       } else {
         /// Exercise is done - notification listener should pick that up and I don't need to do anything?
         yield null; // todo: - will this work?
       }
     }
-    yield null;
   }
 
   Stream<HangboardExerciseState> _mapReverseCompletedToState(
       ReverseComplete event) async* {
     /// Rep timer completing always results in restTimer
     yield HangboardExerciseLoaded(event.exercise);
-    event.timerBloc.dispatch(ReplaceWithRestTimer(event.exercise));
+    event.timerBloc.dispatch(ReplaceWithRestTimer(event.exercise, true));
   }
+
 }

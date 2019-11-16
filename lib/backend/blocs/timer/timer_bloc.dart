@@ -8,7 +8,6 @@ import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/backend/services/preferences.dart';
 
 class TimerBloc extends Bloc<TimerEvent, TimerState> {
-
   /*final HangboardExerciseBloc hangboardExerciseBloc;
   StreamSubscription hangboardExerciseSubscription;
 
@@ -34,7 +33,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     } else if(event is ReplaceWithRepTimer) {
       yield* _mapReplaceWithRepTimerToState(event);
     } else if(event is ReplaceWithRestTimer) {
-      yield*_mapReplaceWithRestTimerToState(event);
+      yield* _mapReplaceWithRestTimerToState(event);
     } else if(event is ReplaceWithBreakTimer) {
       yield* _mapReplaceWithBreakTimerToState(event);
     } else if(event is DisposeTimer) {
@@ -57,25 +56,26 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   /// the ExercisePage.
   Stream<TimerState> _mapLoadTimerToState(LoadTimer event) async* {
     try {
-      final timerEntity = Preferences().getTimerPreferences(
-          event.hangboardExercise.exerciseTitle);
+      final timerEntity = Preferences()
+          .getTimerPreferences(event.hangboardExercise.exerciseTitle);
 
       if(timerEntity != null) {
         Timer timer = Timer.fromEntity(timerEntity);
         double controllerValue = determineControllerValue(timer);
-        yield TimerLoaded(timer, controllerValue);
+        yield TimerLoaded(
+            timer, controllerValue, timerEntity.previouslyRunning);
       } else {
         yield TimerLoaded(
-          Timer(
-            event.hangboardExercise.exerciseTitle,
-            event.hangboardExercise.repDuration,
-            TimerDirection.COUNTERCLOCKWISE,
-            false,
-            0,
+            Timer(
+              event.hangboardExercise.exerciseTitle,
+              event.hangboardExercise.repDuration,
+              TimerDirection.COUNTERCLOCKWISE,
+              false,
+              0,
+              0.0,
+            ),
             0.0,
-          ),
-            0.0
-        );
+            event.isTimerRunning);
       }
     } catch(exception) {
       print(exception);
@@ -94,8 +94,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           0,
           0.0,
         ),
-        1.0
-    );
+        0.0,
+        event.isTimerRunning);
   }
 
   Stream<TimerState> _mapReplaceWithRestTimerToState(
@@ -109,8 +109,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           0,
           0.0,
         ),
-        0.0
-    );
+        1.0,
+        event.isTimerRunning);
   }
 
   Stream<TimerState> _mapReplaceWithBreakTimerToState(
@@ -124,8 +124,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           0,
           0.0,
         ),
-        0.0
-    );
+        1.0,
+        event.isTimerRunning);
   }
 
   Stream<TimerState> _mapTimerCompleteToState(event) {
@@ -144,8 +144,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   Future _saveTimer(Timer timer) {
-    return Preferences().storeTimerPreferences(
-        timer.storageKey, timer.toEntity());
+    return Preferences()
+        .storeTimerPreferences(timer.storageKey, timer.toEntity());
   }
 
   double determineControllerValue(Timer timer) {

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_event.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
@@ -7,6 +6,7 @@ import 'package:crux/backend/blocs/timer/timer_event.dart';
 import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
+import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/frontend/widgets/circular_timer.dart';
 import 'package:crux/frontend/widgets/exercise_tile.dart';
 import 'package:crux/utils/string_format_utils.dart';
@@ -17,18 +17,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class HangboardPage extends StatefulWidget {
   final int index;
 
-  final VoidCallback nextPageCallback;
-  final DocumentReference documentReference;
   final String workoutTitle;
-
+  final FirestoreHangboardWorkoutsRepository
+  firestoreHangboardWorkoutsRepository;
   final HangboardExercise hangboardExercise;
 
   HangboardPage({
                   this.index,
-                  this.nextPageCallback,
-                  this.documentReference,
                   this.workoutTitle,
                   this.hangboardExercise,
+                  this.firestoreHangboardWorkoutsRepository,
                 });
 
   @override
@@ -45,23 +43,49 @@ class _HangboardPageState extends State<HangboardPage>
   TimerBloc _timerBloc;
   HangboardExerciseBloc _hangboardExerciseBloc;
 
-//  StreamSubscription _hangboardExerciseStreamSubscription;
-
   @override
   void initState() {
     _originalNumberOfSets = widget.hangboardExercise.numberOfSets;
     _originalNumberOfHangs = widget.hangboardExercise.hangsPerSet;
 
-    /*_exerciseTitle = StringFormatUtils.formatDepthAndHold(
-        _depth, _depthMeasurementSystem, _fingerConfiguration, _hold);*/
 //    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
-    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
-    _timerBloc =
-    new TimerBloc(); // todo: do i want to add this at a higher level and provide it to the whole pageview?
-    //todo: think about other blocs and where I provide them as well
-    _timerBloc.dispatch(LoadTimer(widget.hangboardExercise));
-//    _hangboardExerciseStreamSubscription = setHangboardExerciseStreamListener();
+    _hangboardExerciseBloc = HangboardExerciseBloc(
+        hangboardExercise: widget.hangboardExercise,
+        firestore: widget.firestoreHangboardWorkoutsRepository)
+      ..dispatch(LoadHangboardExercise(widget.hangboardExercise));
+//    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
+
+    _timerBloc = new TimerBloc()
+      ..dispatch(LoadTimer(widget.hangboardExercise, false));
+
+    _timerController = AnimationController(
+        vsync: this,
+        value: 1.0,
+        duration: Duration(seconds: widget.hangboardExercise.restDuration),
+        reverseDuration:
+        Duration(seconds: widget.hangboardExercise.repDuration));
+
     super.initState();
+  }
+
+  Container hangboardPageWidgetTEMP(state) {
+    return Container(
+      child: ListView(
+        children: <Widget>[
+          titleTile(state),
+          workoutTimerTile(state),
+          IntrinsicHeight(
+            child: Row(
+              children: <Widget>[
+                hangsAndResistanceTile(state),
+                setsTile(state),
+              ],
+            ),
+          ),
+          notesTile(state),
+        ],
+      ),
+    );
   }
 
   @override
@@ -69,41 +93,47 @@ class _HangboardPageState extends State<HangboardPage>
     return BlocBuilder(
         bloc: _hangboardExerciseBloc,
         builder: (BuildContext context, HangboardExerciseState state) {
-          if (state is HangboardExerciseLoading) {
+          if(state is ReplaceWithRepTimer) {
+            print("HBPAGE BUILDER");
+            var repState = state as ReplaceWithRepTimer;
+//            _timerController.duration =
+//                Duration(seconds: repState.hangboardExercise.repDuration);
+//            _timerController.value = 0.0;
+          }
+          if(state is ReplaceWithRestTimer) {
+            print("HBPAGE BUILDER");
+            var restState = state as ReplaceWithRestTimer;
+//            _timerController.duration =
+//                Duration(seconds: restState.hangboardExercise.restDuration);
+//            _timerController.value = 1.0;
+            return hangboardPageWidgetTEMP(state);
+          }
+          if(state is ReplaceWithBreakTimer) {
+            print("HBPAGE BUILDER");
+            return hangboardPageWidgetTEMP(state);
+          }
+          if(state is ClearTimerPreferences) {}
+          if(state is HangboardExerciseLoaded) {
+            //todo: need to check for sharedPrefs and load from there if possible
+            return hangboardPageWidgetTEMP(state);
+          } else {
             return Container();
-          } else if (state is HangboardExerciseLoaded) {
-            return Container(
-              child: ListView(
-                children: <Widget>[
-                  titleTile(state),
-                  workoutTimerTile(state),
-                  IntrinsicHeight(
-                    child: Row(
-                      children: <Widget>[
-                        hangsAndResistanceTile(state),
-                        setsTile(state),
-                      ],
-                    ),
-                  ),
-                  notesTile(state),
-                ],
-              ),
-            );
           }
         });
   }
 
   Widget titleTile(HangboardExerciseLoaded state) {
     return ExerciseTile(
-      tileColor: Theme.of(context).accentColor,
+      tileColor: Theme
+          .of(context)
+          .accentColor,
       child: Container(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
           child: Column(
             children: <Widget>[
               Text(
-                '${state.hangboardExercise.numberOfHands} Handed '
-                    '${state.hangboardExercise.exerciseTitle}',
+                '${state.hangboardExercise.exerciseTitle}',
                 softWrap: true,
                 style: TextStyle(
                   fontSize: 20.0,
@@ -120,16 +150,15 @@ class _HangboardPageState extends State<HangboardPage>
     return BlocBuilder(
       bloc: _timerBloc,
       builder: (BuildContext context, TimerState timerState) {
-        if(timerState is TimerLoading) {
-          return loadingScreen();
-        } else if(timerState is TimerLoaded) {
-          _timerController = AnimationController(
-              vsync: this,
-              value: timerState.controllerValue,
-              duration: Duration(seconds: timerState.timer.duration));
+        if(timerState is TimerLoaded) {
+          print("TIME BUILDER");
 
           VoidCallback timerControllerCallback =
           setupTimerControllerCallback(hangboardState, timerState);
+
+          if(timerState.isTimerRunning) {
+            timerControllerCallback();
+          }
 
           return Container(
             constraints: BoxConstraints(
@@ -199,18 +228,22 @@ class _HangboardPageState extends State<HangboardPage>
                       ),
                     ),
                   ),
-                  setCompleteNotifier(), //todo: don't know if this goes here but let's find out
+//                  setCompleteNotifier(), //todo: don't know if this goes here but let's find out
                 ],
               ),
             ),
           );
+        } else {
+          return loadingScreen();
         }
       },
     );
   }
 
+  //todo: extract this to a bloc? pass timerController and just decide what to do
   VoidCallback setupTimerControllerCallback(
       HangboardExerciseLoaded hangboardState, TimerLoaded timerState) {
+//    _timerController.value = timerState.controllerValue;
     if(timerState.timer.direction == TimerDirection.COUNTERCLOCKWISE) {
       return () {
         _timerController.reverse().whenComplete(() {
@@ -222,8 +255,6 @@ class _HangboardPageState extends State<HangboardPage>
               _timerBloc,
             ));
           }
-
-          //todo: make sure controller keeps animating with new timer
         }).catchError((error) {
           print('Timer failed animating counterclockwise: $error');
           _timerController.stop(canceled: false);
@@ -293,7 +324,7 @@ class _HangboardPageState extends State<HangboardPage>
                     ),
                   ),
                   Text(
-                    '$hangsPerSet Hangs',
+                    '$hangsPerSet',
                     style: TextStyle(fontSize: 30.0),
                   ),
                   hangsPerSet > 0
@@ -387,7 +418,7 @@ class _HangboardPageState extends State<HangboardPage>
                     ),
                   ),
                   Text(
-                    '$numberOfSets Sets',
+                    '$numberOfSets',
                     style: TextStyle(fontSize: 30.0),
                   ),
                   numberOfSets > 0
@@ -419,7 +450,7 @@ class _HangboardPageState extends State<HangboardPage>
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      numberOfSets == 1 ? ' set' : ' sets',
+                      numberOfSets == 1 ? ' Set' : ' Sets',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 18.0),
                     ),
@@ -518,6 +549,14 @@ class _HangboardPageState extends State<HangboardPage>
       },
     );
   }
+
+  @override
+  void dispose() {
+    _timerController.dispose();
+    super.dispose();
+  }
+
+
 }
 //TODO: need to make this a streamListener
 /*Scaffold.of(context).showSnackBar(SnackBar(

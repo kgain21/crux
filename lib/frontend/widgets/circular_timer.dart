@@ -101,9 +101,9 @@ class CircularTimer extends StatelessWidget {
   String timerString() {
     Duration duration;
     if(timerState.timer.direction == TimerDirection.COUNTERCLOCKWISE) {
-      duration = timerController.duration * (1 - timerController.value);
+      duration = timerController.reverseDuration * timerController.value;
     } else {
-      duration = timerController.duration * timerController.value;
+      duration = timerController.duration * (1 - timerController.value);
     }
     return '${duration.inMinutes}:${(duration.inSeconds % 60)
         .toString()

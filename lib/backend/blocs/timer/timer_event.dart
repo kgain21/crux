@@ -10,8 +10,10 @@ abstract class TimerEvent extends Equatable {
 
 class LoadTimer extends TimerEvent {
   final HangboardExercise hangboardExercise;
+  final isTimerRunning;
 
-  LoadTimer(this.hangboardExercise) : super([hangboardExercise]);
+  LoadTimer(this.hangboardExercise, this.isTimerRunning)
+      : super([hangboardExercise, isTimerRunning]);
 
   @override
   String toString() => 'LoadTimer { hangboardExercise: $hangboardExercise }';
@@ -48,8 +50,10 @@ class TimerComplete extends TimerEvent {
 
 class ReplaceWithRepTimer extends TimerEvent {
   final HangboardExercise hangboardExercise;
+  final bool isTimerRunning;
 
-  ReplaceWithRepTimer(this.hangboardExercise) : super([hangboardExercise]);
+  ReplaceWithRepTimer(this.hangboardExercise, this.isTimerRunning)
+      : super([hangboardExercise, isTimerRunning]);
 
   @override
   String toString() =>
@@ -58,8 +62,10 @@ class ReplaceWithRepTimer extends TimerEvent {
 
 class ReplaceWithRestTimer extends TimerEvent {
   final HangboardExercise hangboardExercise;
+  final bool isTimerRunning;
 
-  ReplaceWithRestTimer(this.hangboardExercise) : super([hangboardExercise]);
+  ReplaceWithRestTimer(this.hangboardExercise, this.isTimerRunning)
+      : super([hangboardExercise, isTimerRunning]);
 
   @override
   String toString() =>
@@ -68,8 +74,10 @@ class ReplaceWithRestTimer extends TimerEvent {
 
 class ReplaceWithBreakTimer extends TimerEvent {
   final HangboardExercise hangboardExercise;
+  final bool isTimerRunning;
 
-  ReplaceWithBreakTimer(this.hangboardExercise) : super([hangboardExercise]);
+  ReplaceWithBreakTimer(this.hangboardExercise, this.isTimerRunning)
+      : super([hangboardExercise, isTimerRunning]);
 
   @override
   String toString() =>
@@ -78,7 +86,6 @@ class ReplaceWithBreakTimer extends TimerEvent {
 
 class DisposeTimer extends TimerEvent {
   final Timer timer;
-
 
   DisposeTimer(this.timer) : super([timer]);
 

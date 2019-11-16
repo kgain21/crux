@@ -25,15 +25,15 @@ class StringFormatUtils {
       int hangs, int resistance, String resistanceMeasurementSystem) {
     if (hangs == null || hangs == 1) {
       if (resistance == null || resistance == 0) {
-        return ' hang at bodyweight';
+        return ' Hang At Bodyweight';
       } else {
-        return ' hang with $resistance$resistanceMeasurementSystem';
+        return ' Hang With $resistance$resistanceMeasurementSystem';
       }
     } else {
       if (resistance == null || resistance == 0) {
-        return ' hangs at bodyweight';
+        return ' Hangs At Bodyweight';
       }
-      return ' hangs with $resistance$resistanceMeasurementSystem';
+      return ' Hangs With $resistance$resistanceMeasurementSystem';
     }
   }
 

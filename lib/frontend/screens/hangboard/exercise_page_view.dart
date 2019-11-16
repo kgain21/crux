@@ -49,9 +49,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   bool _exerciseFinished;
   bool _preferencesClearedFlag;
 
-  HangboardWorkoutBloc _hangboardExerciseBloc;
+  HangboardWorkoutBloc _hangboardWorkoutBloc;
 
-//todo: left off here 9/18 -> build out workoutBloc (cant dispatch exercise below)
   /* bool _handlePageNotification(ScrollNotification notification,
                                PageController leader, PageController follower) {
     if (notification.depth == 0 && notification is ScrollUpdateNotification) {
@@ -72,6 +71,9 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     _currentPageValue = 0.0;
     _zoomOut = false;
     _preferencesClearedFlag = false;
+    _hangboardWorkoutBloc = HangboardWorkoutBloc(
+        firestoreHangboardWorkoutsRepository:
+        widget.firestoreHangboardWorkoutsRepository);
 //    _shakeController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
 //    _shakeCurve = CurvedAnimation(parent: _shakeController, curve: ShakeCurve());
 
@@ -92,10 +94,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
 
   @override
   Widget build(BuildContext context) {
-    //todo: need to move this to initstate/ BlocProvider.of<HangboardWorkoutBloc>(context);
-    _hangboardExerciseBloc = HangboardWorkoutBloc(
-        firestoreHangboardWorkoutsRepository:
-        widget.firestoreHangboardWorkoutsRepository);
+
 //        hangboardWorkout: widget.hangboardWorkout)
 //      ..dispatch(LoadHangboardWorkout());
     return Scaffold(
@@ -137,7 +136,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
 
   Widget exerciseBlocBuilder() {
     return BlocBuilder(
-        bloc: _hangboardExerciseBloc,
+        bloc: _hangboardWorkoutBloc,
         builder: (context, hangboardWorkoutState) {
           int exerciseCount = 0;
 //          if (hangboardWorkoutState is HangboardWorkoutLoaded) {
@@ -250,7 +249,6 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         child: HangboardPage(
           workoutTitle: widget.hangboardWorkout.workoutTitle,
           index: index,
-          nextPageCallback: nextPageCallback,
           hangboardExercise: hangboardExercise,
         ),
       );
@@ -259,9 +257,10 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         transform: Matrix4.identity()
           ..rotateY(_currentPageValue - index),
         child: HangboardPage(
+          firestoreHangboardWorkoutsRepository: widget
+              .firestoreHangboardWorkoutsRepository,
           workoutTitle: widget.hangboardWorkout.workoutTitle,
           index: index,
-          nextPageCallback: nextPageCallback,
           hangboardExercise: hangboardExercise,
         ),
       );
@@ -272,7 +271,6 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         HangboardPage(
           workoutTitle: widget.hangboardWorkout.workoutTitle,
           index: index,
-          nextPageCallback: nextPageCallback,
           hangboardExercise: hangboardExercise,
         ),
         _zoomOut
