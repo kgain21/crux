@@ -6,12 +6,13 @@ import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/utils/string_format_utils.dart';
+import 'package:crux/utils/validators.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
   final FirestoreHangboardWorkoutsRepository
-      firestoreHangboardWorkoutsRepository;
+  firestoreHangboardWorkoutsRepository;
   final String workoutTitle;
 
   ExerciseFormBloc({@required this.firestoreHangboardWorkoutsRepository,
@@ -84,7 +85,7 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
     } else if(event is InvalidExerciseFormSaved) {
       yield* _mapInvalidExerciseFormSavedToState();
     } else if(event is ValidExerciseFormSaved) {
-      yield* _mapValidExerciseFormSavedToState();
+      yield* _mapValidExerciseFormSavedToState(event);
     }
   }
 
@@ -104,28 +105,28 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
     yield currentState.update(numberOfHandsSelected: numberOfHandsSelected);
   }
 
-  Stream<ExerciseFormState> _mapHoldChangedToState(Holds hold) async* {
-    List<FingerConfigurations> availableFingerConfigurations =
-        FingerConfigurations.values;
+  Stream<ExerciseFormState> _mapHoldChangedToState(Hold hold) async* {
+    List<FingerConfiguration> availableFingerConfigurations =
+        FingerConfiguration.values;
     bool isFingerConfigurationVisible = false;
     bool isDepthVisible = true;
 
-    if(hold == Holds.POCKET) {
-      availableFingerConfigurations = FingerConfigurations.values.sublist(0, 7);
+    if(hold == Hold.POCKET) {
+      availableFingerConfigurations = FingerConfiguration.values.sublist(0, 7);
       isFingerConfigurationVisible = true;
       isDepthVisible = false;
-    } else if(hold == Holds.OPEN_HAND) {
-      availableFingerConfigurations = FingerConfigurations.values.sublist(4);
+    } else if(hold == Hold.OPEN_HAND) {
+      availableFingerConfigurations = FingerConfiguration.values.sublist(4);
       isFingerConfigurationVisible = true;
-    } else if(hold == Holds.SLOPER) {
+    } else if(hold == Hold.SLOPER) {
       isDepthVisible = false;
-    } else if(hold == Holds.WIDE_PINCH) {
+    } else if(hold == Hold.WIDE_PINCH) {
       isDepthVisible = false;
-    } else if(hold == Holds.MEDIUM_PINCH) {
+    } else if(hold == Hold.MEDIUM_PINCH) {
       isDepthVisible = false;
-    } else if(hold == Holds.NARROW_PINCH) {
+    } else if(hold == Hold.NARROW_PINCH) {
       isDepthVisible = false;
-    } else if(hold == Holds.JUGS) {
+    } else if(hold == Hold.JUGS) {
       isDepthVisible = false;
     }
 
@@ -138,118 +139,88 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
   }
 
   Stream<ExerciseFormState> _mapFingerConfigurationChangedToState(
-      FingerConfigurations fingerConfiguration) async* {
+      FingerConfiguration fingerConfiguration) async* {
     yield currentState.update(fingerConfiguration: fingerConfiguration);
   }
 
   Stream<ExerciseFormState> _mapDepthChangedToState(String depth) async* {
-    double depthValue = double.tryParse(depth);
-    depthValue = (null != depthValue && depthValue > 0) ? depthValue : null;
-
-    yield currentState.update(
-      depth: depthValue,
-    );
+    yield currentState.update(isDepthValid: Validators.validateDepth(depth));
   }
 
   Stream<ExerciseFormState> _mapTimeOffChangedToState(String timeOff) async* {
-    int timeOffValue = int.tryParse(timeOff);
-    timeOffValue =
-    (null != timeOffValue && timeOffValue > 0) ? timeOffValue : null;
-
-    yield currentState.update(
-      timeOff: timeOffValue,
-    );
+    yield currentState.update(isTimeOffValid: Validators.validateTime(timeOff));
   }
 
   Stream<ExerciseFormState> _mapTimeOnChangedToState(String timeOn) async* {
-    int timeOnValue = int.tryParse(timeOn);
-    timeOnValue = (null != timeOnValue && timeOnValue > 0) ? timeOnValue : null;
-
-    yield currentState.update(
-      timeOn: timeOnValue,
-    );
+    yield currentState.update(isTimeOnValid: Validators.validateTime(timeOn));
   }
 
   Stream<ExerciseFormState> _mapHangsPerSetChangedToState(
       String hangsPerSet) async* {
-    int hangsPerSetValue = int.tryParse(hangsPerSet);
-
-    hangsPerSetValue = (null != hangsPerSetValue && hangsPerSetValue > 0)
-        ? hangsPerSetValue
-        : null;
-
-    yield currentState.update(hangsPerSet: hangsPerSetValue);
+    yield currentState.update(
+        isHangsPerSetValid: Validators.validateHangsPerSet(hangsPerSet));
   }
 
   Stream<ExerciseFormState> _mapTimeBetweenSetsChangedToState(
       String timeBetweenSets) async* {
-    int timeBetweenSetsValue = int.tryParse(timeBetweenSets);
-    timeBetweenSetsValue =
-    (null != timeBetweenSetsValue && timeBetweenSetsValue > 0)
-        ? timeBetweenSetsValue
-        : null;
-
     yield currentState.update(
-      timeBetweenSets: timeBetweenSetsValue,
-    );
+        isTimeBetweenSetsValid: Validators.validateTime(timeBetweenSets));
   }
 
   Stream<ExerciseFormState> _mapNumberOfSetsChangedToState(
       String numberOfSets) async* {
-    int numberOfSetsValue = int.tryParse(numberOfSets);
-    numberOfSetsValue = (null != numberOfSetsValue && numberOfSetsValue > 0)
-        ? numberOfSetsValue
-        : null;
-
     yield currentState.update(
-      numberOfSets: numberOfSetsValue,
-    );
+        isNumberOfSetsValid: Validators.validateNumberOfSets(numberOfSets));
   }
 
   Stream<ExerciseFormState> _mapResistanceChangedToState(
       String resistance) async* {
-    int resistanceValue = int.tryParse(resistance);
-    resistanceValue = (null != resistanceValue) ? resistanceValue : null;
-
     yield currentState.update(
-      resistance: resistanceValue,
-    );
+        isResistanceValid: Validators.validateResistance(resistance));
   }
 
+  /// Don't autoValidate form until form is submitted incorrectly
   Stream<ExerciseFormState> _mapInvalidExerciseFormSavedToState() async* {
     yield currentState.update(autoValidate: true);
   }
 
-  Stream<ExerciseFormState> _mapValidExerciseFormSavedToState() async* {
+  Stream<ExerciseFormState> _mapValidExerciseFormSavedToState(
+      ValidExerciseFormSaved event) async* {
     var formattedFingerConfiguration =
-    StringFormatUtils.formatFingerConfiguration(
-        currentState.fingerConfiguration);
-    var formattedHold = StringFormatUtils.formatHold(currentState.hold);
-    var numberOfHandsSelected = currentState.numberOfHandsSelected;
-    var depthMeasurementSystem = currentState.depthMeasurementSystem;
-    var depth = currentState.depth;
+    StringFormatUtils.formatFingerConfiguration(event.fingerConfiguration);
 
-    firestoreHangboardWorkoutsRepository.addNewExercise(workoutTitle,
-        HangboardExercise(
-            StringFormatUtils.createHangboardExerciseTitle(
-              numberOfHandsSelected,
-              depth,
-              formattedFingerConfiguration,
-              formattedHold,
-              depthMeasurementSystem,
-            ),
-            depthMeasurementSystem,
-            currentState.resistanceMeasurementSystem,
-            numberOfHandsSelected,
-            formattedHold,
-            depth,
-            currentState.hangsPerSet,
-            currentState.numberOfSets,
-            currentState.timeOn,
-            currentState.timeOff,
-            fingerConfiguration: formattedFingerConfiguration,
-            breakDuration: currentState.timeBetweenSets,
-            resistance: currentState.resistance));
-    yield currentState.update(autoValidate: true);
+    var formattedHold = StringFormatUtils.formatHold(event.hold);
+    var numberOfHandsSelected = event.numberOfHandsSelected;
+    var depthMeasurementSystem = event.depthMeasurementSystem;
+    var depth = double.tryParse(event.depth);
+
+    var hangboardExercise = HangboardExercise(
+      StringFormatUtils.createHangboardExerciseTitle(
+        numberOfHandsSelected,
+        depth,
+        formattedFingerConfiguration,
+        formattedHold,
+        depthMeasurementSystem,
+      ),
+      depthMeasurementSystem,
+      event.resistanceMeasurementSystem,
+      numberOfHandsSelected,
+      formattedHold,
+      depth,
+      int.tryParse(event.hangsPerSet),
+      int.tryParse(event.numberOfSets),
+      int.tryParse(event.timeOn),
+      int.tryParse(event.timeOff),
+      fingerConfiguration: formattedFingerConfiguration,
+      breakDuration: int.tryParse(event.timeBetweenSets),
+      resistance: int.tryParse(event.resistance),
+    );
+
+    bool isSuccess = await firestoreHangboardWorkoutsRepository.addNewExercise(
+      workoutTitle,
+      hangboardExercise,
+    );
+
+    yield currentState.update(isSuccess: isSuccess);
   }
 }

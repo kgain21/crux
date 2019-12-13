@@ -26,16 +26,33 @@ class FirestoreHangboardWorkoutsRepository
       return snapshot.documents.map((doc) {
         return HangboardExerciseEntity.fromJson(doc.data);
       }).toList();
-    }).first;
+    }).first
+        .catchError((error) {
+      print('Failed retrieving exercises from $workoutTitle: $error');
+      return Future.error(error);
+    });
   }
 
+  /// Given a workout's title and a new exercise, find the workout in the db and
+  /// add the exercise to it.
   @override
-  Future<void> addNewExercise(
+  Future<bool> addNewExercise(
       String workoutTitle, HangboardExercise hangboardExercise) async {
     final hangboardExerciseEntity = hangboardExercise.toEntity();
-    var parentWorkout = await getWorkoutByWorkoutTitle(workoutTitle);
-    parentWorkout.hangboardExerciseEntityList.add(hangboardExerciseEntity);
-    return updateWorkout(HangboardWorkout.fromEntity(parentWorkout));
+
+    getWorkoutByWorkoutTitle(workoutTitle).then((hangboardWorkout) {
+      if(hangboardWorkout.hangboardExerciseEntityList.contains(
+          hangboardExerciseEntity)) {
+        return false;
+      }
+      hangboardWorkout.hangboardExerciseEntityList.add(hangboardExerciseEntity);
+      return updateWorkout(HangboardWorkout.fromEntity(hangboardWorkout));
+    }).catchError((error) {
+      print('Failed to retrieve workout for $workoutTitle: $error');
+      return Future.error(error);
+    });
+    return false;
+
     /*return firestore
         .collection(
             '$workoutType/$workoutTitle/${hangboardExercise.exerciseTitle}')
@@ -76,7 +93,7 @@ class FirestoreHangboardWorkoutsRepository
                 HangboardWorkoutEntity.fromJson(workoutDocument.data)))
             .toList())
         .catchError((error) {
-      print('Failed retrieving workouts from firestore:  $error');
+      print('Failed retrieving workouts:  $error');
       return Future.error(error);
     });
   }
@@ -90,7 +107,7 @@ class FirestoreHangboardWorkoutsRepository
         HangboardParentEntity.fromJson(hangboardCollection.documents)));
   }*/
 
-//  @override
+  @override
   Future<HangboardWorkoutEntity> getWorkoutByWorkoutTitle(
       String workoutTitle) async {
     return firestore
@@ -99,14 +116,19 @@ class FirestoreHangboardWorkoutsRepository
         .first
         .then((hangboardCollection) {
       return HangboardWorkoutEntity.fromJson(hangboardCollection.documents
-          .firstWhere((document) => workoutTitle == document.documentID)
+          .firstWhere((document) => workoutTitle == document.documentID,
+          orElse: () => null)
           .data);
     }).catchError((error) {
-      print(error);
+      print('Failed to retrieve workout by title: $error');
       return Future.error(error);
     });
   }
 
+  /// Adds a new workout. This method also checks to see if the workout being
+  /// added is a duplicate entry in the db.
+  ///
+  /// Returns a boolean to say whether the add was a duplicate or not.
   @override
   Future<bool> addNewWorkout(HangboardWorkout hangboardWorkout) async {
     var workoutRef;
@@ -124,37 +146,58 @@ class FirestoreHangboardWorkoutsRepository
         workoutRef.setData(hangboardWorkoutEntity.toJson());
         return true;
       }
-    } catch (e) {
-      print(e);
-      return false;
+    } catch(error) {
+      print('Failed to add new workout: $error');
+      return Future.error(error);
     }
   }
 
+  /// Updates a workout given a workout. This method assumes that the workout
+  /// has been retrieved prior to update.
+  ///
+  /// Returns a boolean to say whether the update succeeded or not.
   @override
   Future<bool> updateWorkout(HangboardWorkout hangboardWorkout) async {
-//    final hangboardWorkoutEntity = hangboardWorkout.toEntity();
+    CollectionReference collectionReference = firestore.collection(workoutType);
 
-    try {
-      CollectionReference collectionReference =
-          firestore.collection(workoutType);
+    var workoutRef =
+    collectionReference.document(hangboardWorkout.workoutTitle);
 
-      var workoutRef =
-          collectionReference.document(hangboardWorkout.workoutTitle);
-      workoutRef.setData(hangboardWorkout.toEntity().toJson());
+    workoutRef.setData(hangboardWorkout.toEntity().toJson()).then((_) {
       return true;
-    } catch (e) {
-      print(e);
-      return false;
-    }
+    }).catchError((error) {
+      print("Failed updating workout ${hangboardWorkout.workoutTitle}");
+      print(error);
+      return Future.error(error);
+    });
+    return false;
   }
 
+  /// Delete an entire workout and all exercises.
+  ///
+  /// Returns a boolean to say whether the delete succeeded or not.
   @override
-  Future<void> deleteWorkout(HangboardWorkout hangboardWorkout) {
+  Future<bool> deleteWorkout(HangboardWorkout hangboardWorkout) async {
     final hangboardWorkoutEntity = hangboardWorkout.toEntity();
-    return firestore.collection(workoutType).getDocuments().then((snapshot) {
+
+    firestore.collection(workoutType).getDocuments().then((snapshot) {
       firestore
           .document('$workoutType/${hangboardWorkoutEntity.workoutTitle}')
-          .delete();
+          .delete()
+          .then((_) {
+        return true;
+      }).catchError((error) {
+        print("Failed deleting workout ${hangboardWorkoutEntity.workoutTitle}");
+        print(error);
+        return Future.error(error);
+      });
+    }).catchError((error) {
+      print(
+          "Failed retrieving documents on delete of ${hangboardWorkoutEntity
+              .workoutTitle}");
+      print(error);
+      return Future.error(error);
     });
+    return false;
   }
 }

@@ -22,12 +22,10 @@ class TimerLoading extends TimerState {
 class TimerLoaded extends TimerState {
   final Timer timer;
   final double controllerValue;
-  final bool isTimerRunning;
 
   TimerLoaded(this.timer,
-              this.controllerValue,
-              this.isTimerRunning,)
-      : super([timer, controllerValue, isTimerRunning]);
+              this.controllerValue,)
+      : super([timer, controllerValue]);
 
   @override
   String toString() {
@@ -42,7 +40,3 @@ class TimerNotLoaded extends TimerState {
   String toString() => 'TimerNotLoaded';
 }
 
-class TimerDisposed extends TimerState {
-  @override
-  String toString() => 'TimerDisposed';
-}

@@ -9,22 +9,29 @@ class Timer extends Equatable {
   final String storageKey; // Storage key for SharedPreferences
   final int duration;
   final TimerDirection direction;
-  final bool previouslyRunning;
+  final bool isTimerRunning;
   final int deviceTimeOnExit; // In epoch milliseconds
   final double controllerValueOnExit; // Value of animationController
 
   Timer(this.storageKey,
         this.duration,
         this.direction,
-        this.previouslyRunning,
+        this.isTimerRunning,
         this.deviceTimeOnExit,
-        this.controllerValueOnExit,);
+        this.controllerValueOnExit,) : super([
+    storageKey,
+    duration,
+    direction,
+    isTimerRunning,
+    deviceTimeOnExit,
+    controllerValueOnExit,
+  ]);
 
   Timer copyWith({
                    String lookupKey,
                    int duration,
                    TimerDirection direction,
-                   bool previouslyRunning,
+                   bool isTimerRunning,
                    int deviceTimeOnExit,
                    double controllerValueOnExit,
                  }) {
@@ -32,7 +39,7 @@ class Timer extends Equatable {
       lookupKey,
       duration,
       direction,
-      previouslyRunning,
+      isTimerRunning,
       deviceTimeOnExit,
       controllerValueOnExit,
     );
@@ -41,7 +48,7 @@ class Timer extends Equatable {
   @override
   String toString() {
     return 'Timer { storageKey: $storageKey, duration: $duration, '
-        'direction: $direction, previouslyRunning: $previouslyRunning,'
+        'direction: $direction, previouslyRunning: $isTimerRunning,'
         'deviceTimeOnExit: $deviceTimeOnExit, controllerValueOnExit: $controllerValueOnExit';
   }
 
@@ -50,7 +57,7 @@ class Timer extends Equatable {
       storageKey,
       duration,
       direction,
-      previouslyRunning,
+      isTimerRunning,
       deviceTimeOnExit,
       controllerValueOnExit,
     );

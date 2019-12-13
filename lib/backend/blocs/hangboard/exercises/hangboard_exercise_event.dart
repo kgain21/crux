@@ -60,14 +60,14 @@ class HangboardExerciseComplete extends HangboardExerciseEvent {
       'HangboardExerciseComplete { hangboardExercise: $hangboardExercise }';
 }*/
 
-class ExerciseDispose extends HangboardExerciseEvent {
+class DisposeHangboardExercise extends HangboardExerciseEvent {
   final HangboardExercise hangboardExercise;
 
-  ExerciseDispose(this.hangboardExercise) : super([hangboardExercise]);
+  DisposeHangboardExercise(this.hangboardExercise) : super([hangboardExercise]);
 
   @override
   String toString() =>
-      'HangboardExerciseDispose { hangboardExercise: $hangboardExercise }';
+      'DisposeHangboardExercise { hangboardExercise: $hangboardExercise }';
 }
 
 class ClearHangboardExercisePreferences extends HangboardExerciseEvent {
@@ -82,8 +82,10 @@ class ClearHangboardExercisePreferences extends HangboardExerciseEvent {
 
 class IncreaseNumberOfHangsButtonPressed extends HangboardExerciseEvent {
   final HangboardExercise exercise;
+  final TimerBloc timerBloc;
 
-  IncreaseNumberOfHangsButtonPressed(this.exercise) : super([exercise]);
+  IncreaseNumberOfHangsButtonPressed(this.exercise, this.timerBloc)
+      : super([exercise, timerBloc]);
 
   @override
   String toString() =>
@@ -92,8 +94,10 @@ class IncreaseNumberOfHangsButtonPressed extends HangboardExerciseEvent {
 
 class DecreaseNumberOfHangsButtonPressed extends HangboardExerciseEvent {
   final HangboardExercise exercise;
+  final TimerBloc timerBloc;
 
-  DecreaseNumberOfHangsButtonPressed(this.exercise) : super([exercise]);
+  DecreaseNumberOfHangsButtonPressed(this.exercise, this.timerBloc)
+      : super([exercise, timerBloc]);
 
   @override
   String toString() =>
@@ -102,8 +106,10 @@ class DecreaseNumberOfHangsButtonPressed extends HangboardExerciseEvent {
 
 class IncreaseNumberOfSetsButtonPressed extends HangboardExerciseEvent {
   final HangboardExercise exercise;
+  final TimerBloc timerBloc;
 
-  IncreaseNumberOfSetsButtonPressed(this.exercise) : super([exercise]);
+  IncreaseNumberOfSetsButtonPressed(this.exercise, this.timerBloc)
+      : super([exercise, timerBloc]);
 
   @override
   String toString() =>
@@ -112,8 +118,10 @@ class IncreaseNumberOfSetsButtonPressed extends HangboardExerciseEvent {
 
 class DecreaseNumberOfSetsButtonPressed extends HangboardExerciseEvent {
   final HangboardExercise exercise;
+  final TimerBloc timerBloc;
 
-  DecreaseNumberOfSetsButtonPressed(this.exercise) : super([exercise]);
+  DecreaseNumberOfSetsButtonPressed(this.exercise, this.timerBloc)
+      : super([exercise, timerBloc]);
 
   @override
   String toString() =>
@@ -126,8 +134,7 @@ class RepCompleted extends HangboardExerciseEvent {
   RepCompleted(this.exercise) : super([exercise]);
 
   @override
-  String toString() =>
-      'RepCompleted { exercise: $exercise }';
+  String toString() => 'RepCompleted { exercise: $exercise }';
 }
 
 class RestCompleted extends HangboardExerciseEvent {
@@ -136,8 +143,7 @@ class RestCompleted extends HangboardExerciseEvent {
   RestCompleted(this.exercise) : super([exercise]);
 
   @override
-  String toString() =>
-      'RestCompleted { exercise: $exercise }';
+  String toString() => 'RestCompleted { exercise: $exercise }';
 }
 
 class BreakCompleted extends HangboardExerciseEvent {
@@ -146,28 +152,29 @@ class BreakCompleted extends HangboardExerciseEvent {
   BreakCompleted(this.exercise) : super([exercise]);
 
   @override
-  String toString() =>
-      'BreakCompleted { exercise: $exercise }';
+  String toString() => 'BreakCompleted { exercise: $exercise }';
 }
 
-class RepButtonPressed extends HangboardExerciseEvent {
+class ForwardSwitchButtonPressed extends HangboardExerciseEvent {
   final HangboardExercise exercise;
+  final TimerBloc timerBloc;
 
-  RepButtonPressed(this.exercise) : super([exercise]);
+  ForwardSwitchButtonPressed(this.exercise, this.timerBloc)
+      : super([exercise, timerBloc]);
 
   @override
-  String toString() =>
-      'RepButtonPressed { exercise: $exercise }';
+  String toString() => 'ForwardSwitchButtonPressed { exercise: $exercise }';
 }
 
-class RestButtonPressed extends HangboardExerciseEvent {
+class ReverseSwitchButtonPressed extends HangboardExerciseEvent {
   final HangboardExercise exercise;
+  final TimerBloc timerBloc;
 
-  RestButtonPressed(this.exercise) : super([exercise]);
+  ReverseSwitchButtonPressed(this.exercise, this.timerBloc)
+      : super([exercise, timerBloc]);
 
   @override
-  String toString() =>
-      'RestButtonPressed { exercise: $exercise }';
+  String toString() => 'ReverseSwitchButtonPressed { exercise: $exercise }';
 }
 
 class ForwardComplete extends HangboardExerciseEvent {
@@ -179,8 +186,7 @@ class ForwardComplete extends HangboardExerciseEvent {
       : super([exercise, timer]);
 
   @override
-  String toString() =>
-      'ForwardComplete { exercise: $exercise, timer: $timer }';
+  String toString() => 'ForwardComplete { exercise: $exercise, timer: $timer }';
 }
 
 class ReverseComplete extends HangboardExerciseEvent {
@@ -192,10 +198,5 @@ class ReverseComplete extends HangboardExerciseEvent {
       : super([exercise, timer]);
 
   @override
-  String toString() =>
-      'ReverseComplete { exercise: $exercise, timer: $timer }';
+  String toString() => 'ReverseComplete { exercise: $exercise, timer: $timer }';
 }
-
-
-
-

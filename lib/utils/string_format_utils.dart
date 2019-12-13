@@ -6,8 +6,8 @@ import 'package:crux/backend/models/hangboard/hold_enum.dart';
 // TODO: Refactor at some point
 
 class StringFormatUtils {
-  static String formatDepthAndHold(/*int numberOfHands,*/ double depth,
-      String depthMeasurementSystem, String fingerConfiguration, String hold) {
+  static String formatDepthAndHold(double depth, String depthMeasurementSystem,
+                                   String fingerConfiguration, String hold) {
     if (depth == null || depth == 0) {
       if (fingerConfiguration == null || fingerConfiguration == '') {
         return hold;
@@ -37,40 +37,31 @@ class StringFormatUtils {
     }
   }
 
-  /// Formatter for the different [FingerConfigurations] available. Takes the
+  /// Formatter for the different [FingerConfiguration] available. Takes the
   /// enum form and makes it a better looking String for the dropdown.
   static String formatFingerConfiguration(
-      FingerConfigurations fingerConfiguration) {
+      FingerConfiguration fingerConfiguration) {
     if (fingerConfiguration != null) {
-      var fingerConfigurationArray =
-          fingerConfiguration.toString().substring(21).split('_');
-      String formattedConfiguration = '';
-      for (int i = 0; i < fingerConfigurationArray.length; i++) {
-        formattedConfiguration = formattedConfiguration +
-            '${fingerConfigurationArray[i].substring(0, 1).toUpperCase()}${fingerConfigurationArray[i].substring(1).toLowerCase()}';
-        if (!(i == fingerConfigurationArray.length - 1)) {
-          formattedConfiguration += '-';
-        }
-      }
-      return formattedConfiguration;
+      return fingerConfiguration
+          .toString()
+          .substring(20)
+          .split('_')
+          .map((word) {
+        return '${word.substring(0, 1).toUpperCase()}'
+            '${word.substring(1).toLowerCase()}';
+      }).join("-");
     }
     return '';
   }
 
-  /// Formatter for the different [Holds] I have available. Takes the
-  /// enum form and makes it a better looking String for the dropdown.
-  static String formatHold(Holds hold) {
+  /// Formatter for the different [Hold] available. Takes the enum form and
+  /// makes it a better looking String for the dropdown.
+  static String formatHold(Hold hold) {
     if (hold != null) {
-      var holdArray = hold.toString().substring(6).split('_');
-      String formattedHold = '';
-      for (int i = 0; i < holdArray.length; i++) {
-        formattedHold = formattedHold +
-            '${holdArray[i].substring(0, 1).toUpperCase()}${holdArray[i].substring(1).toLowerCase()}';
-        if (!(i == holdArray.length - 1)) {
-          formattedHold += ' ';
-        }
-      }
-      return formattedHold;
+      return hold.toString().substring(5).split('_').map((word) {
+        return '${word.substring(0, 1).toUpperCase()}'
+            '${word.substring(1).toLowerCase()}';
+      }).join(" ");
     }
     return '';
   }
@@ -96,7 +87,7 @@ class StringFormatUtils {
                                              String fingerConfiguration,
                                              String hold,
                                              String depthMeasurementSystem) {
-    String exerciseTitle = '${numberOfHands.toString()} handed';
+    String exerciseTitle = '${numberOfHands.toString()} Handed';
 
     if(depth == null) {
       if(fingerConfiguration == null || fingerConfiguration == '') {
@@ -105,8 +96,15 @@ class StringFormatUtils {
         exerciseTitle += ' $fingerConfiguration $hold';
       }
     } else {
-      exerciseTitle +=
-      ' $depth$depthMeasurementSystem $fingerConfiguration $hold';
+      /// Truncate .0 if possible
+      if(depth.floor() == depth) {
+        exerciseTitle +=
+        ' ${depth
+            .truncate()}$depthMeasurementSystem $fingerConfiguration $hold';
+      } else {
+        exerciseTitle +=
+        ' $depth$depthMeasurementSystem $fingerConfiguration $hold';
+      }
     }
     return exerciseTitle;
   }

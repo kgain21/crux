@@ -63,7 +63,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         Timer timer = Timer.fromEntity(timerEntity);
         double controllerValue = determineControllerValue(timer);
         yield TimerLoaded(
-            timer, controllerValue, timerEntity.previouslyRunning);
+            timer, controllerValue);
       } else {
         yield TimerLoaded(
             Timer(
@@ -72,10 +72,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
               TimerDirection.COUNTERCLOCKWISE,
               false,
               0,
-              0.0,
+              1.0,
             ),
-            0.0,
-            event.isTimerRunning);
+            1.0);
       }
     } catch(exception) {
       print(exception);
@@ -90,12 +89,11 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           event.hangboardExercise.exerciseTitle,
           event.hangboardExercise.repDuration,
           TimerDirection.COUNTERCLOCKWISE,
-          false,
+          event.isTimerRunning,
           0,
-          0.0,
+          1.0,
         ),
-        0.0,
-        event.isTimerRunning);
+        1.0);
   }
 
   Stream<TimerState> _mapReplaceWithRestTimerToState(
@@ -105,12 +103,11 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           event.hangboardExercise.exerciseTitle,
           event.hangboardExercise.restDuration,
           TimerDirection.CLOCKWISE,
-          false,
+          event.isTimerRunning,
           0,
           0.0,
         ),
-        1.0,
-        event.isTimerRunning);
+        0.0);
   }
 
   Stream<TimerState> _mapReplaceWithBreakTimerToState(
@@ -120,12 +117,11 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
           event.hangboardExercise.exerciseTitle,
           event.hangboardExercise.breakDuration,
           TimerDirection.CLOCKWISE,
-          false,
+          event.isTimerRunning,
           0,
           0.0,
         ),
-        1.0,
-        event.isTimerRunning);
+        0.0);
   }
 
   Stream<TimerState> _mapTimerCompleteToState(event) {
@@ -139,7 +135,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   Stream<TimerState> _mapDisposeTimerToState(DisposeTimer event) async* {
     if(currentState is TimerLoaded) {
       _saveTimer(event.timer);
-      yield TimerDisposed();
+//      yield TimerDisposed();
     }
   }
 
@@ -149,7 +145,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   double determineControllerValue(Timer timer) {
-    if(timer.previouslyRunning) {
+    if(timer.isTimerRunning) {
       return valueDifference(timer);
     } else {
       return timer.controllerValueOnExit;

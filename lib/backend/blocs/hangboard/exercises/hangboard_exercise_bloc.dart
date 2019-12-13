@@ -11,6 +11,9 @@ class HangboardExerciseBloc
   final FirestoreHangboardWorkoutsRepository firestore;
   final HangboardExercise hangboardExercise;
 
+  int originalNumberOfHangs;
+  int originalNumberOfSets;
+
   HangboardExerciseBloc({
                           @required this.firestore,
                           this.hangboardExercise,
@@ -53,10 +56,10 @@ class HangboardExerciseBloc
       yield* _mapForwardCompletedToState(event);
     } else if(event is ReverseComplete) {
       yield* _mapReverseCompletedToState(event);
-    } else if(event is RepButtonPressed) {
-      yield* _mapRepButtonPressedToState(event);
-    } else if(event is RestButtonPressed) {
-      yield* _mapRestButtonPressedToState(event);
+    } else if(event is ForwardSwitchButtonPressed) {
+      yield* _mapForwardSwitchButtonPressedToState(event);
+    } else if(event is ReverseSwitchButtonPressed) {
+      yield* _mapReverseSwitchButtonPressedToState(event);
     }
   }
 
@@ -64,6 +67,8 @@ class HangboardExerciseBloc
   Stream<HangboardExerciseState> _mapLoadHangboardExerciseToState(
       LoadHangboardExercise event) async* {
     try {
+      originalNumberOfSets = event.hangboardExercise.numberOfSets;
+      originalNumberOfHangs = event.hangboardExercise.hangsPerSet;
       yield HangboardExerciseLoaded(event.hangboardExercise);
     } catch(_) {
       yield HangboardExerciseNotLoaded();
@@ -98,59 +103,73 @@ class HangboardExerciseBloc
       IncreaseNumberOfHangsButtonPressed event) async* {
     yield HangboardExerciseLoaded(
         event.exercise.copyWith(hangsPerSet: event.exercise.hangsPerSet + 1));
+    event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
   Stream<HangboardExerciseState> _mapDecreaseNumberOfHangsButtonPressedToState(
       DecreaseNumberOfHangsButtonPressed event) async* {
     yield HangboardExerciseLoaded(
         event.exercise.copyWith(hangsPerSet: event.exercise.hangsPerSet - 1));
+    event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
   Stream<HangboardExerciseState> _mapIncreaseNumberOfSetsButtonPressedToState(
       IncreaseNumberOfSetsButtonPressed event) async* {
     yield HangboardExerciseLoaded(
         event.exercise.copyWith(numberOfSets: event.exercise.numberOfSets + 1));
+    event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
   Stream<HangboardExerciseState> _mapDecreaseNumberOfSetsButtonPressedToState(
       DecreaseNumberOfSetsButtonPressed event) async* {
     yield HangboardExerciseLoaded(
         event.exercise.copyWith(numberOfSets: event.exercise.numberOfSets - 1));
+    event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
-  Stream<HangboardExerciseState> _mapRepButtonPressedToState(
-      RepButtonPressed event) {
-    return null;
-  }
-
-  Stream<HangboardExerciseState> _mapRestButtonPressedToState(
-      RestButtonPressed event) async* {
+  Stream<HangboardExerciseState> _mapForwardSwitchButtonPressedToState(
+      ForwardSwitchButtonPressed event) async* {
     yield HangboardExerciseLoaded(event.exercise);
+    event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
+  }
+
+  Stream<HangboardExerciseState> _mapReverseSwitchButtonPressedToState(
+      ReverseSwitchButtonPressed event) async* {
+    yield HangboardExerciseLoaded(event.exercise);
+    event.timerBloc.dispatch(ReplaceWithRestTimer(event.exercise, false));
+    //todo: do i ever want to switch to break timer?
   }
 
   Stream<HangboardExerciseState> _mapForwardCompletedToState(
       ForwardComplete event) async* {
-    var reps = event.exercise.hangsPerSet;
+    var hangs = event.exercise.hangsPerSet;
     var sets = event.exercise.numberOfSets;
 
     /// Rest timer completing
     if(event.timer.duration == event.exercise.restDuration) {
-      if(reps > 0) {
-        yield HangboardExerciseLoaded(event.exercise
-            .copyWith(hangsPerSet: event.exercise.hangsPerSet - 1));
+      hangs--;
+      if(hangs > 0) {
+        yield HangboardExerciseLoaded(
+            event.exercise.copyWith(hangsPerSet: hangs));
         event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, true));
       } else {
+        yield HangboardExerciseLoaded(
+            event.exercise.copyWith(hangsPerSet: hangs));
         event.timerBloc.dispatch(ReplaceWithBreakTimer(event.exercise, true));
       }
     } else {
       /// Break timer completing
+      sets--;
       if(sets > 0) {
-        yield HangboardExerciseLoaded(event.exercise
-            .copyWith(hangsPerSet: event.exercise.hangsPerSet - 1));
-        event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, true));
+        yield HangboardExerciseLoaded(event.exercise.copyWith(
+          hangsPerSet: originalNumberOfHangs,
+          numberOfSets: sets,
+        ));
+        event.timerBloc.dispatch(ReplaceWithRepTimer(
+            event.exercise.copyWith(numberOfSets: sets), true));
       } else {
-        /// Exercise is done - notification listener should pick that up and I don't need to do anything?
-        yield null; // todo: - will this work?
+        // todo: - just removes screen - figure out better solution
+        yield HangboardExerciseNotLoaded();
       }
     }
   }
@@ -161,5 +180,4 @@ class HangboardExerciseBloc
     yield HangboardExerciseLoaded(event.exercise);
     event.timerBloc.dispatch(ReplaceWithRestTimer(event.exercise, true));
   }
-
 }

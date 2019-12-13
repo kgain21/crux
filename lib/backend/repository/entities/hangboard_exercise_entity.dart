@@ -33,39 +33,41 @@ class HangboardExerciseEntity {
                           this.repDuration,
                           this.restDuration);
 
-  /*TODO: going to hold off on these for now but may need in future
   @override
   int get hashCode =>
-      complete.hashCode ^ task.hashCode ^ note.hashCode ^ id.hashCode;
+      exerciseTitle.hashCode ^
+      depthMeasurementSystem.hashCode ^
+      resistanceMeasurementSystem.hashCode ^
+      numberOfHands.hashCode ^
+      holdType.hashCode ^
+      fingerConfiguration.hashCode ^
+      holdDepth.hashCode ^
+      hangsPerSet.hashCode ^
+      numberOfSets.hashCode ^
+      resistance.hashCode ^
+      breakDuration.hashCode ^
+      repDuration.hashCode ^
+      restDuration.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ExerciseEntity &&
+          other is HangboardExerciseEntity &&
               runtimeType == other.runtimeType &&
-              complete == other.complete &&
-              task == other.task &&
-              note == other.note &&
-              id == other.id;
-  */
-
-  /*Map<String, Object> toJson() {
-    return {
-      "exerciseTitle": exerciseTitle,
-      "depthMeasurementSystem": depthMeasurementSystem,
-      "resistanceMeasurementSystem": resistanceMeasurementSystem,
-      "numberOfHands": numberOfHands,
-      "holdType": holdType,
-      "fingerConfiguration": fingerConfiguration,
-      "holdDepth": holdDepth,
-      "hangsPerSet": hangsPerSet,
-      "numberOfSets": numberOfSets,
-      "resistance": resistance,
-      "breakDuration": breakDuration,
-      "repDuration": repDuration,
-      "restDuration": restDuration,
-    };
-  }*/
+              exerciseTitle == other.exerciseTitle &&
+              depthMeasurementSystem == other.depthMeasurementSystem &&
+              resistanceMeasurementSystem ==
+                  other.resistanceMeasurementSystem &&
+              numberOfHands == other.numberOfHands &&
+              holdType == other.holdType &&
+              fingerConfiguration == other.fingerConfiguration &&
+              holdDepth == other.holdDepth &&
+              hangsPerSet == other.hangsPerSet &&
+              numberOfSets == other.numberOfSets &&
+              resistance == other.resistance &&
+              breakDuration == other.breakDuration &&
+              repDuration == other.repDuration &&
+              restDuration == other.restDuration;
 
   Map<String, dynamic> toJson() => _$HangboardExerciseEntityToJson(this);
 
@@ -89,22 +91,4 @@ class HangboardExerciseEntity {
         'restDuration: $restDuration '
         '}';
   }
-
-  /*static HangboardExerciseEntity fromJson(Map<String, Object> json) {
-    return HangboardExerciseEntity(
-      json["exerciseTitle"] as String,
-      json["depthMeasurementSystem"] as String,
-      json["resistanceMeasurementSystem"] as String,
-      json["numberOfHands"] as int,
-      json["holdType"] as String,
-      json["fingerConfiguration"] as String,
-      json["holdDepth"] as double,
-      json["hangsPerSet"] as int,
-      json["numberOfSets"] as int,
-      json["resistance"] as int,
-      json["breakDuration"] as int,
-      json["repDuration"] as int,
-      json["restDuration"] as int,
-    );
-  }*/
 }

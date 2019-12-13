@@ -43,7 +43,7 @@ class NumberOfHandsChanged extends ExerciseFormEvent {
 }
 
 class HoldChanged extends ExerciseFormEvent {
-  final Holds hold;
+  final Hold hold;
 
   HoldChanged({@required this.hold}) : super([hold]);
 
@@ -52,7 +52,7 @@ class HoldChanged extends ExerciseFormEvent {
 }
 
 class FingerConfigurationChanged extends ExerciseFormEvent {
-  final FingerConfigurations fingerConfiguration;
+  final FingerConfiguration fingerConfiguration;
 
   FingerConfigurationChanged({@required this.fingerConfiguration})
       : super([fingerConfiguration]);
@@ -135,7 +135,44 @@ class InvalidExerciseFormSaved extends ExerciseFormEvent {
 }
 
 class ValidExerciseFormSaved extends ExerciseFormEvent {
-  ValidExerciseFormSaved();
+  final String resistanceMeasurementSystem;
+  final String depthMeasurementSystem;
+  final int numberOfHandsSelected;
+  final Hold hold;
+  final FingerConfiguration fingerConfiguration;
+  final String depth;
+  final String timeOff;
+  final String timeOn;
+  final String timeBetweenSets;
+  final String hangsPerSet;
+  final String numberOfSets;
+  final String resistance;
+
+  ValidExerciseFormSaved(this.resistanceMeasurementSystem,
+                         this.depthMeasurementSystem,
+                         this.numberOfHandsSelected,
+                         this.hold,
+                         this.fingerConfiguration,
+                         this.depth,
+                         this.timeOff,
+                         this.timeOn,
+                         this.timeBetweenSets,
+                         this.hangsPerSet,
+                         this.numberOfSets,
+                         this.resistance,) : super([
+    resistanceMeasurementSystem,
+    depthMeasurementSystem,
+    numberOfHandsSelected,
+    hold,
+    fingerConfiguration,
+    depth,
+    timeOff,
+    timeOn,
+    timeBetweenSets,
+    hangsPerSet,
+    numberOfSets,
+    resistance,
+  ]);
 
   @override
   String toString() => 'ValidExerciseFormSaved';

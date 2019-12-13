@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_event.dart';
 import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_state.dart';
@@ -26,16 +25,22 @@ class ExerciseForm extends StatefulWidget {
 }
 
 class _ExerciseFormState extends State<ExerciseForm> {
-  final TextEditingController depthController = TextEditingController();
-  final TextEditingController timeOnController = TextEditingController();
-  final TextEditingController timeOffController = TextEditingController();
-  final TextEditingController hangsPerSetController = TextEditingController();
-  final TextEditingController timeBetweenSetsController =
-      TextEditingController();
-  final TextEditingController numberOfSetsController = TextEditingController();
-  final TextEditingController resistanceController = TextEditingController();
-
   final GlobalKey<FormState> formKey = GlobalKey(debugLabel: 'ExerciseForm');
+
+  final TextEditingController _depthController = TextEditingController();
+  final TextEditingController _timeOnController = TextEditingController();
+  final TextEditingController _timeOffController = TextEditingController();
+  final TextEditingController _hangsPerSetController = TextEditingController();
+  final TextEditingController _timeBetweenSetsController =
+      TextEditingController();
+  final TextEditingController _numberOfSetsController = TextEditingController();
+  final TextEditingController _resistanceController = TextEditingController();
+
+  int _numberOfHandsSelected;
+  String _depthMeasurementSystem;
+  String _resistanceMeasurementSystem;
+  Hold _hold;
+  FingerConfiguration _fingerConfiguration;
 
   ExerciseFormBloc _exerciseFormBloc;
 
@@ -47,22 +52,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
         workoutTitle: widget.workoutTitle,
         firestoreHangboardWorkoutsRepository:
         widget.firestoreHangboardWorkoutsRepository);
-  }
-
-  bool get isPopulated =>
-      depthController.text.isNotEmpty &&
-          timeOnController.text.isNotEmpty &&
-          timeOffController.text.isNotEmpty &&
-          hangsPerSetController.text.isNotEmpty &&
-          timeBetweenSetsController.text.isNotEmpty &&
-          numberOfSetsController.text.isNotEmpty &&
-          resistanceController.text.isNotEmpty;
-
-//  _emailController.text.isNotEmpty && _passwordController.text.isNotEmpty
-
-  bool isSaveButtonEnabled(ExerciseFormState exerciseFormState) {
-    return exerciseFormState.isFormValid &&
-        isPopulated /*&& !exerciseFormState.isSubmitting*/;
   }
 
   @override
@@ -78,40 +67,53 @@ class _ExerciseFormState extends State<ExerciseForm> {
           ),
         ],
       ),
-      body: BlocBuilder(
+      body: BlocListener(
         bloc: _exerciseFormBloc,
-        builder: (context, exerciseFormState) {
-          return Builder(
-            builder: (scaffoldContext) =>
-                Form(
-                  key: formKey,
-                  /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
-              TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
-              https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
-              TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
-               */
-                  child: ListView(
-                    children: <Widget>[
-                      UnitPickerTile(
-                        parentState: exerciseFormState,
-                        parentBloc: _exerciseFormBloc,
-                      ),
-                      numberOfHandsTile(exerciseFormState),
-                      holdDropdownTile(exerciseFormState),
-                      fingerConfigurationDropdownTile(exerciseFormState),
-                      depthTile(exerciseFormState),
-                      hangDurationTile(exerciseFormState),
-                      // hangProtocolTile(),
-                      hangsPerSetTile(exerciseFormState),
-                      timeBetweenSetsTile(exerciseFormState),
-                      numberOfSetsTile(exerciseFormState),
-                      resistanceTile(exerciseFormState),
-                      saveButton(exerciseFormState, scaffoldContext)
-                    ].where(notNull).toList(),
-                  ),
-                ),
-          );
+        listener: (BuildContext context, ExerciseFormState exerciseFormState) {
+          if(exerciseFormState.isSuccess) {
+            exerciseSavedSnackbar(context);
+          } else if(exerciseFormState.isFailure) {
+            _exerciseExistsAlert();
+          }
+//          if(exerciseFormState is InValidExerciseFormSaved) {
+//            exerciseNotSavedSnackbar(context);
+//          }
         },
+        child: BlocBuilder(
+          bloc: _exerciseFormBloc,
+          builder: (context, exerciseFormState) {
+            return Builder(
+              builder: (scaffoldContext) =>
+                  Form(
+                    key: formKey,
+                    /*https://medium.com/saugo360/https-medium-com-saugo360-flutter-using-overlay-to-display-floating-widgets-2e6d0e8decb9
+                TODO: See if I can get the keyboard to jump to the text form field in focus (nice to have)
+                https://stackoverflow.com/questions/46841637/show-a-text-field-dialog-without-being-covered-by-keyboard/46849239#46849239
+                TODO: ^ this was the original solution to the keyboard covering text fields, might want to refer to it in the future
+                 */
+                    child: ListView(
+                      children: <Widget>[
+                        UnitPickerTile(
+                          parentState: exerciseFormState,
+                          parentBloc: _exerciseFormBloc,
+                        ),
+                        _numberOfHandsTile(exerciseFormState),
+                        _holdDropdownTile(exerciseFormState),
+                        _fingerConfigurationDropdownTile(exerciseFormState),
+                        _depthTile(exerciseFormState),
+                        _timeOnTile(exerciseFormState),
+                        // hangProtocolTile(),
+                        _hangsPerSetTile(exerciseFormState),
+                        _timeBetweenSetsTile(exerciseFormState),
+                        _numberOfSetsTile(exerciseFormState),
+                        _resistanceTile(exerciseFormState),
+                        _saveButton(exerciseFormState, scaffoldContext)
+                      ].where(notNull).toList(),
+                    ),
+                  ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -121,7 +123,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
   /// turned back into a list without the null entries.
   bool notNull(Object o) => o != null;
 
-  Widget numberOfHandsTile(ExerciseFormState exerciseFormState) {
+  Widget _numberOfHandsTile(ExerciseFormState exerciseFormState) {
     return new Card(
       child: ListTile(
         key: PageStorageKey('numberOfHandsTile'),
@@ -140,13 +142,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
             ),
             Flexible(
               child: RadioListTile(
-                  title: Text('Two hands'),
-                  value: 2,
-                  groupValue: exerciseFormState.numberOfHandsSelected,
-                  onChanged: (value) {
-                    _exerciseFormBloc.dispatch(
-                        NumberOfHandsChanged(numberOfHandsSelected: value));
-                  }),
+                title: Text('Two hands'),
+                value: 2,
+                groupValue: exerciseFormState.numberOfHandsSelected,
+                onChanged: (value) {
+                  _exerciseFormBloc.dispatch(
+                      NumberOfHandsChanged(numberOfHandsSelected: value));
+                },
+              ),
             ),
           ],
         ),
@@ -154,14 +157,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget holdDropdownTile(ExerciseFormState exerciseFormState) {
+  Widget _holdDropdownTile(ExerciseFormState exerciseFormState) {
     return new Card(
       child: new ListTile(
         leading: Icon(
           Icons.pan_tool,
         ),
         title: DropdownButtonHideUnderline(
-          child: new DropdownButton<Holds>(
+          child: new DropdownButton<Hold>(
             elevation: 10,
             hint: Text(
               'Choose a hold',
@@ -170,8 +173,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
             onChanged: (value) {
               _exerciseFormBloc.dispatch(HoldChanged(hold: value));
             },
-            items: Holds.values.map((Holds hold) {
-              return new DropdownMenuItem<Holds>(
+            items: Hold.values.map((Hold hold) {
+              return new DropdownMenuItem<Hold>(
                 child: new Text(
                   StringFormatUtils.formatHold(hold),
                 ),
@@ -184,9 +187,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget fingerConfigurationDropdownTile(ExerciseFormState exerciseFormState) {
-    if(exerciseFormState.hold == Holds.POCKET ||
-        exerciseFormState.hold == Holds.OPEN_HAND) {
+  Widget _fingerConfigurationDropdownTile(ExerciseFormState exerciseFormState) {
+    if(exerciseFormState.isFingerConfigurationVisible) {
       return new Card(
         child: new ListTile(
           leading: Icon(
@@ -194,7 +196,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
             Icons.pan_tool,
           ),
           title: DropdownButtonHideUnderline(
-            child: new DropdownButton<FingerConfigurations>(
+            child: new DropdownButton<FingerConfiguration>(
               elevation: 10,
               hint: Text(
                 'Choose a finger configuration',
@@ -223,7 +225,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     }
   }
 
-  Widget depthTile(ExerciseFormState exerciseFormState) {
+  Widget _depthTile(ExerciseFormState exerciseFormState) {
     if(!exerciseFormState.isDepthVisible) {
       return null;
     }
@@ -232,13 +234,10 @@ class _ExerciseFormState extends State<ExerciseForm> {
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
-            controller: depthController,
+            controller: _depthController,
             autovalidate: exerciseFormState.autoValidate,
-            validator: (value) {
-              return (null == exerciseFormState.depth ||
-                  null == double.tryParse(value))
-                  ? 'Invalid Depth'
-                  : null;
+            validator: (_) {
+              return exerciseFormState.isDepthValid ? null : 'Invalid Depth';
             },
             onChanged: (value) {
               _exerciseFormBloc.dispatch(DepthChanged(depth: value));
@@ -255,7 +254,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget hangDurationTile(ExerciseFormState exerciseFormState) {
+  Widget _timeOnTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
@@ -266,13 +265,12 @@ class _ExerciseFormState extends State<ExerciseForm> {
                 padding: const EdgeInsets.only(
                     left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
                 child: TextFormField(
-                  controller: timeOnController,
+                  controller: _timeOnController,
                   autovalidate: exerciseFormState.autoValidate,
-                  validator: (value) {
-                    return (null == int.tryParse(value) ||
-                        null == exerciseFormState.timeOn)
-                        ? 'Invalid Time On'
-                        : null;
+                  validator: (_) {
+                    return exerciseFormState.isTimeOnValid
+                        ? null
+                        : 'Invalid Time On';
                   },
                   onChanged: (value) {
                     _exerciseFormBloc.dispatch(TimeOnChanged(timeOn: value));
@@ -289,13 +287,12 @@ class _ExerciseFormState extends State<ExerciseForm> {
                 padding: const EdgeInsets.only(
                     left: 8.0, top: 0.0, right: 8.0, bottom: 8.0),
                 child: TextFormField(
-                  controller: timeOffController,
+                  controller: _timeOffController,
                   autovalidate: exerciseFormState.autoValidate,
-                  validator: (value) {
-                    return (null == exerciseFormState.timeOff ||
-                        null == int.tryParse(value))
-                        ? 'Invalid Time Off'
-                        : null;
+                  validator: (_) {
+                    return exerciseFormState.isTimeOffValid
+                        ? null
+                        : 'Invalid Time Off';
                   },
                   onChanged: (value) {
                     _exerciseFormBloc.dispatch(TimeOffChanged(timeOff: value));
@@ -328,19 +325,18 @@ class _ExerciseFormState extends State<ExerciseForm> {
 //    );
 //  }
 
-  Widget hangsPerSetTile(ExerciseFormState exerciseFormState) {
+  Widget _hangsPerSetTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
-            controller: hangsPerSetController,
+            controller: _hangsPerSetController,
             autovalidate: exerciseFormState.autoValidate,
-            validator: (value) {
-              return (null == exerciseFormState.hangsPerSet ||
-                  null == int.tryParse(value))
-                  ? 'Invalid Hangs Per Set'
-                  : null;
+            validator: (_) {
+              return exerciseFormState.isHangsPerSetValid
+                  ? null
+                  : 'Invalid Hangs Per Set';
             },
             onChanged: (value) {
               _exerciseFormBloc
@@ -357,19 +353,18 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget timeBetweenSetsTile(ExerciseFormState exerciseFormState) {
+  Widget _timeBetweenSetsTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
-            controller: timeBetweenSetsController,
+            controller: _timeBetweenSetsController,
             autovalidate: exerciseFormState.autoValidate,
-            validator: (value) {
-              return (null == exerciseFormState.timeBetweenSets ||
-                  null == int.tryParse(value))
-                  ? 'Invalid Time Between Sets'
-                  : null;
+            validator: (_) {
+              return exerciseFormState.isTimeBetweenSetsValid
+                  ? null
+                  : 'Invalid Time Between Sets';
             },
             onChanged: (value) {
               _exerciseFormBloc
@@ -386,20 +381,19 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget numberOfSetsTile(ExerciseFormState exerciseFormState) {
+  Widget _numberOfSetsTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('numberOfSetsTile'),
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
-            controller: numberOfSetsController,
+            controller: _numberOfSetsController,
             autovalidate: exerciseFormState.autoValidate,
-            validator: (value) {
-              return (null == exerciseFormState.numberOfSets ||
-                  null == int.tryParse(value))
-                  ? 'Invalid Number of Sets'
-                  : null;
+            validator: (_) {
+              return exerciseFormState.isNumberOfSetsValid
+                  ? null
+                  : 'Invalid Number of Sets';
             },
             onChanged: (value) {
               _exerciseFormBloc
@@ -416,28 +410,27 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget resistanceTile(ExerciseFormState exerciseFormState) {
+  Widget _resistanceTile(ExerciseFormState exerciseFormState) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('resistanceTile'),
         title: Padding(
           padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 8.0),
           child: new TextFormField(
-            controller: resistanceController,
+            controller: _resistanceController,
             autovalidate: exerciseFormState.autoValidate,
-            validator: (value) {
-              return (null == exerciseFormState.resistance ||
-                  null == int.tryParse(value))
-                  ? 'Invalid Resistance'
-                  : null;
+            validator: (_) {
+              return exerciseFormState.isResistanceValid
+                  ? null
+                  : 'Invalid Resistance';
             },
             onChanged: (value) {
               _exerciseFormBloc.dispatch(ResistanceChanged(resistance: value));
             },
             decoration: InputDecoration(
               icon: Icon(Icons.fitness_center),
-              labelText:
-              'Resistance (${exerciseFormState.resistanceMeasurementSystem})',
+              labelText: 'Resistance (${exerciseFormState
+                  .resistanceMeasurementSystem})',
             ),
             keyboardType: TextInputType.numberWithOptions(),
           ),
@@ -446,71 +439,64 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget saveButton(ExerciseFormState exerciseFormState,
-                    BuildContext scaffoldContext) {
+  Widget _saveButton(ExerciseFormState exerciseFormState,
+                     BuildContext scaffoldContext) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: RaisedButton(
         onPressed: () {
-          saveTileFields(scaffoldContext);
+          _saveTileFields(scaffoldContext, exerciseFormState);
         },
-        child: Text('Save Set'),
+        child: Text('Save Exercise'),
       ),
     );
   }
 
-  void saveTileFields(BuildContext scaffoldContext) {
+  /// Saving the form exercises the front end validations on each field. These
+  /// validations are done against the form fields and will provide UI messages
+  /// describing invalid fields.
+  ///
+  /// If validation passes, the state is sent to the BLoC to be saved to the DB.
+  void _saveTileFields(BuildContext scaffoldContext,
+                       ExerciseFormState exerciseFormState) {
     if (formKey.currentState.validate()) {
       formKey.currentState.save();
-      _exerciseFormBloc.dispatch(ValidExerciseFormSaved());
-      //todo:left off here 10/23 working on save
+      _exerciseFormBloc.dispatch(ValidExerciseFormSaved(
+        exerciseFormState.resistanceMeasurementSystem,
+        exerciseFormState.depthMeasurementSystem,
+        exerciseFormState.numberOfHandsSelected,
+        exerciseFormState.hold,
+        exerciseFormState.fingerConfiguration,
+        _depthController.text,
+        _timeOffController.text,
+        _timeOnController.text,
+        _timeBetweenSetsController.text,
+        _hangsPerSetController.text,
+        _numberOfSetsController.text,
+        _resistanceController.text,
+      ));
     } else {
       _exerciseFormBloc.dispatch(InvalidExerciseFormSaved());
     }
   }
 
-  /* /// This method currently packages the data to be sent to the Firestore.
-  /// Not sure if I need this or want to make a separate object (probably should
-  /// do that anyway) to send the data instead. I could also make the [exercises]
-  /// field a member var of this tab, and then each [hangboardExercise] could add it's own
-  /// state info like [_depth] and [_hold] to the global [exercises].
-  Map createHangboardData() {
-    Map<String, dynamic> data = {
-      "resistanceMeasurementSystem": _resistanceMeasurementSystem,
-      "depthMeasurementSystem": _depthMeasurementSystem,
-      "numberOfHands": _numberOfHands,
-      "depth": _depth ?? '',
-      "hold": StringFormatUtils.formatHold(_hold),
-      "fingerConfiguration": (_fingerConfiguration != null)
-          ? StringFormatUtils.formatFingerConfiguration(_fingerConfiguration)
-          : '',
-      "resistance": _resistance ?? '',
-      "timeOn": _timeOn,
-      "timeOff": _timeOff,
-      "hangsPerSet": _hangsPerSet ?? '',
-      "timeBetweenSets": _timeBetweenSets ?? '',
-      "numberOfSets": _numberOfSets,
-    };
-    return data;
-  }*/
-
-  List<Widget> mapFingerConfigurations(Holds hold) {
-    if(hold == Holds.POCKET) {
-      return FingerConfigurations.values
+  List<Widget> mapFingerConfigurations(Hold hold) {
+    if(hold == Hold.POCKET) {
+      return FingerConfiguration.values
           .sublist(0, 6)
-          .map((FingerConfigurations fingerConfiguration) {
-        return new DropdownMenuItem<FingerConfigurations>(
+          .map((FingerConfiguration fingerConfiguration) {
+        return new DropdownMenuItem<FingerConfiguration>(
           child: new Text(
             StringFormatUtils.formatFingerConfiguration(fingerConfiguration),
           ),
           value: fingerConfiguration,
         );
       }).toList();
-    } else if(hold == Holds.OPEN_HAND) {
-      return FingerConfigurations.values
+    } else if(hold == Hold.OPEN_HAND) {
+      return FingerConfiguration.values
           .sublist(4)
-          .map((FingerConfigurations fingerConfiguration) {
-        return new DropdownMenuItem<FingerConfigurations>(
+          .map((FingerConfiguration fingerConfiguration) {
+        return new DropdownMenuItem<FingerConfiguration>(
           child: new Text(
             StringFormatUtils.formatFingerConfiguration(fingerConfiguration),
           ),
@@ -518,9 +504,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
         );
       }).toList();
     } else {
-      return FingerConfigurations.values
-          .map((FingerConfigurations fingerConfiguration) {
-        return new DropdownMenuItem<FingerConfigurations>(
+      return FingerConfiguration.values
+          .map((FingerConfiguration fingerConfiguration) {
+        return new DropdownMenuItem<FingerConfiguration>(
           child: new Text(
             StringFormatUtils.formatFingerConfiguration(fingerConfiguration),
           ),
@@ -530,8 +516,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     }
   }
 
-  Future<void> _exerciseExistsAlert(BuildContext scaffoldContext,
-      DocumentReference exerciseRef, Map data) async {
+  Future<void> _exerciseExistsAlert(/*String exerciseTitle*/) async {
 //    String exercise = StringFormatUtils.formatDepthAndHold(
 //        _depth,
 //        _depthMeasurementSystem,
@@ -554,11 +539,11 @@ class _ExerciseFormState extends State<ExerciseForm> {
                       TextSpan(
                           text: 'You already have an exercise created for '),
                       TextSpan(
-//                        text: '$exercise.\n\n',
+//                        text: '$exerciseTitle.\n\n',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      TextSpan(
-                          text: 'Would you like to replace it with this one?'),
+//                      TextSpan(
+//                          text: 'Would you like to replace it with this one?'),
                     ],
                   ),
                 )
@@ -577,13 +562,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     Navigator.of(context).pop();
                   },
                 ),
-                FlatButton(
-                    child: Text('Replace'),
-                    onPressed: () {
-                      exerciseRef.setData(data);
-                      exerciseSavedSnackbar(scaffoldContext);
-                      Navigator.of(context).pop();
-                    }),
+//                FlatButton(
+//                  child: Text('Replace'),
+//                  onPressed: () {
+////                    exerciseRef.setData(data);
+////                    exerciseSavedSnackbar(scaffoldContext);
+//                    Navigator.of(context).pop();
+//                  },
+//                ),
               ],
             ),
           ],

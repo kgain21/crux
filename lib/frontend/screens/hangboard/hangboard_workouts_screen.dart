@@ -62,7 +62,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             child: BlocListener<HangboardParentBloc, HangboardParentState>(
               listener: (context, state) {
                 if(state is HangboardParentDuplicateWorkout) {
-                  _workoutExistsAlert(
+                  _showWorkoutExistsAlert(state.hangboardParent,
                       state.hangboardWorkout.workoutTitle, context);
                 } else if(state is HangboardParentWorkoutAdded) {
                   GenericWidgets.createGenericSnackbar(
@@ -142,21 +142,22 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     return ExerciseTile(
       tileColor: Theme
           .of(context)
-          .primaryColor,
+          .accentColor,
       child: FlatButton(
         color: Theme
             .of(context)
-            .primaryColor,
+            .accentColor,
         onPressed: () {
-          _addWorkoutDialog(hangboardParent);
+          _showAddWorkoutDialog(hangboardParent);
         },
         child: const Text('Add Workout'),
       ),
     );
   }
 
-  Future<void> _workoutExistsAlert(String workoutTitle,
-                                   BuildContext scaffoldContext) async {
+  Future<void> _showWorkoutExistsAlert(HangboardParent hangboardParent,
+                                       String workoutTitle,
+                                       BuildContext scaffoldContext) async {
     return showDialog<void>(
       context: scaffoldContext,
       barrierDismissible: false,
@@ -191,7 +192,10 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     'Ok',
                     style: TextStyle(color: Theme.of(context).accentColor),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showAddWorkoutDialog(hangboardParent);
+                    }
                 ),
               ],
             ),
@@ -201,7 +205,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  void _addWorkoutDialog(HangboardParent hangboardParent) {
+  void _showAddWorkoutDialog(HangboardParent hangboardParent) {
     showDialog(
       context: context,
       builder: (context) {
@@ -227,8 +231,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     style: TextStyle(color: Theme.of(context).accentColor),
                   ),
                   onPressed: () {
-                    var hangboardWorkout =
-                    HangboardWorkout(
+                    var hangboardWorkout = HangboardWorkout(
                         controller.value.text, <HangboardExercise>[]);
                     Navigator.of(context).pop();
                     _hangboardParentBloc.dispatch(AddWorkoutToHangboardParent(

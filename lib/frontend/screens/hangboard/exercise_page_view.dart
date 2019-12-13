@@ -6,7 +6,7 @@ import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/frontend/widgets/dots_indicator.dart';
 import 'package:crux/frontend/widgets/exercise_form.dart';
-import 'package:crux/frontend/widgets/hangboard_page_2.dart';
+import 'package:crux/frontend/widgets/hangboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

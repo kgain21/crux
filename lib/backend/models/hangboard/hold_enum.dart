@@ -1,4 +1,4 @@
-enum Holds {
+enum Hold {
   FULL_CRIMP,
   HALF_CRIMP,
   JUGS,

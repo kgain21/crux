@@ -1,6 +1,7 @@
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/frontend/screens/calendar_screen.dart';
 import 'package:crux/frontend/shared_layouts/app_bar.dart';
+import 'package:crux/frontend/shared_layouts/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -62,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       drawer: dashboardDrawer(),
       appBar: SharedAppBar.sharedAppBar('Dashboard', widget.auth, context),
       body: workoutListView(),
-//      bottomNavigationBar: NewBottomNavBar(),
+      bottomNavigationBar: SharedBottomNavBar(),
     );
 
     //TODO: play with this at some point
