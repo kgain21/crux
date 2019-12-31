@@ -44,8 +44,8 @@ class _HangboardPageState extends State<HangboardPage>
   void initState() {
 //    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
     _hangboardExerciseBloc = HangboardExerciseBloc(
-        hangboardExercise: widget.hangboardExercise,
-        firestore: widget.firestoreHangboardWorkoutsRepository)
+      /*hangboardExercise: widget.hangboardExercise,
+        firestore: widget.firestoreHangboardWorkoutsRepository*/)
       ..dispatch(LoadHangboardExercise(widget.hangboardExercise));
 //    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
 

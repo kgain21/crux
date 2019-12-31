@@ -36,7 +36,8 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
           event is InvalidExerciseFormSaved ||
           event is ValidExerciseFormSaved ||
           event is ResistanceMeasurementSystemChanged ||
-          event is DepthMeasurementSystemChanged);
+          event is DepthMeasurementSystemChanged ||
+          event is ExerciseFormFlagsReset);
     });
 
     /// Debounce any field with a text box to delay validation
@@ -84,6 +85,8 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
       yield* _mapResistanceChangedToState(event.resistance);
     } else if(event is InvalidExerciseFormSaved) {
       yield* _mapInvalidExerciseFormSavedToState();
+    } else if(event is ExerciseFormFlagsReset) {
+      yield* _mapExerciseFormFlagsResetToState();
     } else if(event is ValidExerciseFormSaved) {
       yield* _mapValidExerciseFormSavedToState(event);
     }
@@ -194,14 +197,16 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
     var depthMeasurementSystem = event.depthMeasurementSystem;
     var depth = double.tryParse(event.depth);
 
+    var hangboardExerciseTitle = StringFormatUtils.createHangboardExerciseTitle(
+      numberOfHandsSelected,
+      depth,
+      formattedFingerConfiguration,
+      formattedHold,
+      depthMeasurementSystem,
+    );
+
     var hangboardExercise = HangboardExercise(
-      StringFormatUtils.createHangboardExerciseTitle(
-        numberOfHandsSelected,
-        depth,
-        formattedFingerConfiguration,
-        formattedHold,
-        depthMeasurementSystem,
-      ),
+      hangboardExerciseTitle,
       depthMeasurementSystem,
       event.resistanceMeasurementSystem,
       numberOfHandsSelected,
@@ -216,11 +221,26 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
       resistance: int.tryParse(event.resistance),
     );
 
-    bool isSuccess = await firestoreHangboardWorkoutsRepository.addNewExercise(
-      workoutTitle,
-      hangboardExercise,
-    );
+    bool isFailure = false;
+    bool isSuccess = await firestoreHangboardWorkoutsRepository
+        .addNewExercise(workoutTitle, hangboardExercise)
+        .catchError((error) {
+      print(error);
+      isFailure = true;
+    });
 
-    yield currentState.update(isSuccess: isSuccess);
+    yield currentState.update(
+        exerciseTitle: hangboardExerciseTitle,
+        isSuccess: isSuccess,
+        isFailure: isFailure,
+        isDuplicate: !isSuccess && !isFailure);
+  }
+
+  Stream<ExerciseFormState> _mapExerciseFormFlagsResetToState() async* {
+    yield currentState.update(
+      isSuccess: false,
+      isFailure: false,
+      isDuplicate: false,
+    );
   }
 }

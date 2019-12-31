@@ -127,6 +127,14 @@ class ResistanceChanged extends ExerciseFormEvent {
   String toString() => 'ResistanceChanged { resistance: $resistance }';
 }
 
+class ExerciseFormFlagsReset extends ExerciseFormEvent {
+
+  ExerciseFormFlagsReset();
+
+  @override
+  String toString() => 'ExerciseFormFlagsReset';
+}
+
 class InvalidExerciseFormSaved extends ExerciseFormEvent {
   InvalidExerciseFormSaved();
 

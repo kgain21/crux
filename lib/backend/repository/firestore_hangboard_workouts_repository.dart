@@ -10,7 +10,7 @@ import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 class FirestoreHangboardWorkoutsRepository
     implements HangboardWorkoutsRepository {
   //todo: make this an enum
-  static const String workoutType = 'hangboard';
+  static const String WORKOUT_TYPE = 'hangboard';
 
   final Firestore firestore;
 
@@ -20,13 +20,14 @@ class FirestoreHangboardWorkoutsRepository
   @override
   Future<List<HangboardExerciseEntity>> getExercises(String workoutTitle) {
     return firestore
-        .collection('$workoutType/$workoutTitle')
+        .collection('$WORKOUT_TYPE/$workoutTitle')
         .snapshots()
         .map((snapshot) {
       return snapshot.documents.map((doc) {
         return HangboardExerciseEntity.fromJson(doc.data);
       }).toList();
-    }).first
+    })
+        .first
         .catchError((error) {
       print('Failed retrieving exercises from $workoutTitle: $error');
       return Future.error(error);
@@ -35,23 +36,29 @@ class FirestoreHangboardWorkoutsRepository
 
   /// Given a workout's title and a new exercise, find the workout in the db and
   /// add the exercise to it.
+  ///
+  /// Returns a bool signifying whether the exercise was added or not. If the
+  /// exercise is already present
   @override
   Future<bool> addNewExercise(
       String workoutTitle, HangboardExercise hangboardExercise) async {
     final hangboardExerciseEntity = hangboardExercise.toEntity();
 
-    getWorkoutByWorkoutTitle(workoutTitle).then((hangboardWorkout) {
-      if(hangboardWorkout.hangboardExerciseEntityList.contains(
-          hangboardExerciseEntity)) {
+    return getWorkoutByWorkoutTitle(workoutTitle)
+        .then((hangboardWorkout) async {
+      if(hangboardWorkout.hangboardExerciseEntityList
+          .any((hangboardExerciseEntity) {
+        return hangboardExerciseEntity.exerciseTitle ==
+            hangboardExercise.exerciseTitle;
+      })) {
         return false;
       }
       hangboardWorkout.hangboardExerciseEntityList.add(hangboardExerciseEntity);
-      return updateWorkout(HangboardWorkout.fromEntity(hangboardWorkout));
+      return await updateWorkout(HangboardWorkout.fromEntity(hangboardWorkout));
     }).catchError((error) {
       print('Failed to retrieve workout for $workoutTitle: $error');
       return Future.error(error);
     });
-    return false;
 
     /*return firestore
         .collection(
@@ -85,7 +92,7 @@ class FirestoreHangboardWorkoutsRepository
   @override
   Future<List<HangboardWorkout>> getWorkouts() async {
     return firestore
-        .collection(workoutType)
+        .collection(WORKOUT_TYPE)
         .snapshots()
         .first
         .then((hangboardCollection) => hangboardCollection.documents
@@ -111,7 +118,7 @@ class FirestoreHangboardWorkoutsRepository
   Future<HangboardWorkoutEntity> getWorkoutByWorkoutTitle(
       String workoutTitle) async {
     return firestore
-        .collection(workoutType)
+        .collection(WORKOUT_TYPE)
         .snapshots()
         .first
         .then((hangboardCollection) {
@@ -134,7 +141,7 @@ class FirestoreHangboardWorkoutsRepository
     var workoutRef;
     final hangboardWorkoutEntity = hangboardWorkout.toEntity();
     try {
-      final collectionReference = firestore.collection(workoutType);
+      final collectionReference = firestore.collection(WORKOUT_TYPE);
 
       workoutRef = collectionReference.document(hangboardWorkout.workoutTitle);
 
@@ -158,19 +165,19 @@ class FirestoreHangboardWorkoutsRepository
   /// Returns a boolean to say whether the update succeeded or not.
   @override
   Future<bool> updateWorkout(HangboardWorkout hangboardWorkout) async {
-    CollectionReference collectionReference = firestore.collection(workoutType);
+    CollectionReference collectionReference =
+    firestore.collection(WORKOUT_TYPE);
 
     var workoutRef =
     collectionReference.document(hangboardWorkout.workoutTitle);
 
-    workoutRef.setData(hangboardWorkout.toEntity().toJson()).then((_) {
+    return workoutRef.setData(hangboardWorkout.toEntity().toJson()).then((_) {
       return true;
     }).catchError((error) {
       print("Failed updating workout ${hangboardWorkout.workoutTitle}");
       print(error);
       return Future.error(error);
     });
-    return false;
   }
 
   /// Delete an entire workout and all exercises.
@@ -180,9 +187,9 @@ class FirestoreHangboardWorkoutsRepository
   Future<bool> deleteWorkout(HangboardWorkout hangboardWorkout) async {
     final hangboardWorkoutEntity = hangboardWorkout.toEntity();
 
-    firestore.collection(workoutType).getDocuments().then((snapshot) {
+    return firestore.collection(WORKOUT_TYPE).getDocuments().then((snapshot) {
       firestore
-          .document('$workoutType/${hangboardWorkoutEntity.workoutTitle}')
+          .document('$WORKOUT_TYPE/${hangboardWorkoutEntity.workoutTitle}')
           .delete()
           .then((_) {
         return true;
@@ -198,6 +205,5 @@ class FirestoreHangboardWorkoutsRepository
       print(error);
       return Future.error(error);
     });
-    return false;
   }
 }

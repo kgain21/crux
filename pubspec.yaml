@@ -30,6 +30,8 @@ dependencies:
   table_calendar: ^2.2.1
   shared_preferences: ^0.4.3
 
+  provider: ^3.0.0
+
   bloc: ^0.15.0
   flutter_bloc: ^0.21.0
   rxdart: ^0.22.0

@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_parent.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/frontend/shared_layouts/app_bar.dart';
@@ -29,16 +31,50 @@ class HangboardWorkoutsScreen extends StatefulWidget {
 class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
   HangboardParentBloc _hangboardParentBloc;
 
+//  FirestoreStreamListener _firestoreStreamListener;
+
   @override
   void initState() {
+    _hangboardParentBloc = HangboardParentBloc(
+        hangboardWorkoutsRepository:
+        widget.firestoreHangboardWorkoutsRepository)
+      ..dispatch(LoadHangboardParent());
+
+    Firestore.instance
+        .collection('hangboard')
+        .snapshots()
+        .listen((querySnapshot) {
+      List<HangboardWorkout> hangboardWorkoutList = querySnapshot.documents
+          .map((workoutDocument) =>
+          HangboardWorkout.fromEntity(
+              HangboardWorkoutEntity.fromJson(workoutDocument.data)))
+          .toList();
+
+      _hangboardParentBloc.dispatch(
+          HangboardParentUpdated(HangboardParent(hangboardWorkoutList)));
+    });
+//
+//    _firestoreStreamListener = FirestoreStreamListener()
+//      ..streamSubscription.onData((data) {
+//        _hangboardParentBloc
+//            .dispatch(HangboardParentUpdated(HangboardParent(data)));
+//      });
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _hangboardParentBloc.dispose();
+//    _firestoreStreamListener.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
-          SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
+      SharedAppBar.sharedAppBar(widget.title, widget.auth, this.context),
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -51,43 +87,15 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             ),
           ),
           BlocProvider<HangboardParentBloc>(
-            builder: (context) {
-              _hangboardParentBloc = HangboardParentBloc(
-                  hangboardWorkoutsRepository:
-                  widget.firestoreHangboardWorkoutsRepository)
-                ..dispatch(LoadHangboardParent());
-
-              return _hangboardParentBloc;
-            },
+            builder: (context) => _hangboardParentBloc,
             child: BlocListener<HangboardParentBloc, HangboardParentState>(
               listener: (context, state) {
-                if(state is HangboardParentDuplicateWorkout) {
-                  _showWorkoutExistsAlert(state.hangboardParent,
-                      state.hangboardWorkout.workoutTitle, context);
-                } else if(state is HangboardParentWorkoutAdded) {
-                  GenericWidgets.createGenericSnackbar(
-                      context, 'Workout added!');
-                } else if(state is HangboardParentWorkoutDeleted) {
-                  GenericWidgets.createGenericSnackbar(
-                      context, 'Workout deleted!');
-                }
-//                TODO: This method may be useful in the future -> executes callback once build is completed
-//                  WidgetsBinding.instance.addPostFrameCallback((_) => GenericWidgets.createGenericSnackbar(context, 'Workout Deleted!'));
+                listenForHangboardParentState(state, context);
               },
               child: BlocBuilder(
                 bloc: _hangboardParentBloc,
                 builder: (context, HangboardParentState parentState) {
-                  if(parentState is HangboardParentLoaded) {
-                    return workoutListBuilder(parentState.hangboardParent);
-                  } else if(parentState is HangboardParentWorkoutAdded) {
-                    return workoutListBuilder(parentState.hangboardParent);
-                  } else if(parentState is HangboardParentDuplicateWorkout) {
-                    return workoutListBuilder(parentState.hangboardParent);
-                  } else if(parentState is HangboardParentWorkoutDeleted) {
-                    return workoutListBuilder(parentState.hangboardParent);
-                  } else {
-                    return _retrievingWorkoutsSpinner();
-                  }
+                  return buildFromHangboardParentState(parentState);
                 },
               ),
             ),
@@ -95,6 +103,32 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
         ],
       ),
     );
+  }
+
+  Widget buildFromHangboardParentState(HangboardParentState parentState) {
+    if(parentState is HangboardParentLoaded) {
+      return workoutListBuilder(parentState.hangboardParent);
+    } else if(parentState is HangboardParentWorkoutAdded) {
+      return workoutListBuilder(parentState.hangboardParent);
+    } else if(parentState is HangboardParentDuplicateWorkout) {
+      return workoutListBuilder(parentState.hangboardParent);
+    } else if(parentState is HangboardParentWorkoutDeleted) {
+      return workoutListBuilder(parentState.hangboardParent);
+    } else {
+      return _retrievingWorkoutsSpinner();
+    }
+  }
+
+  void listenForHangboardParentState(HangboardParentState state,
+                                     BuildContext context) {
+    if(state is HangboardParentDuplicateWorkout) {
+      _showWorkoutExistsAlert(
+          state.hangboardParent, state.hangboardWorkout.workoutTitle, context);
+    } else if(state is HangboardParentWorkoutAdded) {
+      GenericWidgets.createGenericSnackbar(context, 'Workout added!');
+    } else if(state is HangboardParentWorkoutDeleted) {
+      GenericWidgets.createGenericSnackbar(context, 'Workout deleted!');
+    }
   }
 
   Padding _retrievingWorkoutsSpinner() {
@@ -188,15 +222,16 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             Row(
               children: <Widget>[
                 FlatButton(
-                  child: Text(
-                    'Ok',
-                    style: TextStyle(color: Theme.of(context).accentColor),
-                  ),
+                    child: Text(
+                      'Ok',
+                      style: TextStyle(color: Theme
+                          .of(context)
+                          .accentColor),
+                    ),
                     onPressed: () {
                       Navigator.of(context).pop();
                       _showAddWorkoutDialog(hangboardParent);
-                    }
-                ),
+                    }),
               ],
             ),
           ],

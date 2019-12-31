@@ -16,20 +16,20 @@ class LoadHangboardWorkout extends HangboardWorkoutEvent {
   String toString() => 'LoadHangboardWorkout';
 }
 
-class AddHangboardWorkout extends HangboardWorkoutEvent {
+class HangboardWorkoutAdded extends HangboardWorkoutEvent {
   final HangboardWorkout hangboardWorkout;
 
-  AddHangboardWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
+  HangboardWorkoutAdded(this.hangboardWorkout) : super([hangboardWorkout]);
 
   @override
   String toString() =>
       'AddHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
 }
 
-class UpdateWorkout extends HangboardWorkoutEvent {
+class HangboardWorkoutUpdated extends HangboardWorkoutEvent {
   final HangboardWorkout hangboardWorkout;
 
-  UpdateWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
+  HangboardWorkoutUpdated(this.hangboardWorkout) : super([hangboardWorkout]);
 
   @override
   String toString() => 'UpdateWorkout { hangboardWorkout: $hangboardWorkout }';

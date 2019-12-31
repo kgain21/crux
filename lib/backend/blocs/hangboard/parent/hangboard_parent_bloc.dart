@@ -16,6 +16,12 @@ class HangboardParentBloc
   HangboardParentState get initialState => HangboardParentLoading();
 
   @override
+  void onEvent(HangboardParentEvent event) {
+    print('HangboardParentBloc Event');
+    super.onEvent(event);
+  }
+
+  @override
   Stream<HangboardParentState> mapEventToState(
       HangboardParentEvent event) async* {
     if (event is LoadHangboardParent) {
@@ -24,6 +30,8 @@ class HangboardParentBloc
       yield* _mapAddWorkoutToHangboardParent(event);
     } else if (event is DeleteWorkoutFromHangboardParent) {
       yield* _mapDeleteWorkoutToState(event);
+    } else if(event is HangboardParentUpdated) {
+      yield* _mapUpdateHangboardParentToState(event);
     }
   }
 
@@ -50,8 +58,7 @@ class HangboardParentBloc
         List<HangboardWorkout> hangboardWorkoutList =
             await hangboardWorkoutsRepository.getWorkouts();
 
-        yield HangboardParentWorkoutAdded(HangboardParent(
-            hangboardWorkoutList
+        yield HangboardParentWorkoutAdded(HangboardParent(hangboardWorkoutList
 //                .map(HangboardWorkout.fromEntity)
 //                .toList()));
         ));
@@ -74,8 +81,8 @@ class HangboardParentBloc
       List<HangboardWorkout> hangboardWorkoutEntityList =
           await hangboardWorkoutsRepository.getWorkouts();
 
-      yield HangboardParentWorkoutDeleted(HangboardParent(
-          hangboardWorkoutEntityList));
+      yield HangboardParentWorkoutDeleted(
+          HangboardParent(hangboardWorkoutEntityList));
 //              .map(HangboardWorkout.fromEntity)
 //              .toList()));
     } catch (e) {
@@ -86,5 +93,10 @@ class HangboardParentBloc
 
   Stream<HangboardParentState> _mapUpdateWorkoutToState(event) {
     return null;
+  }
+
+  Stream<HangboardParentState> _mapUpdateHangboardParentToState(
+      HangboardParentUpdated event) async* {
+    yield HangboardParentLoaded(event.hangboardParent);
   }
 }

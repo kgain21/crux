@@ -36,6 +36,12 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
     super.initState();
   }
 
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     _hangboardParentBloc = BlocProvider.of<HangboardParentBloc>(context);
@@ -67,7 +73,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                           builder: (context) =>
                               ExercisePageView(
                                 hangboardWorkout: widget.hangboardWorkout,
-                                firestoreHangboardWorkoutsRepository:
+                                hangboardWorkoutsRepository:
                                 widget.firestoreHangboardWorkoutsRepository,
                               ),
                         ));

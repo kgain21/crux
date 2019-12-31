@@ -40,7 +40,8 @@ Future<void> main() async {
 
   BlocSupervisor.delegate = SimpleBlocDelegate();
 
-  final Firestore firestore = Firestore(app: app);
+  final Firestore firestore = Firestore(app: app)
+    ..settings();
 
   runApp(MyApp(firestore: firestore, auth: auth, title: title));
 }

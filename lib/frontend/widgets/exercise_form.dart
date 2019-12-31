@@ -72,12 +72,15 @@ class _ExerciseFormState extends State<ExerciseForm> {
         listener: (BuildContext context, ExerciseFormState exerciseFormState) {
           if(exerciseFormState.isSuccess) {
             exerciseSavedSnackbar(context);
-          } else if(exerciseFormState.isFailure) {
-            _exerciseExistsAlert();
+            _exerciseFormBloc.dispatch(ExerciseFormFlagsReset());
+//            BlocProvider.of<HangboardParentBloc>(context).dispatch(HangboardParentUpdated());
+          } else if(exerciseFormState.isDuplicate) {
+            _exerciseExistsAlert(exerciseFormState);
+            _exerciseFormBloc.dispatch(ExerciseFormFlagsReset());
           }
-//          if(exerciseFormState is InValidExerciseFormSaved) {
+          if(exerciseFormState is InvalidExerciseFormSaved) {
 //            exerciseNotSavedSnackbar(context);
-//          }
+          }
         },
         child: BlocBuilder(
           bloc: _exerciseFormBloc,
@@ -429,8 +432,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
             },
             decoration: InputDecoration(
               icon: Icon(Icons.fitness_center),
-              labelText: 'Resistance (${exerciseFormState
-                  .resistanceMeasurementSystem})',
+              labelText:
+              'Resistance (${exerciseFormState.resistanceMeasurementSystem})',
             ),
             keyboardType: TextInputType.numberWithOptions(),
           ),
@@ -516,13 +519,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
     }
   }
 
-  Future<void> _exerciseExistsAlert(/*String exerciseTitle*/) async {
-//    String exercise = StringFormatUtils.formatDepthAndHold(
-//        _depth,
-//        _depthMeasurementSystem,
-//        StringFormatUtils.formatFingerConfiguration(_fingerConfiguration),
-//        StringFormatUtils.formatHold(_hold));
-
+  Future<void> _exerciseExistsAlert(ExerciseFormState exerciseFormState) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -539,11 +536,11 @@ class _ExerciseFormState extends State<ExerciseForm> {
                       TextSpan(
                           text: 'You already have an exercise created for '),
                       TextSpan(
-//                        text: '$exerciseTitle.\n\n',
+                        text: '${exerciseFormState.exerciseTitle}.\n\n',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-//                      TextSpan(
-//                          text: 'Would you like to replace it with this one?'),
+                      TextSpan(
+                          text: 'Would you like to replace it with this one?'),
                     ],
                   ),
                 )
@@ -562,14 +559,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     Navigator.of(context).pop();
                   },
                 ),
-//                FlatButton(
-//                  child: Text('Replace'),
-//                  onPressed: () {
-////                    exerciseRef.setData(data);
-////                    exerciseSavedSnackbar(scaffoldContext);
-//                    Navigator.of(context).pop();
-//                  },
-//                ),
+                FlatButton(
+                  child: Text('Replace'),
+                  onPressed: () {
+//                    exerciseRef.setData(data);
+//                    exerciseSavedSnackbar(scaffoldContext);
+                    Navigator.of(context).pop();
+                  },
+                ),
               ],
             ),
           ],
@@ -627,7 +624,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
                       ),
                       onPressed: () {
                         formKey.currentState.reset();
-//                        clearFields();
+                        clearFields();
                         Scaffold.of(scaffoldContext).hideCurrentSnackBar();
                       },
                     ),
@@ -641,25 +638,10 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-//  void clearFields() {
-//    setState(() {
-//      timeOffController.clear();
-//      hangsPerSetController.clear();
-//      timeBetweenSetsController.clear();
-//      numberOfSetsController.clear();
-//      resistanceController.clear();
-//      timeOnController.clear();
-//      _isTwoHandsSelected = true;
-//      _holdSelected = false;
-//      //TODO: don't think nulls work here
-//      _fingerConfiguration = null;
-//      _hold = null;
-//      _depthMeasurementSystem = 'mm';
-//      _resistanceMeasurementSystem = 'kg';
-//      _hangProtocolSelected = false;
-//      _autoValidate = false;
-//    });
-//  }
+  void clearFields() {
+    //todo: add this for resetting form
+//    _exerciseFormBloc.dispatch(ExerciseFormCleared());
+  }
 
 //TODO: Figure out how to use date w/ firestore -- crashes app with this shit:
 //todo: java.lang.IllegalArgumentException: Unsupported value: Timestamp(seconds=1549021849, nanoseconds=676000000)

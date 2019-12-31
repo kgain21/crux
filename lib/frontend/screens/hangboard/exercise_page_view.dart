@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_event.dart';
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
-import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
+import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/frontend/widgets/dots_indicator.dart';
 import 'package:crux/frontend/widgets/exercise_form.dart';
 import 'package:crux/frontend/widgets/hangboard_page.dart';
@@ -19,14 +21,12 @@ class ShakeCurve extends Curve {
 
 class ExercisePageView extends StatefulWidget {
   final HangboardWorkout hangboardWorkout;
-  final FirestoreHangboardWorkoutsRepository
-  firestoreHangboardWorkoutsRepository;
+  final HangboardWorkoutsRepository hangboardWorkoutsRepository;
 
   @override
   State createState() => _ExercisePageViewState();
 
-  ExercisePageView(
-      {this.hangboardWorkout, this.firestoreHangboardWorkoutsRepository});
+  ExercisePageView({this.hangboardWorkout, this.hangboardWorkoutsRepository});
 }
 
 class _ExercisePageViewState extends State<ExercisePageView> {
@@ -50,6 +50,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   bool _preferencesClearedFlag;
 
   HangboardWorkoutBloc _hangboardWorkoutBloc;
+  HangboardExerciseBloc _hangboardExerciseBloc;
 
   /* bool _handlePageNotification(ScrollNotification notification,
                                PageController leader, PageController follower) {
@@ -71,9 +72,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     _currentPageValue = 0.0;
     _zoomOut = false;
     _preferencesClearedFlag = false;
-    _hangboardWorkoutBloc = HangboardWorkoutBloc(
-        firestoreHangboardWorkoutsRepository:
-        widget.firestoreHangboardWorkoutsRepository);
+    _hangboardWorkoutBloc =
+        HangboardWorkoutBloc(widget.hangboardWorkoutsRepository);
 //    _shakeController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
 //    _shakeCurve = CurvedAnimation(parent: _shakeController, curve: ShakeCurve());
 
@@ -92,9 +92,19 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     });
   }
 
+
+  @override
+  void reassemble() {
+
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
-
 //        hangboardWorkout: widget.hangboardWorkout)
 //      ..dispatch(LoadHangboardWorkout());
     return Scaffold(
@@ -130,20 +140,18 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           });
         }
       },
-      child: exerciseBlocBuilder(),
+      child: hangboardWorkoutBlocBuilder(),
     );
   }
 
-  Widget exerciseBlocBuilder() {
+  Widget hangboardWorkoutBlocBuilder() {
     return BlocBuilder(
         bloc: _hangboardWorkoutBloc,
         builder: (context, hangboardWorkoutState) {
           int exerciseCount = 0;
 //          if (hangboardWorkoutState is HangboardWorkoutLoaded) {
-//            var exerciseList =
-//                hangboardWorkoutState.hangboardWorkout.hangboardExerciseList;
-          var exerciseList = widget.hangboardWorkout.hangboardExerciseList ??
-              [];
+          var exerciseList =
+              widget.hangboardWorkout.hangboardExerciseList ?? [];
           exerciseCount = exerciseList.length;
 
           _pageCount = exerciseCount + 1;
@@ -158,8 +166,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
                 children: <Widget>[
                   PageView(
                     controller: _zoomOut ? _zoomController : _controller,
-                    children: createPageList(
-                        exerciseList),
+                    children: createPageList(exerciseList),
                   ),
                   dotsIndicator(),
                 ],
@@ -209,7 +216,6 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   }
 
   Widget newExercisePage() {
-    //todo: trying to figure out why added exercises are incorrect sometimes on navigating back
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -221,8 +227,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               MaterialPageRoute(builder: (context) {
                 return ExerciseForm(
                   workoutTitle: widget.hangboardWorkout.workoutTitle,
-                  firestoreHangboardWorkoutsRepository: widget
-                      .firestoreHangboardWorkoutsRepository,
+                  firestoreHangboardWorkoutsRepository:
+                  widget.hangboardWorkoutsRepository,
                 );
               }),
             );
@@ -241,7 +247,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   }
 
   Widget animatedHangboardPage(int index, HangboardExercise hangboardExercise) {
-    /// Last page should always be a [newExercisePage]; this index will always
+    /// Last page should always be a [newExercisePage()]. This index will always
     /// be greater than the current exercises list so this must be checked first
     if(index == _currentPageValue.floor()) {
       return Transform(
@@ -257,8 +263,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         transform: Matrix4.identity()
           ..rotateY(_currentPageValue - index),
         child: HangboardPage(
-          firestoreHangboardWorkoutsRepository: widget
-              .firestoreHangboardWorkoutsRepository,
+          firestoreHangboardWorkoutsRepository:
+          widget.hangboardWorkoutsRepository,
           workoutTitle: widget.hangboardWorkout.workoutTitle,
           index: index,
           hangboardExercise: hangboardExercise,
@@ -283,11 +289,14 @@ class _ExercisePageViewState extends State<ExercisePageView> {
                       color: Colors.black,
                       icon: Icon(Icons.cancel),
                       onPressed: () {
+                        _hangboardExerciseBloc.dispatch(
+                            DeleteHangboardExercise(hangboardExercise));
                         //TODO: ask user for delete confirmation
                         /*Firestore.instance
                             .document(document.reference.path)
                             .delete();*/
                         //todo: implement delete dispatching
+                        //todo: need to pass in repo - DI for this since im passing it down several times already
                       },
                     ),
                   ],

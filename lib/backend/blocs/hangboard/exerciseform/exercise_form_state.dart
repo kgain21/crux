@@ -5,19 +5,21 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ExerciseFormState extends Equatable {
+  final String exerciseTitle;
+
+  final bool autoValidate;
+
   final bool isFingerConfigurationVisible;
   final List<FingerConfiguration> availableFingerConfigurations;
   final bool isTimeBetweenSetsVisible;
   final bool isDepthVisible;
 
-  final FingerConfiguration fingerConfiguration;
-
-  final bool autoValidate;
-
   final String depthMeasurementSystem;
   final String resistanceMeasurementSystem;
   final int numberOfHandsSelected;
   final Hold hold;
+  final FingerConfiguration fingerConfiguration;
+
   final bool isDepthValid;
   final bool isTimeOffValid;
   final bool isTimeOnValid;
@@ -28,17 +30,19 @@ class ExerciseFormState extends Equatable {
 
   final bool isSuccess;
   final bool isFailure;
+  final bool isDuplicate;
 
   ExerciseFormState({
+                      this.exerciseTitle,
                       this.depthMeasurementSystem,
                       this.resistanceMeasurementSystem,
                       this.isDepthVisible,
                       this.autoValidate,
-    this.isFingerConfigurationVisible,
-    this.isTimeBetweenSetsVisible,
+                      this.isFingerConfigurationVisible,
+                      this.isTimeBetweenSetsVisible,
                       this.numberOfHandsSelected,
                       this.hold,
-    this.availableFingerConfigurations,
+                      this.availableFingerConfigurations,
                       this.fingerConfiguration,
                       this.isDepthValid,
                       this.isTimeOffValid,
@@ -49,7 +53,9 @@ class ExerciseFormState extends Equatable {
                       this.isResistanceValid,
                       this.isSuccess,
                       this.isFailure,
-  }) : super([
+                      this.isDuplicate,
+                    }) : super([
+    exerciseTitle,
     depthMeasurementSystem,
     resistanceMeasurementSystem,
     isDepthVisible,
@@ -69,10 +75,12 @@ class ExerciseFormState extends Equatable {
     isResistanceValid,
     isSuccess,
     isFailure,
-        ]);
+    isDuplicate,
+  ]);
 
   factory ExerciseFormState.initial() {
     return ExerciseFormState(
+      exerciseTitle: null,
       depthMeasurementSystem: 'mm',
       resistanceMeasurementSystem: 'kg',
       isDepthVisible: false,
@@ -92,58 +100,12 @@ class ExerciseFormState extends Equatable {
       isResistanceValid: true,
       isSuccess: false,
       isFailure: false,
+      isDuplicate: false,
     );
   }
-
-  /*factory ExerciseFormState.success() {
-    return ExerciseFormState(
-//      depthMeasurementSystem: this.depthMeasurementSystem,
-//      resistanceMeasurementSystem: 'kg',
-      isDepthVisible: false,
-      autoValidate: false,
-      availableFingerConfigurations: FingerConfigurations.values,
-      isFingerConfigurationVisible: false,
-      isTimeBetweenSetsVisible: true,
-//      numberOfHandsSelected: 2,
-//      hold: null,
-//      fingerConfiguration: null,
-      isDepthValid: true,
-      isTimeOffValid: true,
-      isTimeOnValid: true,
-      isHangsPerSetValid: true,
-      isTimeBetweenSetsValid: true,
-      isNumberOfSetsValid: true,
-      isResistanceValid: true,
-      isSuccess: true,
-      isFailure: false,
-    );
-  }
-
-  factory ExerciseFormState.failure() {
-    return ExerciseFormState(
-//      depthMeasurementSystem: 'mm',
-//      resistanceMeasurementSystem: 'kg',
-      isDepthVisible: false,
-      autoValidate: false,
-      availableFingerConfigurations: FingerConfigurations.values,
-      isFingerConfigurationVisible: false,
-      isTimeBetweenSetsVisible: true,
-//      numberOfHandsSelected: 2,
-//      hold: null,
-//      fingerConfiguration: null,
-      isDepthValid: null,
-      isTimeOffValid: null,
-      isTimeOnValid: null,
-      isHangsPerSetValid: null,
-      isTimeBetweenSetsValid: null,
-      isNumberOfSetsValid: null,
-      isResistanceValid: null,
-      isSuccess: false,
-      isFailure: true,
-    );
-  }*/
 
   ExerciseFormState update({
+                             String exerciseTitle,
                              String depthMeasurementSystem,
                              String resistanceMeasurementSystem,
                              bool isDepthVisible,
@@ -153,7 +115,7 @@ class ExerciseFormState extends Equatable {
                              int numberOfHandsSelected,
                              Hold hold,
                              FingerConfiguration fingerConfiguration,
-    bool isFingerConfigurationVisible,
+                             bool isFingerConfigurationVisible,
                              bool isDepthValid,
                              bool isTimeOffValid,
                              bool isTimeOnValid,
@@ -163,8 +125,10 @@ class ExerciseFormState extends Equatable {
                              bool isResistanceValid,
                              bool isSuccess,
                              bool isFailure,
-  }) {
+                             bool isDuplicate,
+                           }) {
     return copyWith(
+      exerciseTitle: exerciseTitle,
       depthMeasurementSystem: depthMeasurementSystem,
       resistanceMeasurementSystem: resistanceMeasurementSystem,
       isDepthVisible: isDepthVisible,
@@ -183,10 +147,12 @@ class ExerciseFormState extends Equatable {
       isResistanceValid: isResistanceValid,
       isSuccess: isSuccess,
       isFailure: isFailure,
+      isDuplicate: isDuplicate,
     );
   }
 
   ExerciseFormState copyWith({
+                               String exerciseTitle,
                                String depthMeasurementSystem,
                                String resistanceMeasurementSystem,
                                bool isDepthVisible,
@@ -196,7 +162,7 @@ class ExerciseFormState extends Equatable {
                                int numberOfHandsSelected,
                                Hold hold,
                                FingerConfiguration fingerConfiguration,
-    bool isFingerConfigurationVisible,
+                               bool isFingerConfigurationVisible,
                                bool isDepthValid,
                                bool isTimeOffValid,
                                bool isTimeOnValid,
@@ -206,8 +172,10 @@ class ExerciseFormState extends Equatable {
                                bool isResistanceValid,
                                bool isSuccess,
                                bool isFailure,
-  }) {
+                               bool isDuplicate,
+                             }) {
     return ExerciseFormState(
+      exerciseTitle: exerciseTitle ?? this.exerciseTitle,
       depthMeasurementSystem:
       depthMeasurementSystem ?? this.depthMeasurementSystem,
       resistanceMeasurementSystem:
@@ -234,21 +202,33 @@ class ExerciseFormState extends Equatable {
       isResistanceValid: isResistanceValid ?? this.isResistanceValid,
       isSuccess: isSuccess ?? this.isSuccess,
       isFailure: isFailure ?? this.isFailure,
+      isDuplicate: isDuplicate ?? this.isDuplicate,
     );
   }
 
-  //todo: fix this when state is figured out
   @override
   String toString() {
     return '''NewExerciseFormState {
-    autoValidate: $autoValidate,
-      isDepthValid $isDepthValid,
-      isTimeOffValid $isTimeOffValid,
-      isTimeOnValid $isTimeOnValid,
-      isHangsPerSetValid $isHangsPerSetValid,
-      isTimeBetweenSetsValid $isTimeBetweenSetsValid,
-      isNumberOfSetsValid $isNumberOfSetsValid,
-      isResistanceValid $isResistanceValid,
+      exerciseTitle: $exerciseTitle,
+      depthMeasurementSystem: $depthMeasurementSystem,
+      resistanceMeasurementSystem: $resistanceMeasurementSystem,
+      isDepthVisible: $isDepthVisible,
+      autoValidate: $autoValidate,
+      availableFingerConfigurations: $availableFingerConfigurations,
+      numberOfHandsSelected: $numberOfHandsSelected,
+      hold: $hold,
+      fingerConfiguration: $fingerConfiguration,
+      isFingerConfigurationVisible: $isFingerConfigurationVisible,
+      isDepthValid: $isDepthValid,
+      isTimeOffValid: $isTimeOffValid,
+      isTimeOnValid: $isTimeOnValid,
+      isHangsPerSetValid: $isHangsPerSetValid,
+      isTimeBetweenSetsValid: $isTimeBetweenSetsValid,
+      isNumberOfSetsValid: $isNumberOfSetsValid,
+      isResistanceValid: $isResistanceValid,
+      isSuccess: $isSuccess,
+      isFailure: $isFailure,
+      isDuplicate: $isDuplicate,
     }''';
   }
 }
