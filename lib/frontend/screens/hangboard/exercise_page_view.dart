@@ -1,10 +1,14 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_event.dart';
 import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_event.dart';
+import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/frontend/widgets/dots_indicator.dart';
 import 'package:crux/frontend/widgets/exercise_form.dart';
@@ -20,13 +24,14 @@ class ShakeCurve extends Curve {
 }
 
 class ExercisePageView extends StatefulWidget {
-  final HangboardWorkout hangboardWorkout;
+  final String hangboardWorkoutTitle;
   final HangboardWorkoutsRepository hangboardWorkoutsRepository;
 
   @override
   State createState() => _ExercisePageViewState();
 
-  ExercisePageView({this.hangboardWorkout, this.hangboardWorkoutsRepository});
+  ExercisePageView(
+      {this.hangboardWorkoutTitle, this.hangboardWorkoutsRepository});
 }
 
 class _ExercisePageViewState extends State<ExercisePageView> {
@@ -68,12 +73,25 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   @override
   void initState() {
     super.initState();
+
+    Firestore.instance
+        .document('hangboard/${widget.hangboardWorkoutTitle}')
+        .snapshots()
+        .listen((querySnapshot) {
+      var hangboardWorkout = HangboardWorkout.fromEntity(
+          HangboardWorkoutEntity.fromJson(querySnapshot.data));
+
+      _hangboardWorkoutBloc.dispatch(UpdateHangboardWorkout(hangboardWorkout));
+    });
+
     _overlayVisible = false;
     _currentPageValue = 0.0;
     _zoomOut = false;
     _preferencesClearedFlag = false;
     _hangboardWorkoutBloc =
-        HangboardWorkoutBloc(widget.hangboardWorkoutsRepository);
+    HangboardWorkoutBloc(widget.hangboardWorkoutsRepository)
+      ..dispatch(LoadHangboardWorkout(widget.hangboardWorkoutTitle));
+
 //    _shakeController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
 //    _shakeCurve = CurvedAnimation(parent: _shakeController, curve: ShakeCurve());
 
@@ -92,11 +110,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     });
   }
 
-
   @override
-  void reassemble() {
-
-  }
+  void reassemble() {}
 
   @override
   void didChangeDependencies() {
@@ -110,7 +125,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     return Scaffold(
       appBar: AppBar(
         elevation: 8.0,
-        title: Text(widget.hangboardWorkout.workoutTitle),
+        title: Text(widget.hangboardWorkoutTitle),
         actions: <Widget>[buildPopupMenuButton()],
         //TODO: Add action menu that allows you to reset all exercises (clear sharedPrefs)
       ),
@@ -148,34 +163,36 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     return BlocBuilder(
         bloc: _hangboardWorkoutBloc,
         builder: (context, hangboardWorkoutState) {
-          int exerciseCount = 0;
+          if(hangboardWorkoutState is HangboardWorkoutLoaded) {
+            int exerciseCount = 0;
 //          if (hangboardWorkoutState is HangboardWorkoutLoaded) {
-          var exerciseList =
-              widget.hangboardWorkout.hangboardExerciseList ?? [];
-          exerciseCount = exerciseList.length;
+            var exerciseList =
+                hangboardWorkoutState.hangboardWorkout.hangboardExerciseList ??
+                    [];
+            exerciseCount = exerciseList.length;
 
-          _pageCount = exerciseCount + 1;
+            _pageCount = exerciseCount + 1;
 
-          return Center(
-            child: new Container(
-              color: Theme
-                  .of(context)
-                  .canvasColor,
-              /*Dark*/
-              child: Stack(
-                children: <Widget>[
-                  PageView(
-                    controller: _zoomOut ? _zoomController : _controller,
-                    children: createPageList(exerciseList),
-                  ),
-                  dotsIndicator(),
-                ],
+            return Center(
+              child: new Container(
+                color: Theme
+                    .of(context)
+                    .canvasColor,
+                /*Dark*/
+                child: Stack(
+                  children: <Widget>[
+                    PageView(
+                      controller: _zoomOut ? _zoomController : _controller,
+                      children: createPageList(exerciseList),
+                    ),
+                    dotsIndicator(),
+                  ],
+                ),
               ),
-            ),
-          );
-//          } else {
-//            return Center();
-//          } //just making it happy here- double check
+            );
+          } else {
+            return Center();
+          } //just making it happy here- double check
         });
   }
 
@@ -226,7 +243,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               context,
               MaterialPageRoute(builder: (context) {
                 return ExerciseForm(
-                  workoutTitle: widget.hangboardWorkout.workoutTitle,
+                  workoutTitle: widget.hangboardWorkoutTitle,
                   firestoreHangboardWorkoutsRepository:
                   widget.hangboardWorkoutsRepository,
                 );
@@ -253,7 +270,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
       return Transform(
         transform: Matrix4.identity()..rotateX(_currentPageValue - index),
         child: HangboardPage(
-          workoutTitle: widget.hangboardWorkout.workoutTitle,
+          workoutTitle: widget.hangboardWorkoutTitle,
           index: index,
           hangboardExercise: hangboardExercise,
         ),
@@ -265,7 +282,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         child: HangboardPage(
           firestoreHangboardWorkoutsRepository:
           widget.hangboardWorkoutsRepository,
-          workoutTitle: widget.hangboardWorkout.workoutTitle,
+          workoutTitle: widget.hangboardWorkoutTitle,
           index: index,
           hangboardExercise: hangboardExercise,
         ),
@@ -275,7 +292,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     return Stack(
       children: <Widget>[
         HangboardPage(
-          workoutTitle: widget.hangboardWorkout.workoutTitle,
+          workoutTitle: widget.hangboardWorkoutTitle,
           index: index,
           hangboardExercise: hangboardExercise,
         ),
@@ -341,7 +358,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         if(value == 'reset workout') {
           SharedPreferences.getInstance().then((preferences) {
             preferences.getKeys().forEach((key) {
-              if(key.contains(widget.hangboardWorkout.workoutTitle))
+              if(key.contains(widget.hangboardWorkoutTitle))
                 preferences.remove(key);
             });
             setState(() {

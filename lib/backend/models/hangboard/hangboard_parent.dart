@@ -1,8 +1,7 @@
-import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
-import 'package:crux/backend/repository/entities/hangboard_parent_entity.dart';
+
 
 class HangboardParent {
-  final List<HangboardWorkout> hangboardWorkoutList;
+  final List<String> hangboardWorkoutList;
 
   HangboardParent(
     this.hangboardWorkoutList,
@@ -14,7 +13,7 @@ class HangboardParent {
         '}';
   }
 
-  HangboardParentEntity toEntity() {
+/*HangboardParentEntity toEntity() {
     return HangboardParentEntity(
       hangboardWorkoutList.map((workout) => workout.toEntity()).toList(),
     );
@@ -26,5 +25,5 @@ class HangboardParent {
           .map((workoutEntity) => HangboardWorkout.fromEntity(workoutEntity))
           .toList(),
     );
-  }
+  }*/
 }

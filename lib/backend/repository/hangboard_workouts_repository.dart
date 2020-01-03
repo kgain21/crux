@@ -16,11 +16,11 @@ abstract class HangboardWorkoutsRepository {
 
   Future<void> updateExercise(HangboardExercise hangboardExercise);
 
-  Future<List<HangboardWorkout>> getWorkouts();
+  Future<List<String>> getWorkoutTitles();
 
   Future<bool> addNewWorkout(HangboardWorkout hangboardWorkout);
 
-  Future<void> deleteWorkout(HangboardWorkout hangboardWorkout);
+  Future<void> deleteWorkout(String hangboardWorkoutTitle);
 
   Future<void> updateWorkout(HangboardWorkout hangboardWorkout);
 }

@@ -1,11 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
 import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_parent.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
-import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/frontend/shared_layouts/app_bar.dart';
@@ -31,7 +29,6 @@ class HangboardWorkoutsScreen extends StatefulWidget {
 class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
   HangboardParentBloc _hangboardParentBloc;
 
-//  FirestoreStreamListener _firestoreStreamListener;
 
   @override
   void initState() {
@@ -40,33 +37,12 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
         widget.firestoreHangboardWorkoutsRepository)
       ..dispatch(LoadHangboardParent());
 
-    Firestore.instance
-        .collection('hangboard')
-        .snapshots()
-        .listen((querySnapshot) {
-      List<HangboardWorkout> hangboardWorkoutList = querySnapshot.documents
-          .map((workoutDocument) =>
-          HangboardWorkout.fromEntity(
-              HangboardWorkoutEntity.fromJson(workoutDocument.data)))
-          .toList();
-
-      _hangboardParentBloc.dispatch(
-          HangboardParentUpdated(HangboardParent(hangboardWorkoutList)));
-    });
-//
-//    _firestoreStreamListener = FirestoreStreamListener()
-//      ..streamSubscription.onData((data) {
-//        _hangboardParentBloc
-//            .dispatch(HangboardParentUpdated(HangboardParent(data)));
-//      });
-
     super.initState();
   }
 
   @override
   void dispose() {
     _hangboardParentBloc.dispose();
-//    _firestoreStreamListener.dispose();
     super.dispose();
   }
 
@@ -162,7 +138,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             return addWorkoutButton(hangboardParent);
           }
           return HangboardWorkoutTile(
-            hangboardWorkout: workoutList[index],
+            hangboardWorkoutTitle: workoutList[index],
             index: index,
             firestoreHangboardWorkoutsRepository:
             widget.firestoreHangboardWorkoutsRepository,

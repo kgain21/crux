@@ -90,14 +90,13 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<List<HangboardWorkout>> getWorkouts() async {
+  Future<List<String>> getWorkoutTitles() async {
     return firestore
         .collection(WORKOUT_TYPE)
         .snapshots()
         .first
         .then((hangboardCollection) => hangboardCollection.documents
-            .map((workoutDocument) => HangboardWorkout.fromEntity(
-                HangboardWorkoutEntity.fromJson(workoutDocument.data)))
+        .map((workoutDocument) => workoutDocument.documentID)
             .toList())
         .catchError((error) {
       print('Failed retrieving workouts:  $error');
@@ -184,24 +183,14 @@ class FirestoreHangboardWorkoutsRepository
   ///
   /// Returns a boolean to say whether the delete succeeded or not.
   @override
-  Future<bool> deleteWorkout(HangboardWorkout hangboardWorkout) async {
-    final hangboardWorkoutEntity = hangboardWorkout.toEntity();
-
-    return firestore.collection(WORKOUT_TYPE).getDocuments().then((snapshot) {
-      firestore
-          .document('$WORKOUT_TYPE/${hangboardWorkoutEntity.workoutTitle}')
-          .delete()
-          .then((_) {
-        return true;
-      }).catchError((error) {
-        print("Failed deleting workout ${hangboardWorkoutEntity.workoutTitle}");
-        print(error);
-        return Future.error(error);
-      });
+  Future<bool> deleteWorkout(String hangboardWorkoutTitle) async {
+    return firestore
+        .document('$WORKOUT_TYPE/$hangboardWorkoutTitle}')
+        .delete()
+        .then((_) {
+      return true;
     }).catchError((error) {
-      print(
-          "Failed retrieving documents on delete of ${hangboardWorkoutEntity
-              .workoutTitle}");
+      print("Failed deleting workout $hangboardWorkoutTitle");
       print(error);
       return Future.error(error);
     });

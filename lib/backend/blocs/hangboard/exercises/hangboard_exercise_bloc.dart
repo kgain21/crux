@@ -129,13 +129,14 @@ class HangboardExerciseBloc
       ForwardSwitchButtonPressed event) async* {
     yield HangboardExerciseLoaded(event.exercise);
     event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
+    //todo: if this is pressed after a replaceWithRepTimer event has just happened
+    //todo: the state hasn't changed so nothing happens and it doesnt update
   }
 
   Stream<HangboardExerciseState> _mapReverseSwitchButtonPressedToState(
       ReverseSwitchButtonPressed event) async* {
     yield HangboardExerciseLoaded(event.exercise);
     event.timerBloc.dispatch(ReplaceWithRestTimer(event.exercise, false));
-    //todo: do i ever want to switch to break timer?
   }
 
   Stream<HangboardExerciseState> _mapForwardCompletedToState(

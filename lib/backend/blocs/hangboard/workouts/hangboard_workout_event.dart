@@ -10,38 +10,40 @@ abstract class HangboardWorkoutEvent extends Equatable {
 class LoadHangboardWorkout extends HangboardWorkoutEvent {
   final String workoutTitle;
 
-  LoadHangboardWorkout({this.workoutTitle})
-      : super([workoutTitle]); //todo add extra shit
+  LoadHangboardWorkout(this.workoutTitle)
+      : super([workoutTitle]);
   @override
   String toString() => 'LoadHangboardWorkout';
 }
 
-class HangboardWorkoutAdded extends HangboardWorkoutEvent {
+class AddHangboardWorkout extends HangboardWorkoutEvent {
   final HangboardWorkout hangboardWorkout;
 
-  HangboardWorkoutAdded(this.hangboardWorkout) : super([hangboardWorkout]);
+  AddHangboardWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
 
   @override
   String toString() =>
       'AddHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
 }
 
-class HangboardWorkoutUpdated extends HangboardWorkoutEvent {
+class UpdateHangboardWorkout extends HangboardWorkoutEvent {
   final HangboardWorkout hangboardWorkout;
 
-  HangboardWorkoutUpdated(this.hangboardWorkout) : super([hangboardWorkout]);
+  UpdateHangboardWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
 
   @override
-  String toString() => 'UpdateWorkout { hangboardWorkout: $hangboardWorkout }';
+  String toString() =>
+      'UpdateHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
 }
 
-class DeleteWorkout extends HangboardWorkoutEvent {
+class DeleteHangboardWorkout extends HangboardWorkoutEvent {
   final HangboardWorkout hangboardWorkout;
 
-  DeleteWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
+  DeleteHangboardWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
 
   @override
-  String toString() => 'DeleteWorkout { hangboardWorkout: $hangboardWorkout }';
+  String toString() =>
+      'DeleteHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
 }
 
 class WorkoutComplete extends HangboardWorkoutEvent {

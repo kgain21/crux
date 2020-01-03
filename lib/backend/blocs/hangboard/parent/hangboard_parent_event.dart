@@ -57,15 +57,15 @@ class HangboardParentUpdated extends HangboardParentEvent {
 
 
 class DeleteWorkoutFromHangboardParent extends HangboardParentEvent {
-  final HangboardWorkout hangboardWorkout;
+  final String hangboardWorkoutTitle;
 
-  DeleteWorkoutFromHangboardParent(this.hangboardWorkout)
-      : super([hangboardWorkout]);
+  DeleteWorkoutFromHangboardParent(this.hangboardWorkoutTitle)
+      : super([hangboardWorkoutTitle]);
 
   @override
   String toString() {
     return 'DeleteWorkoutFromHangboardParent: {'
-        'hangboardWorkout: ${hangboardWorkout.toString()}'
+        'hangboardWorkout: ${hangboardWorkoutTitle.toString()}'
         '}';
   }
 }

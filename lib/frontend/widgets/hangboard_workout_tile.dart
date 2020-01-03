@@ -3,7 +3,6 @@ import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart'
 import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_bloc.dart';
 import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_event.dart';
 import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_state.dart';
-import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/preferences.dart';
 import 'package:crux/frontend/screens/hangboard/exercise_page_view.dart';
@@ -14,11 +13,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HangboardWorkoutTile extends StatefulWidget {
   final int index;
-  final HangboardWorkout hangboardWorkout;
+  final String hangboardWorkoutTitle;
   final HangboardWorkoutsRepository firestoreHangboardWorkoutsRepository;
 
   HangboardWorkoutTile({this.index,
-                         this.hangboardWorkout,
+                         this.hangboardWorkoutTitle,
                          this.firestoreHangboardWorkoutsRepository})
       : super();
 
@@ -48,7 +47,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
 
     _hangboardWorkoutTileBloc = HangboardWorkoutTileBloc();
 
-    var workoutTitle = widget.hangboardWorkout.workoutTitle;
+    var workoutTitle = widget.hangboardWorkoutTitle;
 
     return BlocBuilder(
         bloc: _hangboardWorkoutTileBloc,
@@ -72,7 +71,8 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                         MaterialPageRoute(
                           builder: (context) =>
                               ExercisePageView(
-                                hangboardWorkout: widget.hangboardWorkout,
+                                hangboardWorkoutTitle: widget
+                                    .hangboardWorkoutTitle,
                                 hangboardWorkoutsRepository:
                                 widget.firestoreHangboardWorkoutsRepository,
                               ),
@@ -108,7 +108,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                         Navigator.of(context).pop();
                         _hangboardParentBloc.dispatch(
                             DeleteWorkoutFromHangboardParent(
-                                widget.hangboardWorkout));
+                                widget.hangboardWorkoutTitle));
 
                         /// Clear out sharedPrefs with workout deletion
                         /*SharedPreferences.getInstance().then((preferences) {
@@ -116,7 +116,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                         });*/
 
                         Preferences().removeTimerPreferences(
-                            widget.hangboardWorkout.workoutTitle);
+                            widget.hangboardWorkoutTitle);
                       },
                     )
                   ],
@@ -126,7 +126,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                       children: [
                         TextSpan(text: 'Are you sure you want to delete '),
                         TextSpan(
-                          text: '${widget.hangboardWorkout.workoutTitle}?\n\n',
+                          text: '${widget.hangboardWorkoutTitle}?\n\n',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         TextSpan(text: 'All exercises will be lost.'),
