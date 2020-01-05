@@ -27,8 +27,12 @@ class HangboardWorkoutBloc
       yield* _mapAddWorkoutToState(event);
     } else if(event is DeleteHangboardWorkout) {
       yield* _mapDeleteWorkoutToState(event);
-    } else if(event is UpdateHangboardWorkout) {
-      yield* _mapUpdateWorkoutToState(event);
+    } else if(event is ReloadHangboardWorkout) {
+      yield* _mapReloadHangboardWorkoutToState(event);
+    } else if(event is DeleteHangboardExercise) {
+      yield* _mapHangboardExerciseToState(event);
+    } else if(event is ExerciseTileLongPress) {
+      yield* _mapExerciseTileLongPressToState(event);
     }
   }
 
@@ -51,7 +55,22 @@ class HangboardWorkoutBloc
     return null;
   }
 
-  Stream<HangboardWorkoutState> _mapUpdateWorkoutToState(event) {
-    return null;
+  Stream<HangboardWorkoutState> _mapReloadHangboardWorkoutToState(
+      ReloadHangboardWorkout event) async* {
+    yield HangboardWorkoutLoaded(event.hangboardWorkout);
+  }
+
+  Stream<HangboardWorkoutState> _mapHangboardExerciseToState(
+      DeleteHangboardExercise event) async* {
+//    hangboardWorkoutsRepository.deleteExerciseFromWorkout(event.hangboardExercise);
+//todo: pass in workout, remove exercise from workout, save workout to firebase, yield workout
+    yield /*HangboardWorkoutLoaded()*/ null;
+  }
+
+  Stream<HangboardWorkoutState> _mapExerciseTileLongPressToState(
+      ExerciseTileLongPress event) async* {
+    //todo: UPDATED: ***THIS NEEDS TO BE THE SAME STATE BUT WITH A FLAG INSTEAD***
+    //todo: need to pass down state in builder, cant do that if I have two different states, hence it has to be a flag
+    yield EditingHangboardWorkout(event.hangboardWorkout);
   }
 }

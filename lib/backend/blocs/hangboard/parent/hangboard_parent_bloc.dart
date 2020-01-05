@@ -70,7 +70,7 @@ class HangboardParentBloc
       DeleteWorkoutFromHangboardParent event) async* {
     try {
       await hangboardWorkoutsRepository
-          .deleteWorkout(event.hangboardWorkoutTitle);
+          .deleteWorkoutByTitle(event.hangboardWorkoutTitle);
 
       List<String> hangboardWorkoutEntityList =
       await hangboardWorkoutsRepository.getWorkoutTitles();

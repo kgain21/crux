@@ -90,11 +90,7 @@ class StringFormatUtils {
     String exerciseTitle = '${numberOfHands.toString()} Handed';
 
     if(depth == null) {
-      if(fingerConfiguration == null || fingerConfiguration == '') {
-        exerciseTitle += ' $hold';
-      } else {
-        exerciseTitle += ' $fingerConfiguration $hold';
-      }
+      exerciseTitle += ' $fingerConfiguration $hold';
     } else {
       /// Truncate .0 if possible
       if(depth.floor() == depth) {
@@ -106,6 +102,8 @@ class StringFormatUtils {
         ' $depth$depthMeasurementSystem $fingerConfiguration $hold';
       }
     }
-    return exerciseTitle;
+
+    /// Strip extra space if no fingerConfiguration is present
+    return exerciseTitle.replaceAll('  ', ' ');
   }
 }

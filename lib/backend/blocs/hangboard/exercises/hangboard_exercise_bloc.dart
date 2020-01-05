@@ -36,8 +36,6 @@ class HangboardExerciseBloc
       yield* _mapLoadHangboardExerciseToState(event);
     } else if(event is AddHangboardExercise) {
       yield* _mapAddHangboardExerciseToState(event);
-    } else if(event is DeleteHangboardExercise) {
-      yield* _mapDeleteHangboardExerciseToState(event);
     } else if(event is UpdateHangboardExercise) {
       yield* _mapUpdateHangboardExerciseToState(event);
     } else if(event is ClearHangboardExercisePreferences) {
@@ -74,11 +72,6 @@ class HangboardExerciseBloc
   }
 
   Stream<HangboardExerciseState> _mapAddHangboardExerciseToState(event) async* {
-    yield null;
-  }
-
-  Stream<HangboardExerciseState> _mapDeleteHangboardExerciseToState(
-      event) async* {
     yield null;
   }
 

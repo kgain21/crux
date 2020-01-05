@@ -29,6 +29,21 @@ class HangboardWorkoutLoaded extends HangboardWorkoutState {
   }
 }
 
+class EditingHangboardWorkout extends HangboardWorkoutState {
+  final HangboardWorkout hangboardWorkout;
+
+  EditingHangboardWorkout(this.hangboardWorkout,) : super([
+    hangboardWorkout,
+  ]);
+
+  @override
+  String toString() {
+    return 'EditingHangboardWorkout: {'
+        'hangboardWorkout: ${hangboardWorkout.toString()}'
+        '}';
+  }
+}
+
 class HangboardWorkoutNotLoaded extends HangboardWorkoutState {
   @override
   String toString() => 'HangboardWorkoutNotLoaded';

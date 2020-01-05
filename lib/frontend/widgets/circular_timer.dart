@@ -88,7 +88,10 @@ class CircularTimer extends StatelessWidget {
               return Text(
                 timerString(),
                 style: TextStyle(
-                  fontSize: 50.0,
+                  fontSize: MediaQuery
+                      .of(context)
+                      .size
+                      .width / 7.0,
                 ),
               );
             },

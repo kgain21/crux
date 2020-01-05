@@ -4,15 +4,16 @@ import 'package:crux/backend/repository/entities/hangboard_exercise_entity.dart'
 import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
 
 abstract class HangboardWorkoutsRepository {
-
-  Future<List<HangboardExerciseEntity>> getExercises(String workout);
+  Future<List<HangboardExerciseEntity>> getExercisesFromWorkout(
+      String workoutTitle);
 
   Future<HangboardWorkoutEntity> getWorkoutByWorkoutTitle(String workoutTitle);
 
-  Future<void> addNewExercise(
+  Future<void> addExerciseToWorkout(
       String workoutTitle, HangboardExercise hangboardExercise);
 
-  Future<void> deleteExercise(HangboardExercise hangboardExercise);
+  Future<void> deleteExerciseFromWorkout(String workoutTitle,
+                                         HangboardExercise hangboardExercise);
 
   Future<void> updateExercise(HangboardExercise hangboardExercise);
 
@@ -20,7 +21,7 @@ abstract class HangboardWorkoutsRepository {
 
   Future<bool> addNewWorkout(HangboardWorkout hangboardWorkout);
 
-  Future<void> deleteWorkout(String hangboardWorkoutTitle);
+  Future<void> deleteWorkoutByTitle(String hangboardWorkoutTitle);
 
   Future<void> updateWorkout(HangboardWorkout hangboardWorkout);
 }

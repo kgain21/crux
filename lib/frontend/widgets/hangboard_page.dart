@@ -45,7 +45,8 @@ class _HangboardPageState extends State<HangboardPage>
 //    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
     _hangboardExerciseBloc = HangboardExerciseBloc(
       /*hangboardExercise: widget.hangboardExercise,
-        firestore: widget.firestoreHangboardWorkoutsRepository*/)
+        firestore: widget.firestoreHangboardWorkoutsRepository*/
+    )
       ..dispatch(LoadHangboardExercise(widget.hangboardExercise));
 //    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
 
@@ -113,6 +114,10 @@ class _HangboardPageState extends State<HangboardPage>
           .of(context)
           .accentColor,
       child: Container(
+        height: MediaQuery
+            .of(context)
+            .size
+            .width / 9.0,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
           child: Column(
@@ -121,7 +126,10 @@ class _HangboardPageState extends State<HangboardPage>
                 '${state.hangboardExercise.exerciseTitle}',
                 softWrap: true,
                 style: TextStyle(
-                  fontSize: 20.0,
+                  fontSize: MediaQuery
+                      .of(context)
+                      .size
+                      .width / 20.0,
                 ),
               ),
             ],
@@ -254,7 +262,13 @@ class _HangboardPageState extends State<HangboardPage>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.refresh),
+              icon: Icon(
+                Icons.refresh,
+                size: MediaQuery
+                    .of(context)
+                    .size
+                    .width / 15.0,
+              ),
               onPressed: () {
                 _hangboardExerciseBloc.dispatch(ForwardSwitchButtonPressed(
                     hangboardState.hangboardExercise, _timerBloc));
@@ -267,6 +281,10 @@ class _HangboardPageState extends State<HangboardPage>
                   fontFamily: 'MaterialIcons',
                   matchTextDirection: true,
                 ),
+                size: MediaQuery
+                    .of(context)
+                    .size
+                    .width / 15.0,
                 textDirection: TextDirection.rtl,
               ),
               onPressed: () {
@@ -301,7 +319,13 @@ class _HangboardPageState extends State<HangboardPage>
                   currentHangsPerSet <
                       _hangboardExerciseBloc.originalNumberOfHangs
                       ? IconButton(
-                      icon: Icon(Icons.arrow_drop_up),
+                      icon: Icon(
+                        Icons.arrow_drop_up,
+                        size: MediaQuery
+                            .of(context)
+                            .size
+                            .width / 15.0,
+                      ),
                       onPressed: () {
                         if(currentHangsPerSet !=
                             _hangboardExerciseBloc.originalNumberOfHangs) {
@@ -318,6 +342,10 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_up,
+                      size: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 15.0,
                       color: Theme
                           .of(context)
                           .primaryColorLight,
@@ -329,7 +357,13 @@ class _HangboardPageState extends State<HangboardPage>
                   ),
                   currentHangsPerSet > 0
                       ? IconButton(
-                    icon: Icon(Icons.arrow_drop_down),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      size: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 15.0,
+                    ),
                     onPressed: () {
                       if(currentHangsPerSet != 0) {
                         _timerController.stop(canceled: false);
@@ -346,6 +380,10 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_down,
+                      size: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 15.0,
                       color: Theme
                           .of(context)
                           .primaryColorLight,
@@ -363,7 +401,10 @@ class _HangboardPageState extends State<HangboardPage>
                           state.hangboardExercise.resistance.toInt(),
                           state.hangboardExercise.resistanceMeasurementSystem),
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18.0),
+                      style: TextStyle(fontSize: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 20.0),
                     ),
                   ),
                 ],
@@ -398,7 +439,13 @@ class _HangboardPageState extends State<HangboardPage>
                   currentNumberOfSets <
                       _hangboardExerciseBloc.originalNumberOfSets
                       ? IconButton(
-                    icon: Icon(Icons.arrow_drop_up),
+                    icon: Icon(
+                      Icons.arrow_drop_up,
+                      size: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 15.0,
+                    ),
                     onPressed: () {
                       if(currentNumberOfSets !=
                           _hangboardExerciseBloc.originalNumberOfSets) {
@@ -413,6 +460,10 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_up,
+                      size: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 15.0,
                       color: Theme
                           .of(context)
                           .primaryColorLight,
@@ -420,11 +471,22 @@ class _HangboardPageState extends State<HangboardPage>
                   ),
                   Text(
                     '$currentNumberOfSets',
-                    style: TextStyle(fontSize: 30.0),
+                    style: TextStyle(
+                      fontSize: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 12.0,
+                    ),
                   ),
                   currentNumberOfSets > 0
                       ? IconButton(
-                    icon: Icon(Icons.arrow_drop_down),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      size: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 15.0,
+                    ),
                     onPressed: () {
                       if(currentNumberOfSets != 0) {
                         _timerController.stop(canceled: false);
@@ -438,6 +500,10 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () => null,
                     icon: Icon(
                       Icons.arrow_drop_down,
+                      size: MediaQuery
+                          .of(context)
+                          .size
+                          .width / 15.0,
                       color: Theme
                           .of(context)
                           .primaryColorLight,
@@ -452,7 +518,11 @@ class _HangboardPageState extends State<HangboardPage>
                     child: Text(
                       currentNumberOfSets == 1 ? ' Set' : ' Sets',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18.0),
+                      style: TextStyle(
+                          fontSize: MediaQuery
+                              .of(context)
+                              .size
+                              .width / 20.0),
                     ),
                   ),
                 ],

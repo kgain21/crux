@@ -223,7 +223,7 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
 
     bool isFailure = false;
     bool isSuccess = await firestoreHangboardWorkoutsRepository
-        .addNewExercise(workoutTitle, hangboardExercise)
+        .addExerciseToWorkout(workoutTitle, hangboardExercise)
         .catchError((error) {
       print(error);
       isFailure = true;

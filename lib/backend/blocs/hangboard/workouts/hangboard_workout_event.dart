@@ -1,3 +1,4 @@
+import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
@@ -12,6 +13,7 @@ class LoadHangboardWorkout extends HangboardWorkoutEvent {
 
   LoadHangboardWorkout(this.workoutTitle)
       : super([workoutTitle]);
+
   @override
   String toString() => 'LoadHangboardWorkout';
 }
@@ -26,14 +28,14 @@ class AddHangboardWorkout extends HangboardWorkoutEvent {
       'AddHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
 }
 
-class UpdateHangboardWorkout extends HangboardWorkoutEvent {
+class ReloadHangboardWorkout extends HangboardWorkoutEvent {
   final HangboardWorkout hangboardWorkout;
 
-  UpdateHangboardWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
+  ReloadHangboardWorkout(this.hangboardWorkout) : super([hangboardWorkout]);
 
   @override
   String toString() =>
-      'UpdateHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
+      'ReloadHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
 }
 
 class DeleteHangboardWorkout extends HangboardWorkoutEvent {
@@ -44,6 +46,16 @@ class DeleteHangboardWorkout extends HangboardWorkoutEvent {
   @override
   String toString() =>
       'DeleteHangboardWorkout { hangboardWorkout: $hangboardWorkout }';
+}
+
+class DeleteHangboardExercise extends HangboardWorkoutEvent {
+  final HangboardExercise hangboardExercise;
+
+  DeleteHangboardExercise(this.hangboardExercise) : super([hangboardExercise]);
+
+  @override
+  String toString() =>
+      'DeleteHangboardExercise { hangboardExercise: $hangboardExercise }';
 }
 
 class WorkoutComplete extends HangboardWorkoutEvent {

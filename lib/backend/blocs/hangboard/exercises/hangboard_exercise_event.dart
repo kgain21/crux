@@ -38,16 +38,6 @@ class UpdateHangboardExercise extends HangboardExerciseEvent {
   String toString() =>
       'UpdateHangboardExercise { hangboardExercise: $hangboardExercise }';
 }
-
-class DeleteHangboardExercise extends HangboardExerciseEvent {
-  final HangboardExercise hangboardExercise;
-
-  DeleteHangboardExercise(this.hangboardExercise) : super([hangboardExercise]);
-
-  @override
-  String toString() =>
-      'DeleteHangboardExercise { hangboardExercise: $hangboardExercise }';
-}
 /*
 class HangboardExerciseComplete extends HangboardExerciseEvent {
   final HangboardExercise hangboardExercise;

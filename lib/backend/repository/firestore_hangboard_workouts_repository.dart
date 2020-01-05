@@ -18,7 +18,8 @@ class FirestoreHangboardWorkoutsRepository
 
   /// Returns a list of exercises mapped from the given workout
   @override
-  Future<List<HangboardExerciseEntity>> getExercises(String workoutTitle) {
+  Future<List<HangboardExerciseEntity>> getExercisesFromWorkout(
+      String workoutTitle) {
     return firestore
         .collection('$WORKOUT_TYPE/$workoutTitle')
         .snapshots()
@@ -40,7 +41,7 @@ class FirestoreHangboardWorkoutsRepository
   /// Returns a bool signifying whether the exercise was added or not. If the
   /// exercise is already present
   @override
-  Future<bool> addNewExercise(
+  Future<bool> addExerciseToWorkout(
       String workoutTitle, HangboardExercise hangboardExercise) async {
     final hangboardExerciseEntity = hangboardExercise.toEntity();
 
@@ -84,7 +85,10 @@ class FirestoreHangboardWorkoutsRepository
   }
 
   @override
-  Future<void> deleteExercise(HangboardExercise hangboardExercise) {
+  Future<void> deleteExerciseFromWorkout(String workoutTitle,
+                                         HangboardExercise hangboardExercise) {
+
+
     return null;
 //    return firestore.collection(workoutType).document(id).delete();
   }
@@ -183,7 +187,7 @@ class FirestoreHangboardWorkoutsRepository
   ///
   /// Returns a boolean to say whether the delete succeeded or not.
   @override
-  Future<bool> deleteWorkout(String hangboardWorkoutTitle) async {
+  Future<bool> deleteWorkoutByTitle(String hangboardWorkoutTitle) async {
     return firestore
         .document('$WORKOUT_TYPE/$hangboardWorkoutTitle}')
         .delete()
