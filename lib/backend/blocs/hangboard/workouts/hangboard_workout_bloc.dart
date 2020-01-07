@@ -69,8 +69,6 @@ class HangboardWorkoutBloc
 
   Stream<HangboardWorkoutState> _mapExerciseTileLongPressToState(
       ExerciseTileLongPress event) async* {
-    //todo: UPDATED: ***THIS NEEDS TO BE THE SAME STATE BUT WITH A FLAG INSTEAD***
-    //todo: need to pass down state in builder, cant do that if I have two different states, hence it has to be a flag
     yield EditingHangboardWorkout(event.hangboardWorkout);
   }
 }

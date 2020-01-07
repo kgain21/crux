@@ -6,7 +6,6 @@ import 'package:crux/backend/blocs/timer/timer_event.dart';
 import 'package:crux/backend/blocs/timer/timer_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
-import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/frontend/widgets/circular_timer.dart';
 import 'package:crux/frontend/widgets/exercise_tile.dart';
 import 'package:crux/utils/string_format_utils.dart';
@@ -18,15 +17,12 @@ class HangboardPage extends StatefulWidget {
   final int index;
 
   final String workoutTitle;
-  final FirestoreHangboardWorkoutsRepository
-  firestoreHangboardWorkoutsRepository;
   final HangboardExercise hangboardExercise;
 
   HangboardPage({
                   this.index,
                   this.workoutTitle,
                   this.hangboardExercise,
-                  this.firestoreHangboardWorkoutsRepository,
                 });
 
   @override
@@ -401,10 +397,11 @@ class _HangboardPageState extends State<HangboardPage>
                           state.hangboardExercise.resistance.toInt(),
                           state.hangboardExercise.resistanceMeasurementSystem),
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: MediaQuery
-                          .of(context)
-                          .size
-                          .width / 20.0),
+                      style: TextStyle(
+                          fontSize: MediaQuery
+                              .of(context)
+                              .size
+                              .width / 20.0),
                     ),
                   ),
                 ],
