@@ -9,6 +9,7 @@ import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 class HangboardWorkoutBloc
     extends Bloc<HangboardWorkoutEvent, HangboardWorkoutState> {
   final HangboardWorkoutsRepository hangboardWorkoutsRepository;
+  HangboardWorkout _hangboardWorkout;
 
   HangboardWorkoutBloc(this.hangboardWorkoutsRepository);
 
@@ -21,17 +22,17 @@ class HangboardWorkoutBloc
   @override
   Stream<HangboardWorkoutState> mapEventToState(
       HangboardWorkoutEvent event) async* {
-    if(event is LoadHangboardWorkout) {
+    if (event is LoadHangboardWorkout) {
       yield* _mapLoadWorkoutToState(event);
-    } else if(event is AddHangboardWorkout) {
+    } else if (event is AddHangboardWorkout) {
       yield* _mapAddWorkoutToState(event);
-    } else if(event is DeleteHangboardWorkout) {
+    } else if (event is DeleteHangboardWorkout) {
       yield* _mapDeleteWorkoutToState(event);
-    } else if(event is ReloadHangboardWorkout) {
+    } else if (event is ReloadHangboardWorkout) {
       yield* _mapReloadHangboardWorkoutToState(event);
-    } else if(event is DeleteHangboardExercise) {
+    } else if (event is DeleteHangboardExercise) {
       yield* _mapHangboardExerciseToState(event);
-    } else if(event is ExerciseTileLongPress) {
+    } else if (event is ExerciseTileLongPress) {
       yield* _mapExerciseTileLongPressToState(event);
     }
   }
@@ -39,9 +40,11 @@ class HangboardWorkoutBloc
   Stream<HangboardWorkoutState> _mapLoadWorkoutToState(
       LoadHangboardWorkout event) async* {
     try {
-      yield HangboardWorkoutLoaded(HangboardWorkout.fromEntity(
+      _hangboardWorkout = HangboardWorkout.fromEntity(
           await hangboardWorkoutsRepository
-              .getWorkoutByWorkoutTitle(event.workoutTitle)));
+              .getWorkoutByWorkoutTitle(event.workoutTitle));
+
+      yield HangboardWorkoutLoaded(_hangboardWorkout);
     } catch (_) {
       yield HangboardWorkoutNotLoaded();
     }
@@ -62,9 +65,20 @@ class HangboardWorkoutBloc
 
   Stream<HangboardWorkoutState> _mapHangboardExerciseToState(
       DeleteHangboardExercise event) async* {
-//    hangboardWorkoutsRepository.deleteExerciseFromWorkout(event.hangboardExercise);
-//todo: pass in workout, remove exercise from workout, save workout to firebase, yield workout
-    yield /*HangboardWorkoutLoaded()*/ null;
+    var updatedHangboardWorkout = await hangboardWorkoutsRepository
+        .deleteExerciseFromWorkout(
+        _hangboardWorkout.workoutTitle, event.hangboardExercise)
+        .then((hangboardWorkout) {
+      if(hangboardWorkout == null) {
+        return _hangboardWorkout;
+      } else {
+        return hangboardWorkout;
+      }
+    }).catchError((error) {
+      return _hangboardWorkout;
+    });
+
+    yield HangboardWorkoutLoaded(updatedHangboardWorkout);
   }
 
   Stream<HangboardWorkoutState> _mapExerciseTileLongPressToState(

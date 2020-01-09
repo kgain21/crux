@@ -12,10 +12,8 @@ abstract class HangboardWorkoutsRepository {
   Future<void> addExerciseToWorkout(
       String workoutTitle, HangboardExercise hangboardExercise);
 
-  Future<void> deleteExerciseFromWorkout(String workoutTitle,
-                                         HangboardExercise hangboardExercise);
-
-  Future<void> updateExercise(HangboardExercise hangboardExercise);
+  Future<HangboardWorkout> deleteExerciseFromWorkout(
+      String workoutTitle, HangboardExercise hangboardExercise);
 
   Future<List<String>> getWorkoutTitles();
 
