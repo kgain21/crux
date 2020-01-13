@@ -31,9 +31,11 @@ class HangboardWorkoutBloc
     } else if (event is ReloadHangboardWorkout) {
       yield* _mapReloadHangboardWorkoutToState(event);
     } else if (event is DeleteHangboardExercise) {
-      yield* _mapHangboardExerciseToState(event);
-    } else if (event is ExerciseTileLongPress) {
-      yield* _mapExerciseTileLongPressToState(event);
+      yield* _mapDeleteHangboardExerciseToState(event);
+    } else if (event is ExerciseTileLongPressed) {
+      yield* _mapExerciseTileLongPressedToState(event);
+    } else if (event is ExerciseTileTapped) {
+      yield* _mapExerciseTileTappedToState(event);
     }
   }
 
@@ -60,10 +62,11 @@ class HangboardWorkoutBloc
 
   Stream<HangboardWorkoutState> _mapReloadHangboardWorkoutToState(
       ReloadHangboardWorkout event) async* {
+    _hangboardWorkout = event.hangboardWorkout;
     yield HangboardWorkoutLoaded(event.hangboardWorkout);
   }
 
-  Stream<HangboardWorkoutState> _mapHangboardExerciseToState(
+  Stream<HangboardWorkoutState> _mapDeleteHangboardExerciseToState(
       DeleteHangboardExercise event) async* {
     var updatedHangboardWorkout = await hangboardWorkoutsRepository
         .deleteExerciseFromWorkout(
@@ -72,6 +75,7 @@ class HangboardWorkoutBloc
       if(hangboardWorkout == null) {
         return _hangboardWorkout;
       } else {
+        _hangboardWorkout = hangboardWorkout;
         return hangboardWorkout;
       }
     }).catchError((error) {
@@ -81,8 +85,13 @@ class HangboardWorkoutBloc
     yield HangboardWorkoutLoaded(updatedHangboardWorkout);
   }
 
-  Stream<HangboardWorkoutState> _mapExerciseTileLongPressToState(
-      ExerciseTileLongPress event) async* {
+  Stream<HangboardWorkoutState> _mapExerciseTileLongPressedToState(
+      ExerciseTileLongPressed event) async* {
     yield EditingHangboardWorkout(event.hangboardWorkout);
+  }
+
+  Stream<HangboardWorkoutState> _mapExerciseTileTappedToState(
+      ExerciseTileTapped event) async* {
+    yield HangboardWorkoutLoaded(event.hangboardWorkout);
   }
 }

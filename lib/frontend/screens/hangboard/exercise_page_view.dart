@@ -50,7 +50,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
 //  OverlayEntry _overlayEntry;
 //  bool _overlayVisible;
   double _currentPageValue;
-  bool _zoomOut;
+  bool _isEditing;
 
 //  bool _exerciseFinished;
   bool _preferencesClearedFlag;
@@ -88,12 +88,12 @@ class _ExercisePageViewState extends State<ExercisePageView> {
 
 //    _overlayVisible = false;
     _currentPageValue = 0.0;
-    _zoomOut = false;
+    _isEditing = false;
 //    _preferencesClearedFlag = false;
 
     _hangboardWorkoutBloc =
-    HangboardWorkoutBloc(widget.hangboardWorkoutsRepository)
-      ..dispatch(LoadHangboardWorkout(widget.hangboardWorkoutTitle));
+        HangboardWorkoutBloc(widget.hangboardWorkoutsRepository)
+          ..dispatch(LoadHangboardWorkout(widget.hangboardWorkoutTitle));
 
 //    _shakeController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
 //    _shakeCurve = CurvedAnimation(parent: _shakeController, curve: ShakeCurve());
@@ -135,10 +135,11 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           bloc: _hangboardWorkoutBloc,
           builder: (context, hangboardWorkoutState) {
             if(hangboardWorkoutState is EditingHangboardWorkout) {
-              _zoomOut = true;
+              _isEditing = true;
               return exercisePageView(
                   hangboardWorkoutState.hangboardWorkout, context);
             } else if(hangboardWorkoutState is HangboardWorkoutLoaded) {
+              _isEditing = false;
               return exercisePageView(
                   hangboardWorkoutState.hangboardWorkout, context);
             } else {
@@ -150,7 +151,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
   }
 
   Center exercisePageView(HangboardWorkout hangboardWorkout,
-                          BuildContext context) {
+      BuildContext context) {
     int exerciseCount = 0;
     var exerciseList = hangboardWorkout.hangboardExerciseList ?? [];
     exerciseCount = exerciseList.length;
@@ -165,16 +166,16 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         child: GestureDetector(
           onLongPress: () {
             _hangboardWorkoutBloc
-                .dispatch(ExerciseTileLongPress(hangboardWorkout));
+                .dispatch(ExerciseTileLongPressed(hangboardWorkout));
           },
           onTap: () {
-            //                          _hangboardWorkoutBloc.dispatch(ExerciseTileTapped(
-            //                              hangboardWorkoutState.hangboardWorkout));
+            _hangboardWorkoutBloc
+                .dispatch(ExerciseTileTapped(hangboardWorkout));
           },
           child: Stack(
             children: <Widget>[
               PageView(
-                controller: /*_zoomOut ? _zoomController :*/ _controller,
+                controller: _controller,
                 children: createPageList(hangboardWorkout),
               ),
               dotsIndicator(),
@@ -264,7 +265,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     /// be greater than the current exercises list so this must be checked first
     if(index == _currentPageValue.floor()) {
       return Transform(
-        transform: Matrix4.identity()..rotateX(_currentPageValue - index),
+        transform: Matrix4.identity()
+          ..rotateX(_currentPageValue - index),
         child: Stack(
           children: <Widget>[
             HangboardPage(
@@ -272,27 +274,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               index: index,
               hangboardExercise: hangboardExercise,
             ),
-            _zoomOut ?
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  IconButton(
-                    color: Colors.black,
-                    icon: Icon(Icons.cancel),
-                    onPressed: () {
-                      _hangboardWorkoutBloc
-                          .dispatch(DeleteHangboardExercise(hangboardExercise));
-                      //TODO: ask user for delete confirmation
-                      /*Firestore.instance
-                            .document(document.reference.path)
-                            .delete();*/
-                    },
-                  ),
-                ],
-              ),
-            )
+            _isEditing
+                ? exerciseDeleteButton(hangboardExercise)
                 : null,
           ].where(notNull).toList(),
         ),
@@ -308,27 +291,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               index: index,
               hangboardExercise: hangboardExercise,
             ),
-            _zoomOut ?
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  IconButton(
-                    color: Colors.black,
-                    icon: Icon(Icons.cancel),
-                    onPressed: () {
-                      _hangboardWorkoutBloc
-                          .dispatch(DeleteHangboardExercise(hangboardExercise));
-                      //TODO: ask user for delete confirmation
-                      /*Firestore.instance
-                            .document(document.reference.path)
-                            .delete();*/
-                    },
-                  ),
-                ],
-              ),
-            )
+            _isEditing
+                ? exerciseDeleteButton(hangboardExercise)
                 : null,
           ].where(notNull).toList(),
         ),
@@ -342,29 +306,30 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           index: index,
           hangboardExercise: hangboardExercise,
         ),
-        _zoomOut ?
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              IconButton(
-                color: Colors.black,
-                icon: Icon(Icons.cancel),
-                onPressed: () {
-                  _hangboardWorkoutBloc
-                      .dispatch(DeleteHangboardExercise(hangboardExercise));
-                  //TODO: ask user for delete confirmation
-                  /*Firestore.instance
-                            .document(document.reference.path)
-                            .delete();*/
-                },
-              ),
-            ],
-          ),
-        )
+        _isEditing
+            ? exerciseDeleteButton(hangboardExercise)
             : null,
       ].where(notNull).toList(),
+    );
+  }
+
+  Padding exerciseDeleteButton(HangboardExercise hangboardExercise) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          IconButton(
+            color: Colors.black,
+            icon: Icon(Icons.cancel),
+            onPressed: () {
+              _hangboardWorkoutBloc.dispatch(
+                  DeleteHangboardExercise(hangboardExercise));
+              //TODO: ask user for delete confirmation
+            },
+          ),
+        ],
+      ),
     );
   }
 

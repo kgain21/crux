@@ -32,34 +32,29 @@ class HangboardExerciseBloc
   @override
   Stream<HangboardExerciseState> mapEventToState(
       HangboardExerciseEvent event) async* {
-    if(event is LoadHangboardExercise) {
+    if (event is LoadHangboardExercise) {
       yield* _mapLoadHangboardExerciseToState(event);
-    } else if(event is AddHangboardExercise) {
-      yield* _mapAddHangboardExerciseToState(event);
-    } else if(event is UpdateHangboardExercise) {
-      yield* _mapUpdateHangboardExerciseToState(event);
-    } else if(event is ClearHangboardExercisePreferences) {
+    } else if (event is ClearHangboardExercisePreferences) {
       yield* _mapClearHangboardExercisePreferencesToState(event);
-    } else if(event is IncreaseNumberOfHangsButtonPressed) {
+    } else if (event is IncreaseNumberOfHangsButtonPressed) {
       yield* _mapIncreaseNumberOfHangsButtonPressedToState(event);
-    } else if(event is DecreaseNumberOfHangsButtonPressed) {
+    } else if (event is DecreaseNumberOfHangsButtonPressed) {
       yield* _mapDecreaseNumberOfHangsButtonPressedToState(event);
-    } else if(event is IncreaseNumberOfSetsButtonPressed) {
+    } else if (event is IncreaseNumberOfSetsButtonPressed) {
       yield* _mapIncreaseNumberOfSetsButtonPressedToState(event);
-    } else if(event is DecreaseNumberOfSetsButtonPressed) {
+    } else if (event is DecreaseNumberOfSetsButtonPressed) {
       yield* _mapDecreaseNumberOfSetsButtonPressedToState(event);
-    } else if(event is ForwardComplete) {
+    } else if (event is ForwardComplete) {
       yield* _mapForwardCompletedToState(event);
-    } else if(event is ReverseComplete) {
+    } else if (event is ReverseComplete) {
       yield* _mapReverseCompletedToState(event);
-    } else if(event is ForwardSwitchButtonPressed) {
+    } else if (event is ForwardSwitchButtonPressed) {
       yield* _mapForwardSwitchButtonPressedToState(event);
-    } else if(event is ReverseSwitchButtonPressed) {
+    } else if (event is ReverseSwitchButtonPressed) {
       yield* _mapReverseSwitchButtonPressedToState(event);
     }
   }
 
-  //TODO: do i even need this? seems like I could just pass the exercise to the hbpage instead
   Stream<HangboardExerciseState> _mapLoadHangboardExerciseToState(
       LoadHangboardExercise event) async* {
     try {
@@ -69,15 +64,6 @@ class HangboardExerciseBloc
     } catch(_) {
       yield HangboardExerciseNotLoaded();
     }
-  }
-
-  Stream<HangboardExerciseState> _mapAddHangboardExerciseToState(event) async* {
-    yield null;
-  }
-
-  Stream<HangboardExerciseState> _mapUpdateHangboardExerciseToState(
-      event) async* {
-    yield null;
   }
 
 /*
@@ -92,29 +78,45 @@ class HangboardExerciseBloc
 
   Stream<HangboardExerciseState> _mapIncreaseNumberOfHangsButtonPressedToState(
       IncreaseNumberOfHangsButtonPressed event) async* {
+    var updatedHangsPerSet = event.exercise.hangsPerSet;
+    if(updatedHangsPerSet < originalNumberOfHangs) {
+      updatedHangsPerSet++;
+    }
     yield HangboardExerciseLoaded(
-        event.exercise.copyWith(hangsPerSet: event.exercise.hangsPerSet + 1));
+        event.exercise.copyWith(hangsPerSet: updatedHangsPerSet));
     event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
   Stream<HangboardExerciseState> _mapDecreaseNumberOfHangsButtonPressedToState(
       DecreaseNumberOfHangsButtonPressed event) async* {
+    var updatedHangsPerSet = event.exercise.hangsPerSet;
+    if(updatedHangsPerSet > 0) {
+      updatedHangsPerSet--;
+    }
     yield HangboardExerciseLoaded(
-        event.exercise.copyWith(hangsPerSet: event.exercise.hangsPerSet - 1));
+        event.exercise.copyWith(hangsPerSet: updatedHangsPerSet));
     event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
   Stream<HangboardExerciseState> _mapIncreaseNumberOfSetsButtonPressedToState(
       IncreaseNumberOfSetsButtonPressed event) async* {
+    var updatedNumberOfSets = event.exercise.numberOfSets;
+    if(updatedNumberOfSets < originalNumberOfSets) {
+      updatedNumberOfSets++;
+    }
     yield HangboardExerciseLoaded(
-        event.exercise.copyWith(numberOfSets: event.exercise.numberOfSets + 1));
+        event.exercise.copyWith(numberOfSets: updatedNumberOfSets));
     event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
   Stream<HangboardExerciseState> _mapDecreaseNumberOfSetsButtonPressedToState(
       DecreaseNumberOfSetsButtonPressed event) async* {
+    var updatedNumberOfSets = event.exercise.numberOfSets;
+    if(updatedNumberOfSets > 0) {
+      updatedNumberOfSets--;
+    }
     yield HangboardExerciseLoaded(
-        event.exercise.copyWith(numberOfSets: event.exercise.numberOfSets - 1));
+        event.exercise.copyWith(numberOfSets: updatedNumberOfSets));
     event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, false));
   }
 
@@ -139,8 +141,8 @@ class HangboardExerciseBloc
 
     /// Rest timer completing
     if(event.timer.duration == event.exercise.restDuration) {
-      hangs--;
       if(hangs > 0) {
+        hangs--;
         yield HangboardExerciseLoaded(
             event.exercise.copyWith(hangsPerSet: hangs));
         event.timerBloc.dispatch(ReplaceWithRepTimer(event.exercise, true));
@@ -151,8 +153,8 @@ class HangboardExerciseBloc
       }
     } else {
       /// Break timer completing
-      sets--;
       if(sets > 0) {
+        sets--;
         yield HangboardExerciseLoaded(event.exercise.copyWith(
           hangsPerSet: originalNumberOfHangs,
           numberOfSets: sets,

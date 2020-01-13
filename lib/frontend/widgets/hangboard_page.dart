@@ -110,22 +110,23 @@ class _HangboardPageState extends State<HangboardPage>
           .of(context)
           .accentColor,
       child: Container(
-        height: MediaQuery
-            .of(context)
-            .size
-            .width / 9.0,
+        height: MediaQuery.of(context).size.width / 6.0,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12.0, 12.0, 0.0, 12.0),
+          padding: EdgeInsets.fromLTRB(
+            MediaQuery.of(context).size.width / 35,
+            MediaQuery.of(context).size.height / 70,
+            MediaQuery.of(context).size.width / 35,
+            MediaQuery.of(context).size.height / 70,
+          ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
                 '${state.hangboardExercise.exerciseTitle}',
+                textAlign: TextAlign.center,
                 softWrap: true,
                 style: TextStyle(
-                  fontSize: MediaQuery
-                      .of(context)
-                      .size
-                      .width / 20.0,
+                  fontSize: MediaQuery.of(context).size.width / 17.0,
                 ),
               ),
             ],

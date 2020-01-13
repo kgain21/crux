@@ -189,13 +189,30 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
 
   Stream<ExerciseFormState> _mapValidExerciseFormSavedToState(
       ValidExerciseFormSaved event) async* {
+    /// Depth can be left over from a previous exercise submission - remove it
+    /// if the depth field was made not visible in case a value is still there.
+    var depth = double.tryParse(event.depth);
+    if (!currentState.isDepthVisible) {
+      depth = null;
+    }
+
+    /// FingerConfiguration can be left over from a previous exercise submission
+    /// - remove it if the fingerConfiguration field was made not visible in
+    /// case a value is still there.
     var formattedFingerConfiguration =
-    StringFormatUtils.formatFingerConfiguration(event.fingerConfiguration);
+        StringFormatUtils.formatFingerConfiguration(event.fingerConfiguration);
+    if (!currentState.isFingerConfigurationVisible) {
+      formattedFingerConfiguration = "";
+    }
+
+    var timeBetweenSets = int.tryParse(event.timeBetweenSets);
+    if (!currentState.isTimeBetweenSetsVisible) {
+      timeBetweenSets = null;
+    }
 
     var formattedHold = StringFormatUtils.formatHold(event.hold);
     var numberOfHandsSelected = event.numberOfHandsSelected;
     var depthMeasurementSystem = event.depthMeasurementSystem;
-    var depth = double.tryParse(event.depth);
 
     var hangboardExerciseTitle = StringFormatUtils.createHangboardExerciseTitle(
       numberOfHandsSelected,
@@ -217,7 +234,7 @@ class ExerciseFormBloc extends Bloc<ExerciseFormEvent, ExerciseFormState> {
       int.tryParse(event.timeOn),
       int.tryParse(event.timeOff),
       fingerConfiguration: formattedFingerConfiguration,
-      breakDuration: int.tryParse(event.timeBetweenSets),
+      breakDuration: timeBetweenSets,
       resistance: int.tryParse(event.resistance),
     );
 
