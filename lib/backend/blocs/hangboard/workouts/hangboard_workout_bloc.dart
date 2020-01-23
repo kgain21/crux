@@ -82,7 +82,7 @@ class HangboardWorkoutBloc
       return _hangboardWorkout;
     });
 
-    yield HangboardWorkoutLoaded(updatedHangboardWorkout);
+//    yield HangboardWorkoutLoaded(updatedHangboardWorkout);
   }
 
   Stream<HangboardWorkoutState> _mapExerciseTileLongPressedToState(

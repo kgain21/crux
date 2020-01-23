@@ -20,10 +20,10 @@ class HangboardPage extends StatefulWidget {
   final HangboardExercise hangboardExercise;
 
   HangboardPage({
-                  this.index,
-                  this.workoutTitle,
-                  this.hangboardExercise,
-                });
+    this.index,
+    this.workoutTitle,
+    this.hangboardExercise,
+  });
 
   @override
   State<HangboardPage> createState() => _HangboardPageState();
@@ -42,7 +42,7 @@ class _HangboardPageState extends State<HangboardPage>
     _hangboardExerciseBloc = HangboardExerciseBloc(
       /*hangboardExercise: widget.hangboardExercise,
         firestore: widget.firestoreHangboardWorkoutsRepository*/
-    )
+        )
       ..dispatch(LoadHangboardExercise(widget.hangboardExercise));
 //    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
 
@@ -57,6 +57,16 @@ class _HangboardPageState extends State<HangboardPage>
         Duration(seconds: widget.hangboardExercise.repDuration));
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+//    _timerBloc.dispatch(DisposeTimer());
+//    _hangboardExerciseBloc.dispatch(DisposeHangboardExercise());
+    _timerBloc.dispose();
+    _hangboardExerciseBloc.dispose();
+    _timerController.dispose();
+    super.dispose();
   }
 
   @override
@@ -110,13 +120,28 @@ class _HangboardPageState extends State<HangboardPage>
           .of(context)
           .accentColor,
       child: Container(
-        height: MediaQuery.of(context).size.width / 6.0,
+        height: MediaQuery
+            .of(context)
+            .size
+            .width / 6.0,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            MediaQuery.of(context).size.width / 35,
-            MediaQuery.of(context).size.height / 70,
-            MediaQuery.of(context).size.width / 35,
-            MediaQuery.of(context).size.height / 70,
+            MediaQuery
+                .of(context)
+                .size
+                .width / 35,
+            MediaQuery
+                .of(context)
+                .size
+                .height / 70,
+            MediaQuery
+                .of(context)
+                .size
+                .width / 35,
+            MediaQuery
+                .of(context)
+                .size
+                .height / 70,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -220,8 +245,7 @@ class _HangboardPageState extends State<HangboardPage>
 
   /// Positions and scales the [CircularTimer] for the [HangboardPage]
   Positioned _workoutTimer(BuildContext context,
-                           VoidCallback timerControllerCallback,
-                           TimerLoaded timerState) {
+      VoidCallback timerControllerCallback, TimerLoaded timerState) {
     return Positioned(
       top: 0.0,
       bottom: 0.0,
@@ -578,14 +602,5 @@ class _HangboardPageState extends State<HangboardPage>
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-//    _timerBloc.dispatch(DisposeTimer());
-//    _hangboardExerciseBloc.dispatch(DisposeHangboardExercise());
-
-    _timerController.dispose();
-    super.dispose();
   }
 }

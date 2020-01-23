@@ -16,7 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ExerciseForm extends StatefulWidget {
   final String workoutTitle;
   final FirestoreHangboardWorkoutsRepository
-  firestoreHangboardWorkoutsRepository;
+      firestoreHangboardWorkoutsRepository;
 
   ExerciseForm({this.firestoreHangboardWorkoutsRepository, this.workoutTitle});
 
@@ -100,16 +100,18 @@ class _ExerciseFormState extends State<ExerciseForm> {
                           parentState: exerciseFormState,
                           parentBloc: _exerciseFormBloc,
                         ),
-                        _numberOfHandsTile(exerciseFormState),
-                        _holdDropdownTile(exerciseFormState),
-                        _fingerConfigurationDropdownTile(exerciseFormState),
-                        _depthTile(exerciseFormState),
-                        _timeOnTile(exerciseFormState),
+                        _numberOfHandsTile(exerciseFormState, scaffoldContext),
+                        _holdDropdownTile(exerciseFormState, scaffoldContext),
+                        _fingerConfigurationDropdownTile(
+                            exerciseFormState, scaffoldContext),
+                        _depthTile(exerciseFormState, scaffoldContext),
+                        _timeOnTile(exerciseFormState, scaffoldContext),
                         // hangProtocolTile(),
-                        _hangsPerSetTile(exerciseFormState),
-                        _timeBetweenSetsTile(exerciseFormState),
-                        _numberOfSetsTile(exerciseFormState),
-                        _resistanceTile(exerciseFormState),
+                        _hangsPerSetTile(exerciseFormState, scaffoldContext),
+                        _timeBetweenSetsTile(
+                            exerciseFormState, scaffoldContext),
+                        _numberOfSetsTile(exerciseFormState, scaffoldContext),
+                        _resistanceTile(exerciseFormState, scaffoldContext),
                         _saveButton(exerciseFormState, scaffoldContext)
                       ].where(notNull).toList(),
                     ),
@@ -126,7 +128,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
   /// turned back into a list without the null entries.
   bool notNull(Object o) => o != null;
 
-  Widget _numberOfHandsTile(ExerciseFormState exerciseFormState) {
+  Widget _numberOfHandsTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     return new Card(
       child: ListTile(
         key: PageStorageKey('numberOfHandsTile'),
@@ -138,6 +141,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
                 value: 1,
                 groupValue: exerciseFormState.numberOfHandsSelected,
                 onChanged: (value) {
+                  Scaffold.of(scaffoldContext).hideCurrentSnackBar();
                   _exerciseFormBloc.dispatch(
                       NumberOfHandsChanged(numberOfHandsSelected: value));
                 },
@@ -149,6 +153,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
                 value: 2,
                 groupValue: exerciseFormState.numberOfHandsSelected,
                 onChanged: (value) {
+                  Scaffold.of(scaffoldContext).hideCurrentSnackBar();
                   _exerciseFormBloc.dispatch(
                       NumberOfHandsChanged(numberOfHandsSelected: value));
                 },
@@ -160,7 +165,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget _holdDropdownTile(ExerciseFormState exerciseFormState) {
+  Widget _holdDropdownTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     return new Card(
       child: new ListTile(
         leading: Icon(
@@ -174,6 +180,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
             ),
             value: exerciseFormState.hold,
             onChanged: (value) {
+              Scaffold.of(scaffoldContext).hideCurrentSnackBar();
               _exerciseFormBloc.dispatch(HoldChanged(hold: value));
             },
             items: Hold.values.map((Hold hold) {
@@ -190,7 +197,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget _fingerConfigurationDropdownTile(ExerciseFormState exerciseFormState) {
+  Widget _fingerConfigurationDropdownTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     if(exerciseFormState.isFingerConfigurationVisible) {
       return new Card(
         child: new ListTile(
@@ -206,6 +214,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
               ),
               value: exerciseFormState.fingerConfiguration,
               onChanged: (value) {
+                Scaffold.of(scaffoldContext).hideCurrentSnackBar();
                 _exerciseFormBloc.dispatch(
                     FingerConfigurationChanged(fingerConfiguration: value));
               },
@@ -228,7 +237,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     }
   }
 
-  Widget _depthTile(ExerciseFormState exerciseFormState) {
+  Widget _depthTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     if(!exerciseFormState.isDepthVisible) {
       return null;
     }
@@ -251,13 +261,17 @@ class _ExerciseFormState extends State<ExerciseForm> {
             ),
             keyboardType:
             TextInputType.numberWithOptions(signed: true, decimal: true),
+            onTap: () {
+              Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _timeOnTile(ExerciseFormState exerciseFormState) {
+  Widget _timeOnTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 4.0),
@@ -282,6 +296,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     labelText: 'Time On (sec)',
                   ),
                   keyboardType: TextInputType.numberWithOptions(),
+                  onTap: () {
+                    Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+                  },
                 ),
               ),
             ),
@@ -304,6 +321,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     labelText: 'Time Off (sec)',
                   ),
                   keyboardType: TextInputType.numberWithOptions(),
+                  onTap: () {
+                    Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+                  },
                 ),
               ),
             ),
@@ -328,7 +348,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
 //    );
 //  }
 
-  Widget _hangsPerSetTile(ExerciseFormState exerciseFormState) {
+  Widget _hangsPerSetTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     return Card(
       child: ListTile(
         title: Padding(
@@ -350,13 +371,17 @@ class _ExerciseFormState extends State<ExerciseForm> {
               icon: Icon(Icons.format_list_bulleted),
             ),
             keyboardType: TextInputType.numberWithOptions(),
+            onTap: () {
+              Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _timeBetweenSetsTile(ExerciseFormState exerciseFormState) {
+  Widget _timeBetweenSetsTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     return Card(
       child: ListTile(
         title: Padding(
@@ -378,13 +403,17 @@ class _ExerciseFormState extends State<ExerciseForm> {
               labelText: 'Time between sets (sec)',
             ),
             keyboardType: TextInputType.numberWithOptions(),
+            onTap: () {
+              Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _numberOfSetsTile(ExerciseFormState exerciseFormState) {
+  Widget _numberOfSetsTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('numberOfSetsTile'),
@@ -407,13 +436,17 @@ class _ExerciseFormState extends State<ExerciseForm> {
               icon: Icon(Icons.format_list_bulleted),
             ),
             keyboardType: TextInputType.numberWithOptions(),
+            onTap: () {
+              Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _resistanceTile(ExerciseFormState exerciseFormState) {
+  Widget _resistanceTile(ExerciseFormState exerciseFormState,
+      BuildContext scaffoldContext) {
     return Card(
       child: ListTile(
         key: PageStorageKey<String>('resistanceTile'),
@@ -436,6 +469,9 @@ class _ExerciseFormState extends State<ExerciseForm> {
               'Resistance (${exerciseFormState.resistanceMeasurementSystem})',
             ),
             keyboardType: TextInputType.numberWithOptions(),
+            onTap: () {
+              Scaffold.of(scaffoldContext).hideCurrentSnackBar();
+            },
           ),
         ),
       ),
@@ -443,7 +479,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
   }
 
   Widget _saveButton(ExerciseFormState exerciseFormState,
-                     BuildContext scaffoldContext) {
+      BuildContext scaffoldContext) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: RaisedButton(
@@ -461,8 +497,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
   ///
   /// If validation passes, the state is sent to the BLoC to be saved to the DB.
   void _saveTileFields(BuildContext scaffoldContext,
-                       ExerciseFormState exerciseFormState) {
-    if (formKey.currentState.validate()) {
+      ExerciseFormState exerciseFormState) {
+    if(formKey.currentState.validate()) {
       formKey.currentState.save();
       _exerciseFormBloc.dispatch(ValidExerciseFormSaved(
         exerciseFormState.resistanceMeasurementSystem,

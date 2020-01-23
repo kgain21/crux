@@ -184,7 +184,7 @@ class FirestoreHangboardWorkoutsRepository
   @override
   Future<bool> deleteWorkoutByTitle(String hangboardWorkoutTitle) async {
     return firestore
-        .document('$HANGBOARD/$hangboardWorkoutTitle}')
+        .document('$HANGBOARD/$hangboardWorkoutTitle')
         .delete()
         .then((_) {
       return true;
