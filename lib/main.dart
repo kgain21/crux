@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/backend/blocs/simple_bloc_delegate.dart';
+import 'package:crux/backend/bloc/simple_bloc_delegate.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/auth.dart';
 import 'package:crux/backend/services/base_auth.dart';

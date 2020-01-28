@@ -1,16 +1,13 @@
-
-
-class HangboardParent {
+class HangboardWorkoutList {
   final List<String> hangboardWorkoutList;
 
-  HangboardParent(
+  HangboardWorkoutList(
     this.hangboardWorkoutList,
   );
 
   @override
   String toString() {
-    return 'HangboardParent { hangboardWorkoutList: $hangboardWorkoutList '
-        '}';
+    return '''HangboardParent { hangboardWorkoutList: $hangboardWorkoutList }''';
   }
 
 /*HangboardParentEntity toEntity() {

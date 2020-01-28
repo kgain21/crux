@@ -18,49 +18,37 @@ class HangboardExercise extends Equatable {
   final int repDuration;
   final int restDuration;
 
-  HangboardExercise(this.exerciseTitle,
-                    this.depthMeasurementSystem,
-                    this.resistanceMeasurementSystem,
-                    this.numberOfHands,
-                    this.holdType,
-                    this.holdDepth,
-                    this.hangsPerSet,
-                    this.numberOfSets,
-                    this.repDuration,
-                    this.restDuration, {
-                      this.fingerConfiguration,
-                      this.breakDuration,
-                      this.resistance,
-                    }) : super([
-    exerciseTitle,
-    depthMeasurementSystem,
-    resistanceMeasurementSystem,
-    numberOfHands,
-    holdType,
-    holdDepth,
-    hangsPerSet,
-    numberOfSets,
-    repDuration,
-    restDuration,
-    fingerConfiguration,
-    breakDuration,
-  ]);
+  HangboardExercise(
+    this.exerciseTitle,
+    this.depthMeasurementSystem,
+    this.resistanceMeasurementSystem,
+    this.numberOfHands,
+    this.holdType,
+    this.holdDepth,
+    this.hangsPerSet,
+    this.numberOfSets,
+    this.repDuration,
+    this.restDuration, {
+    this.fingerConfiguration,
+    this.breakDuration,
+    this.resistance,
+  });
 
   HangboardExercise copyWith({
-                               String exerciseTitle,
-                               String depthMeasurementSystem,
-                               String resistanceMeasurementSystem,
-                               int numberOfHands,
-                               String holdType,
-                               String fingerConfiguration,
-                               double holdDepth,
-                               int hangsPerSet,
-                               int numberOfSets,
-                               int resistance,
-                               int breakDuration,
-                               int repDuration,
-                               int restDuration,
-                             }) {
+    String exerciseTitle,
+    String depthMeasurementSystem,
+    String resistanceMeasurementSystem,
+    int numberOfHands,
+    String holdType,
+    String fingerConfiguration,
+    double holdDepth,
+    int hangsPerSet,
+    int numberOfSets,
+    int resistance,
+    int breakDuration,
+    int repDuration,
+    int restDuration,
+  }) {
     return HangboardExercise(
       exerciseTitle ?? this.exerciseTitle,
       depthMeasurementSystem ?? this.depthMeasurementSystem,
@@ -80,20 +68,21 @@ class HangboardExercise extends Equatable {
 
   @override
   String toString() {
-    return 'HangboardExercise{ exerciseTitle: $exerciseTitle, '
-        'depthMeasurementSystem: $depthMeasurementSystem, '
-        'resistanceMeasurementSystem: $resistanceMeasurementSystem, '
-        'numberOfHands: $numberOfHands, '
-        'holdType: $holdType, '
-        'fingerConfiguration: $fingerConfiguration, '
-        'holdDepth: $holdDepth, '
-        'hangsPerSet: $hangsPerSet, '
-        'numberOfSets: $numberOfSets, '
-        'resistance: $resistance, '
-        'breakDuration: $breakDuration, '
-        'repDuration: $repDuration, '
-        'restDuration: $restDuration '
-        '}';
+    return '''HangboardExercise {
+    exerciseTitle: $exerciseTitle,
+    depthMeasurementSystem: $depthMeasurementSystem, 
+    resistanceMeasurementSystem: $resistanceMeasurementSystem, 
+    numberOfHands: $numberOfHands, 
+    holdType: $holdType, 
+    fingerConfiguration: $fingerConfiguration, 
+    holdDepth: $holdDepth, 
+    hangsPerSet: $hangsPerSet, 
+    numberOfSets: $numberOfSets, 
+    resistance: $resistance, 
+    breakDuration: $breakDuration, 
+    repDuration: $repDuration, 
+    restDuration: $restDuration 
+    }''';
   }
 
   HangboardExerciseEntity toEntity() {
@@ -131,4 +120,21 @@ class HangboardExercise extends Equatable {
       resistance: entity.resistance,
     );
   }
+
+  @override
+  List<Object> get props =>
+      [
+        exerciseTitle,
+        depthMeasurementSystem,
+        resistanceMeasurementSystem,
+        numberOfHands,
+        holdType,
+        holdDepth,
+        hangsPerSet,
+        numberOfSets,
+        repDuration,
+        restDuration,
+        fingerConfiguration,
+        breakDuration,
+      ];
 }

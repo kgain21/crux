@@ -18,7 +18,7 @@ class HangboardWorkoutTileState {
 
   @override
   String toString() {
-    return '''LoginState {
+    return '''HangboardWorkoutTileState {
       isEditing: $isEditing
     }''';
   }

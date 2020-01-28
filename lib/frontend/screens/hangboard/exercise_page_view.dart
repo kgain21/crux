@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_event.dart';
-import 'package:crux/backend/blocs/hangboard/workouts/hangboard_workout_state.dart';
+import 'package:crux/backend/bloc/hangboard/workout/hangboard_workout_bloc.dart';
+import 'package:crux/backend/bloc/hangboard/workout/hangboard_workout_event.dart';
+import 'package:crux/backend/bloc/hangboard/workout/hangboard_workout_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
 import 'package:crux/backend/repository/entities/hangboard_workout_entity.dart';
@@ -83,7 +83,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
       var hangboardWorkout = HangboardWorkout.fromEntity(
           HangboardWorkoutEntity.fromJson(querySnapshot.data));
 
-      _hangboardWorkoutBloc.dispatch(ReloadHangboardWorkout(hangboardWorkout));
+      _hangboardWorkoutBloc.add(HangboardWorkoutReloaded(hangboardWorkout));
     });
 
 //    _overlayVisible = false;
@@ -93,7 +93,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
 
     _hangboardWorkoutBloc =
         HangboardWorkoutBloc(widget.hangboardWorkoutsRepository)
-          ..dispatch(LoadHangboardWorkout(widget.hangboardWorkoutTitle));
+          ..add(HangboardWorkoutLoaded(widget.hangboardWorkoutTitle));
 
 //    _shakeController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
 //    _shakeCurve = CurvedAnimation(parent: _shakeController, curve: ShakeCurve());
@@ -105,17 +105,18 @@ class _ExercisePageViewState extends State<ExercisePageView> {
     //TODO: Store last page # and reload there
 //    _zoomController = new PageController(
 //        viewportFraction: _kViewportFraction /*initialPage: _index - 2*/);
-    _controller = new PageController(/*initialPage: _index - 2*/);
-    _controller.addListener(() {
-      setState(() {
-        _currentPageValue = _controller.page;
-      }); //todo: make sure I get rid of this setState at some point
-    });
+    _controller =
+        new PageController(keepPage: false /*initialPage: _index - 2*/);
+//    _controller.addListener(() {
+//      setState(() {
+//        _currentPageValue = _controller.page;
+//      }); //todo: make sure I get rid of this setState at some point
+//    });
   }
 
   @override
   void dispose() {
-    _hangboardWorkoutBloc.dispose();
+    _hangboardWorkoutBloc.close();
 //    _hangboardExerciseBloc.dispose();
     _controller.dispose();
 //    _zoomController.dispose();
@@ -134,11 +135,11 @@ class _ExercisePageViewState extends State<ExercisePageView> {
       body: BlocBuilder(
           bloc: _hangboardWorkoutBloc,
           builder: (context, hangboardWorkoutState) {
-            if(hangboardWorkoutState is EditingHangboardWorkout) {
+            if(hangboardWorkoutState is HangboardWorkoutEditInProgress) {
               _isEditing = true;
               return exercisePageView(
                   hangboardWorkoutState.hangboardWorkout, context);
-            } else if(hangboardWorkoutState is HangboardWorkoutLoaded) {
+            } else if(hangboardWorkoutState is HangboardWorkoutLoadSuccess) {
               _isEditing = false;
               return exercisePageView(
                   hangboardWorkoutState.hangboardWorkout, context);
@@ -166,17 +167,29 @@ class _ExercisePageViewState extends State<ExercisePageView> {
         child: GestureDetector(
           onLongPress: () {
             _hangboardWorkoutBloc
-                .dispatch(ExerciseTileLongPressed(hangboardWorkout));
+                .add(ExerciseTileLongPressed(hangboardWorkout));
           },
           onTap: () {
             _hangboardWorkoutBloc
-                .dispatch(ExerciseTileTapped(hangboardWorkout));
+                .add(ExerciseTileTapped(hangboardWorkout));
           },
           child: Stack(
             children: <Widget>[
-              PageView(
+              PageView.custom(
+                childrenDelegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                    if(index ==
+                        hangboardWorkout.hangboardExerciseList.length) {
+                      return newExercisePage();
+                    } else {
+                      return animatedHangboardPage(
+                          index, hangboardWorkout.hangboardExerciseList[index]);
+                    }
+                  },
+                  childCount: hangboardWorkout.hangboardExerciseList.length + 1,
+                ),
                 controller: _controller,
-                children: createPageList(hangboardWorkout),
+//                children: createPageList(hangboardWorkout),
               ),
               dotsIndicator(),
             ],
@@ -274,9 +287,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               index: index,
               hangboardExercise: hangboardExercise,
             ),
-            _isEditing
-                ? exerciseDeleteButton(hangboardExercise)
-                : null,
+            _isEditing ? exerciseDeleteButton(hangboardExercise) : null,
           ].where(notNull).toList(),
         ),
       );
@@ -291,9 +302,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
               index: index,
               hangboardExercise: hangboardExercise,
             ),
-            _isEditing
-                ? exerciseDeleteButton(hangboardExercise)
-                : null,
+            _isEditing ? exerciseDeleteButton(hangboardExercise) : null,
           ].where(notNull).toList(),
         ),
       );
@@ -306,9 +315,7 @@ class _ExercisePageViewState extends State<ExercisePageView> {
           index: index,
           hangboardExercise: hangboardExercise,
         ),
-        _isEditing
-            ? exerciseDeleteButton(hangboardExercise)
-            : null,
+        _isEditing ? exerciseDeleteButton(hangboardExercise) : null,
       ].where(notNull).toList(),
     );
   }
@@ -323,8 +330,8 @@ class _ExercisePageViewState extends State<ExercisePageView> {
             color: Colors.black,
             icon: Icon(Icons.cancel),
             onPressed: () {
-              _hangboardWorkoutBloc.dispatch(
-                  DeleteHangboardExercise(hangboardExercise));
+              _hangboardWorkoutBloc
+                  .add(HangboardWorkoutExerciseDeleted(hangboardExercise));
               //TODO: ask user for delete confirmation
             },
           ),

@@ -1,8 +1,8 @@
-import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
-import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_event.dart';
-import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_state.dart';
+import 'package:crux/backend/bloc/hangboard/workoutlist/hangboard_workout_list_bloc.dart';
+import 'package:crux/backend/bloc/hangboard/workoutlist/hangboard_workout_list_event.dart';
+import 'package:crux/backend/bloc/hangboard/workouttile/hangboard_workout_tile_bloc.dart';
+import 'package:crux/backend/bloc/hangboard/workouttile/hangboard_workout_tile_event.dart';
+import 'package:crux/backend/bloc/hangboard/workouttile/hangboard_workout_tile_state.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/preferences.dart';
 import 'package:crux/frontend/screens/hangboard/exercise_page_view.dart';
@@ -16,9 +16,10 @@ class HangboardWorkoutTile extends StatefulWidget {
   final String hangboardWorkoutTitle;
   final HangboardWorkoutsRepository firestoreHangboardWorkoutsRepository;
 
-  HangboardWorkoutTile({this.index,
-                         this.hangboardWorkoutTitle,
-                         this.firestoreHangboardWorkoutsRepository})
+  HangboardWorkoutTile(
+      {this.index,
+      this.hangboardWorkoutTitle,
+      this.firestoreHangboardWorkoutsRepository})
       : super();
 
   @override
@@ -27,14 +28,13 @@ class HangboardWorkoutTile extends StatefulWidget {
 
 class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
   final Icon _arrowIcon = Icon(Icons.chevron_right);
-  HangboardParentBloc _hangboardParentBloc;
+  HangboardWorkoutListBloc _hangboardWorkoutListBloc;
   HangboardWorkoutTileBloc _hangboardWorkoutTileBloc;
 
   @override
   void initState() {
     super.initState();
   }
-
 
   @override
   void didChangeDependencies() {
@@ -43,7 +43,8 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
 
   @override
   Widget build(BuildContext context) {
-    _hangboardParentBloc = BlocProvider.of<HangboardParentBloc>(context);
+    _hangboardWorkoutListBloc =
+        BlocProvider.of<HangboardWorkoutListBloc>(context);
 
     _hangboardWorkoutTileBloc = HangboardWorkoutTileBloc();
 
@@ -59,12 +60,12 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                 !state.isEditing ? _arrowIcon : interactiveCloseIcon(),
                 onLongPress: () {
                   _hangboardWorkoutTileBloc
-                      .dispatch(HangboardWorkoutTileLongPressed(true));
+                      .add(HangboardWorkoutTileLongPressed(true));
                 },
                 onTap: () {
                   if(state.isEditing) {
                     _hangboardWorkoutTileBloc
-                        .dispatch(HangboardWorkoutTileTapped(false));
+                        .add(HangboardWorkoutTileTapped(false));
                   } else {
                     Navigator.push(
                         context,
@@ -106,8 +107,8 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                       child: Text('Delete'),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        _hangboardParentBloc.dispatch(
-                            DeleteWorkoutFromHangboardParent(
+                        _hangboardWorkoutListBloc.add(
+                            HangboardWorkoutListWorkoutDeleted(
                                 widget.hangboardWorkoutTitle));
 
                         /// Clear out sharedPrefs with workout deletion
@@ -134,7 +135,7 @@ class _HangboardWorkoutTileState extends State<HangboardWorkoutTile> {
                     ),
                   ));
             });
-        _hangboardWorkoutTileBloc.dispatch(HangboardWorkoutTileTapped(false));
+        _hangboardWorkoutTileBloc.add(HangboardWorkoutTileTapped(false));
       },
     );
   }

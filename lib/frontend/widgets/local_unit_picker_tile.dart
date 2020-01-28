@@ -1,4 +1,6 @@
-import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_event.dart';
+import 'package:crux/backend/bloc/hangboard/exerciseform/exercise_form_bloc.dart';
+import 'package:crux/backend/bloc/hangboard/exerciseform/exercise_form_event.dart';
+import 'package:crux/backend/bloc/hangboard/exerciseform/exercise_form_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -6,10 +8,10 @@ import 'package:flutter/widgets.dart';
 /// This may need to be a more central user config - for now it is just used
 /// on the [hangboard] workout creator screen.
 class UnitPickerTile extends StatefulWidget {
-  final parentState;
-  final parentBloc;
+  final ExerciseFormState exerciseFormState;
+  final ExerciseFormBloc exerciseFormBloc;
 
-  UnitPickerTile({this.parentBloc, this.parentState});
+  UnitPickerTile({this.exerciseFormBloc, this.exerciseFormState});
 
   @override
   State createState() => _UnitPickerTileState();
@@ -55,11 +57,11 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: widget.parentState.depthMeasurementSystem,
+                groupValue: widget.exerciseFormState.depthMeasurementSystem,
                 value: 'mm',
                 onChanged: (value) {
-                  widget.parentBloc.dispatch(DepthMeasurementSystemChanged(
-                      depthMeasurementSystem: value));
+                  widget.exerciseFormBloc
+                      .add(ExerciseFormDepthMeasurementSystemChanged(value));
                 },
               ),
               new RadioListTile(
@@ -69,11 +71,11 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: widget.parentState.depthMeasurementSystem,
+                groupValue: widget.exerciseFormState.depthMeasurementSystem,
                 value: 'in',
                 onChanged: (value) {
-                  widget.parentBloc.dispatch(DepthMeasurementSystemChanged(
-                      depthMeasurementSystem: value));
+                  widget.exerciseFormBloc
+                      .add(ExerciseFormDepthMeasurementSystemChanged(value));
                 },
               ),
             ],
@@ -96,11 +98,12 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: widget.parentState.resistanceMeasurementSystem,
+                groupValue:
+                    widget.exerciseFormState.resistanceMeasurementSystem,
                 value: 'kg',
                 onChanged: (value) {
-                  widget.parentBloc.dispatch(ResistanceMeasurementSystemChanged(
-                      resistanceMeasurementSystem: value));
+                  widget.exerciseFormBloc.add(
+                      ExerciseFormResistanceMeasurementSystemChanged(value));
                 },
               ),
               new RadioListTile(
@@ -110,11 +113,12 @@ class _UnitPickerTileState extends State<UnitPickerTile> {
                     fontSize: 14.0,
                   ),
                 ),
-                groupValue: widget.parentState.resistanceMeasurementSystem,
+                groupValue:
+                widget.exerciseFormState.resistanceMeasurementSystem,
                 value: 'lb',
                 onChanged: (value) {
-                  widget.parentBloc.dispatch(ResistanceMeasurementSystemChanged(
-                      resistanceMeasurementSystem: value));
+                  widget.exerciseFormBloc.add(
+                      ExerciseFormResistanceMeasurementSystemChanged(value));
                 },
               ),
             ],

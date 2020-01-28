@@ -11,32 +11,38 @@ import 'package:meta/meta.dart';
 ///
 @immutable
 abstract class TimerState extends Equatable {
-  TimerState([List props = const []]) : super(props);
+  TimerState();
 }
 
-class TimerLoading extends TimerState {
+class TimerLoadInProgress extends TimerState {
   @override
-  String toString() => 'TimerLoading';
+  String toString() => 'TimerLoadInProgress';
+
+  @override
+  List<Object> get props => [];
 }
 
-class TimerLoaded extends TimerState {
+class TimerLoadSuccess extends TimerState {
   final Timer timer;
   final double controllerValue;
 
-  TimerLoaded(this.timer,
-              this.controllerValue,)
-      : super([timer, controllerValue]);
+  TimerLoadSuccess(this.timer, this.controllerValue);
 
   @override
   String toString() {
-    return 'TimerLoaded: { '
-        'timer: ${timer.toString()}'
-        '}';
+    return '''TimerLoadSuccess: { 
+        timer: ${timer.toString()}
+        }''';
   }
-}
 
-class TimerNotLoaded extends TimerState {
   @override
-  String toString() => 'TimerNotLoaded';
+  List<Object> get props => [timer, controllerValue];
 }
 
+class TimerLoadFailure extends TimerState {
+  @override
+  String toString() => 'TimerLoadFailure';
+
+  @override
+  List<Object> get props => [];
+}

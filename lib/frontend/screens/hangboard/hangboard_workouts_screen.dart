@@ -1,9 +1,9 @@
-import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_event.dart';
-import 'package:crux/backend/blocs/hangboard/parent/hangboard_parent_state.dart';
+import 'package:crux/backend/bloc/hangboard/workoutlist/hangboard_workout_list_bloc.dart';
+import 'package:crux/backend/bloc/hangboard/workoutlist/hangboard_workout_list_event.dart';
+import 'package:crux/backend/bloc/hangboard/workoutlist/hangboard_workout_list_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
-import 'package:crux/backend/models/hangboard/hangboard_parent.dart';
 import 'package:crux/backend/models/hangboard/hangboard_workout.dart';
+import 'package:crux/backend/models/hangboard/hangboard_workout_list.dart';
 import 'package:crux/backend/repository/hangboard_workouts_repository.dart';
 import 'package:crux/backend/services/base_auth.dart';
 import 'package:crux/frontend/shared_layouts/app_bar.dart';
@@ -27,22 +27,21 @@ class HangboardWorkoutsScreen extends StatefulWidget {
 }
 
 class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
-  HangboardParentBloc _hangboardParentBloc;
-
+  HangboardWorkoutListBloc _hangboardParentBloc;
 
   @override
   void initState() {
-    _hangboardParentBloc = HangboardParentBloc(
+    _hangboardParentBloc = HangboardWorkoutListBloc(
         hangboardWorkoutsRepository:
-        widget.firestoreHangboardWorkoutsRepository)
-      ..dispatch(LoadHangboardParent());
+            widget.firestoreHangboardWorkoutsRepository)
+      ..add(HangboardWorkoutListLoaded());
 
     super.initState();
   }
 
   @override
   void dispose() {
-    _hangboardParentBloc.dispose();
+    _hangboardParentBloc.close();
     super.dispose();
   }
 
@@ -58,20 +57,25 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
             padding: const EdgeInsets.only(top: 16.0),
             child: Text(
               'Your Hangboard Workouts:',
-              style: Theme.of(context).textTheme.title,
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .title,
               textAlign: TextAlign.start,
             ),
           ),
-          BlocProvider<HangboardParentBloc>(
-            builder: (context) => _hangboardParentBloc,
-            child: BlocListener<HangboardParentBloc, HangboardParentState>(
+          BlocProvider<HangboardWorkoutListBloc>(
+            create: (context) => _hangboardParentBloc,
+            child: BlocListener<
+                HangboardWorkoutListBloc,
+                HangboardWorkoutListState>(
               listener: (context, state) {
-                listenForHangboardParentState(state, context);
+                listenForHangboardWorkoutListState(state, context);
               },
               child: BlocBuilder(
                 bloc: _hangboardParentBloc,
-                builder: (context, HangboardParentState parentState) {
-                  return buildFromHangboardParentState(parentState);
+                builder: (context, HangboardWorkoutListState parentState) {
+                  return buildFromHangboardWorkoutListState(parentState);
                 },
               ),
             ),
@@ -81,28 +85,29 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  Widget buildFromHangboardParentState(HangboardParentState parentState) {
-    if(parentState is HangboardParentLoaded) {
-      return workoutListBuilder(parentState.hangboardParent);
-    } else if(parentState is HangboardParentWorkoutAdded) {
-      return workoutListBuilder(parentState.hangboardParent);
-    } else if(parentState is HangboardParentDuplicateWorkout) {
-      return workoutListBuilder(parentState.hangboardParent);
-    } else if(parentState is HangboardParentWorkoutDeleted) {
-      return workoutListBuilder(parentState.hangboardParent);
+  Widget buildFromHangboardWorkoutListState(
+      HangboardWorkoutListState parentState) {
+    if(parentState is HangboardWorkoutListLoadSuccess) {
+      return workoutListBuilder(parentState.hangboardWorkoutList);
+    } else if(parentState is HangboardWorkoutListAddWorkoutSuccess) {
+      return workoutListBuilder(parentState.hangboardWorkoutList);
+    } else if(parentState is HangboardWorkoutListAddWorkoutDuplicate) {
+      return workoutListBuilder(parentState.hangboardWorkoutList);
+    } else if(parentState is HangboardWorkoutListDeleteWorkoutSuccess) {
+      return workoutListBuilder(parentState.hangboardWorkoutList);
     } else {
       return _retrievingWorkoutsSpinner();
     }
   }
 
-  void listenForHangboardParentState(HangboardParentState state,
-                                     BuildContext context) {
-    if(state is HangboardParentDuplicateWorkout) {
-      _showWorkoutExistsAlert(
-          state.hangboardParent, state.hangboardWorkout.workoutTitle, context);
-    } else if(state is HangboardParentWorkoutAdded) {
+  void listenForHangboardWorkoutListState(HangboardWorkoutListState state,
+      BuildContext context) {
+    if(state is HangboardWorkoutListAddWorkoutDuplicate) {
+      _showWorkoutExistsAlert(state.hangboardWorkoutList,
+          state.hangboardWorkout.workoutTitle, context);
+    } else if(state is HangboardWorkoutListWorkoutAdded) {
       GenericWidgets.createGenericSnackbar(context, 'Workout added!');
-    } else if(state is HangboardParentWorkoutDeleted) {
+    } else if(state is HangboardWorkoutListDeleteWorkoutSuccess) {
       GenericWidgets.createGenericSnackbar(context, 'Workout deleted!');
     }
   }
@@ -127,7 +132,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  Flexible workoutListBuilder(HangboardParent hangboardParent) {
+  Flexible workoutListBuilder(HangboardWorkoutList hangboardParent) {
     var workoutList = hangboardParent.hangboardWorkoutList;
     return Flexible(
       child: ListView.builder(
@@ -148,7 +153,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  Widget addWorkoutButton(HangboardParent hangboardParent) {
+  Widget addWorkoutButton(HangboardWorkoutList hangboardParent) {
     return ExerciseTile(
       tileColor: Theme
           .of(context)
@@ -165,9 +170,8 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  Future<void> _showWorkoutExistsAlert(HangboardParent hangboardParent,
-                                       String workoutTitle,
-                                       BuildContext scaffoldContext) async {
+  Future<void> _showWorkoutExistsAlert(HangboardWorkoutList hangboardParent,
+      String workoutTitle, BuildContext scaffoldContext) async {
     return showDialog<void>(
       context: scaffoldContext,
       barrierDismissible: false,
@@ -216,7 +220,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
     );
   }
 
-  void _showAddWorkoutDialog(HangboardParent hangboardParent) {
+  void _showAddWorkoutDialog(HangboardWorkoutList hangboardParent) {
     showDialog(
       context: context,
       builder: (context) {
@@ -245,7 +249,7 @@ class _HangboardWorkoutsScreenState extends State<HangboardWorkoutsScreen> {
                     var hangboardWorkout = HangboardWorkout(
                         controller.value.text, <HangboardExercise>[]);
                     Navigator.of(context).pop();
-                    _hangboardParentBloc.dispatch(AddWorkoutToHangboardParent(
+                    _hangboardParentBloc.add(HangboardWorkoutListWorkoutAdded(
                         hangboardParent, hangboardWorkout));
                   },
                 ),

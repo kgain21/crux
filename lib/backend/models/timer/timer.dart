@@ -13,28 +13,23 @@ class Timer extends Equatable {
   final int deviceTimeOnExit; // In epoch milliseconds
   final double controllerValueOnExit; // Value of animationController
 
-  Timer(this.storageKey,
-        this.duration,
-        this.direction,
-        this.isTimerRunning,
-        this.deviceTimeOnExit,
-        this.controllerValueOnExit,) : super([
-    storageKey,
-    duration,
-    direction,
-    isTimerRunning,
-    deviceTimeOnExit,
-    controllerValueOnExit,
-  ]);
+  Timer(
+    this.storageKey,
+    this.duration,
+    this.direction,
+    this.isTimerRunning,
+    this.deviceTimeOnExit,
+    this.controllerValueOnExit,
+  );
 
   Timer copyWith({
-                   String lookupKey,
-                   int duration,
-                   TimerDirection direction,
-                   bool isTimerRunning,
-                   int deviceTimeOnExit,
-                   double controllerValueOnExit,
-                 }) {
+    String lookupKey,
+    int duration,
+    TimerDirection direction,
+    bool isTimerRunning,
+    int deviceTimeOnExit,
+    double controllerValueOnExit,
+  }) {
     return Timer(
       lookupKey,
       duration,
@@ -47,9 +42,14 @@ class Timer extends Equatable {
 
   @override
   String toString() {
-    return 'Timer { storageKey: $storageKey, duration: $duration, '
-        'direction: $direction, previouslyRunning: $isTimerRunning,'
-        'deviceTimeOnExit: $deviceTimeOnExit, controllerValueOnExit: $controllerValueOnExit';
+    return '''Timer { 
+    storageKey: $storageKey, 
+    duration: $duration,
+    direction: $direction,
+    previouslyRunning: $isTimerRunning,
+    deviceTimeOnExit: $deviceTimeOnExit, 
+    controllerValueOnExit: $controllerValueOnExit
+    }''';
   }
 
   TimerEntity toEntity() {
@@ -73,4 +73,15 @@ class Timer extends Equatable {
       entity.controllerValueOnExit,
     );
   }
+
+  @override
+  List<Object> get props =>
+      [
+        storageKey,
+        duration,
+        direction,
+        isTimerRunning,
+        deviceTimeOnExit,
+        controllerValueOnExit,
+      ];
 }

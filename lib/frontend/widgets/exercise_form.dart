@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_event.dart';
-import 'package:crux/backend/blocs/hangboard/exerciseform/exercise_form_state.dart';
+import 'package:crux/backend/bloc/hangboard/exerciseform/exercise_form_bloc.dart';
+import 'package:crux/backend/bloc/hangboard/exerciseform/exercise_form_event.dart';
+import 'package:crux/backend/bloc/hangboard/exerciseform/exercise_form_state.dart';
 import 'package:crux/backend/models/hangboard/finger_configurations_enum.dart';
 import 'package:crux/backend/models/hangboard/hold_enum.dart';
 import 'package:crux/backend/repository/firestore_hangboard_workouts_repository.dart';
@@ -70,15 +70,15 @@ class _ExerciseFormState extends State<ExerciseForm> {
       body: BlocListener(
         bloc: _exerciseFormBloc,
         listener: (BuildContext context, ExerciseFormState exerciseFormState) {
-          if(exerciseFormState.isSuccess) {
+          if (exerciseFormState.isSuccess) {
             exerciseSavedSnackbar(context);
-            _exerciseFormBloc.dispatch(ExerciseFormFlagsReset());
-//            BlocProvider.of<HangboardParentBloc>(context).dispatch(HangboardParentUpdated());
-          } else if(exerciseFormState.isDuplicate) {
+            _exerciseFormBloc.add(ExerciseFormFlagsReset());
+//            BlocProvider.of<HangboardParentBloc>(context).add(HangboardParentUpdated());
+          } else if (exerciseFormState.isDuplicate) {
             _exerciseExistsAlert(exerciseFormState);
-            _exerciseFormBloc.dispatch(ExerciseFormFlagsReset());
+            _exerciseFormBloc.add(ExerciseFormFlagsReset());
           }
-          if(exerciseFormState is InvalidExerciseFormSaved) {
+          if (exerciseFormState is ExerciseFormSaveInvalid) {
 //            exerciseNotSavedSnackbar(context);
           }
         },
@@ -97,8 +97,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
                     child: ListView(
                       children: <Widget>[
                         UnitPickerTile(
-                          parentState: exerciseFormState,
-                          parentBloc: _exerciseFormBloc,
+                          exerciseFormState: exerciseFormState,
+                          exerciseFormBloc: _exerciseFormBloc,
                         ),
                         _numberOfHandsTile(exerciseFormState, scaffoldContext),
                         _holdDropdownTile(exerciseFormState, scaffoldContext),
@@ -142,8 +142,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
                 groupValue: exerciseFormState.numberOfHandsSelected,
                 onChanged: (value) {
                   Scaffold.of(scaffoldContext).hideCurrentSnackBar();
-                  _exerciseFormBloc.dispatch(
-                      NumberOfHandsChanged(numberOfHandsSelected: value));
+                  _exerciseFormBloc.add(
+                      ExerciseFormNumberOfHandsChanged(value));
                 },
               ),
             ),
@@ -154,8 +154,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
                 groupValue: exerciseFormState.numberOfHandsSelected,
                 onChanged: (value) {
                   Scaffold.of(scaffoldContext).hideCurrentSnackBar();
-                  _exerciseFormBloc.dispatch(
-                      NumberOfHandsChanged(numberOfHandsSelected: value));
+                  _exerciseFormBloc.add(
+                      ExerciseFormNumberOfHandsChanged(value));
                 },
               ),
             ),
@@ -181,7 +181,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
             value: exerciseFormState.hold,
             onChanged: (value) {
               Scaffold.of(scaffoldContext).hideCurrentSnackBar();
-              _exerciseFormBloc.dispatch(HoldChanged(hold: value));
+              _exerciseFormBloc.add(ExerciseFormHoldChanged(value));
             },
             items: Hold.values.map((Hold hold) {
               return new DropdownMenuItem<Hold>(
@@ -215,8 +215,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
               value: exerciseFormState.fingerConfiguration,
               onChanged: (value) {
                 Scaffold.of(scaffoldContext).hideCurrentSnackBar();
-                _exerciseFormBloc.dispatch(
-                    FingerConfigurationChanged(fingerConfiguration: value));
+                _exerciseFormBloc.add(
+                    ExerciseFormFingerConfigurationChanged(value));
               },
               items: exerciseFormState.availableFingerConfigurations
                   .map((fingerConfiguration) {
@@ -253,7 +253,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
               return exerciseFormState.isDepthValid ? null : 'Invalid Depth';
             },
             onChanged: (value) {
-              _exerciseFormBloc.dispatch(DepthChanged(depth: value));
+              _exerciseFormBloc.add(ExerciseFormDepthChanged(value));
             },
             decoration: InputDecoration(
               icon: Icon(Icons.keyboard_tab),
@@ -290,7 +290,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
                         : 'Invalid Time On';
                   },
                   onChanged: (value) {
-                    _exerciseFormBloc.dispatch(TimeOnChanged(timeOn: value));
+                    _exerciseFormBloc.add(ExerciseFormTimeOnChanged(value));
                   },
                   decoration: InputDecoration(
                     labelText: 'Time On (sec)',
@@ -315,7 +315,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
                         : 'Invalid Time Off';
                   },
                   onChanged: (value) {
-                    _exerciseFormBloc.dispatch(TimeOffChanged(timeOff: value));
+                    _exerciseFormBloc.add(ExerciseFormTimeOffChanged(value));
                   },
                   decoration: InputDecoration(
                     labelText: 'Time Off (sec)',
@@ -364,7 +364,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
             },
             onChanged: (value) {
               _exerciseFormBloc
-                  .dispatch(HangsPerSetChanged(hangsPerSet: value));
+                  .add(ExerciseFormHangsPerSetChanged(value));
             },
             decoration: InputDecoration(
               labelText: 'Hangs per set',
@@ -396,7 +396,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
             },
             onChanged: (value) {
               _exerciseFormBloc
-                  .dispatch(TimeBetweenSetsChanged(timeBetweenSets: value));
+                  .add(ExerciseFormTimeBetweenSetsChanged(value));
             },
             decoration: InputDecoration(
               icon: Icon(Icons.watch_later),
@@ -429,7 +429,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
             },
             onChanged: (value) {
               _exerciseFormBloc
-                  .dispatch(NumberOfSetsChanged(numberOfSets: value));
+                  .add(ExerciseFormNumberOfSetsChanged(value));
             },
             decoration: InputDecoration(
               labelText: 'Number of sets',
@@ -461,7 +461,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
                   : 'Invalid Resistance';
             },
             onChanged: (value) {
-              _exerciseFormBloc.dispatch(ResistanceChanged(resistance: value));
+              _exerciseFormBloc.add(ExerciseFormResistanceChanged(value));
             },
             decoration: InputDecoration(
               icon: Icon(Icons.fitness_center),
@@ -500,7 +500,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
       ExerciseFormState exerciseFormState) {
     if(formKey.currentState.validate()) {
       formKey.currentState.save();
-      _exerciseFormBloc.dispatch(ValidExerciseFormSaved(
+      _exerciseFormBloc.add(ValidExerciseFormSaved(
         exerciseFormState.resistanceMeasurementSystem,
         exerciseFormState.depthMeasurementSystem,
         exerciseFormState.numberOfHandsSelected,
@@ -515,7 +515,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
         _resistanceController.text,
       ));
     } else {
-      _exerciseFormBloc.dispatch(InvalidExerciseFormSaved());
+      _exerciseFormBloc.add(ExerciseFormSaveInvalid());
     }
   }
 
@@ -676,7 +676,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
   void clearFields() {
     //todo: add this for resetting form
-//    _exerciseFormBloc.dispatch(ExerciseFormCleared());
+//    _exerciseFormBloc.add(ExerciseFormCleared());
   }
 
 //TODO: Figure out how to use date w/ firestore -- crashes app with this shit:

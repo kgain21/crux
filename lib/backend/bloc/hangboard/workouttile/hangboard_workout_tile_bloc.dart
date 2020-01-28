@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_event.dart';
-import 'package:crux/backend/blocs/hangboard/workouttile/hangboard_workout_tile_state.dart';
+import 'package:crux/backend/bloc/hangboard/workouttile/hangboard_workout_tile_event.dart';
+import 'package:crux/backend/bloc/hangboard/workouttile/hangboard_workout_tile_state.dart';
 
 class HangboardWorkoutTileBloc
     extends Bloc<HangboardWorkoutTileEvent, HangboardWorkoutTileState> {
@@ -11,25 +11,27 @@ class HangboardWorkoutTileBloc
   @override
   Stream<HangboardWorkoutTileState> mapEventToState(
       HangboardWorkoutTileEvent event) async* {
-    if (event is DeleteButtonTapped) {
-      yield* _mapDeleteButtonTapped(event);
+    if (event is HangboardWorkoutTileDeleteButtonTapped) {
+      yield* _mapHangboardWorkoutTileDeleteButtonTapped(event);
     } else if (event is HangboardWorkoutTileLongPressed) {
-      yield* _mapExerciseTileLongPressed(event);
+      yield* _mapHangboardWorkoutTileLongPressed(event);
     } else if (event is HangboardWorkoutTileTapped) {
       yield* _mapHangboardWorkoutTileTapped(event);
     }
   }
 
-  Stream<HangboardWorkoutTileState> _mapDeleteButtonTapped(event) async* {
+  Stream<HangboardWorkoutTileState> _mapHangboardWorkoutTileDeleteButtonTapped(
+      event) async* {
     yield null;
   }
 
-  Stream<HangboardWorkoutTileState> _mapExerciseTileLongPressed(event) async* {
-    yield currentState.update(isEditing: true);
+  Stream<HangboardWorkoutTileState> _mapHangboardWorkoutTileLongPressed(
+      event) async* {
+    yield state.update(isEditing: true);
   }
 
   Stream<HangboardWorkoutTileState> _mapHangboardWorkoutTileTapped(
       event) async* {
-    yield currentState.update(isEditing: false);
+    yield state.update(isEditing: false);
   }
 }

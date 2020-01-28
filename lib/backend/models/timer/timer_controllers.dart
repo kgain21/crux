@@ -1,5 +1,5 @@
-import 'package:crux/backend/blocs/timer/timer_bloc.dart';
-import 'package:crux/backend/blocs/timer/timer_event.dart';
+import 'package:crux/backend/bloc/timer/timer_bloc.dart';
+import 'package:crux/backend/bloc/timer/timer_event.dart';
 import 'package:crux/backend/models/timer/timer.dart';
 import 'package:flutter/widgets.dart';
 
@@ -24,8 +24,8 @@ class RepAnimationController extends AnimationController
       if (this.status == AnimationStatus.dismissed) {
         //TODO: 6/26 - thinking about dispatching to both here -> one to create
         //todo: the next timer and one to update set/rep count with the exercise
-        timerBloc.dispatch(TimerComplete(timer));
-//        hangboardExerciseBloc.dispatch(RepComplete());
+        timerBloc.add(TimerCompleted(timer));
+//        hangboardExerciseBloc.add(RepComplete());
       }
     }).catchError((error) {
       print('Timer failed animating counterclockwise: $error');

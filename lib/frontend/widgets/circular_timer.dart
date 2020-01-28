@@ -1,4 +1,4 @@
-import 'package:crux/backend/blocs/timer/timer_state.dart';
+import 'package:crux/backend/bloc/timer/timer_state.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/utils/timer_painter.dart';
 import 'package:flutter/material.dart';
@@ -8,13 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CircularTimer extends StatelessWidget {
   final AnimationController timerController;
   final VoidCallback timerControllerCallback;
-  final TimerLoaded timerState;
+  final TimerLoadSuccess timerState;
 
   const CircularTimer({
-                        @required this.timerController,
-                        @required this.timerControllerCallback,
-                        @required this.timerState,
-                      });
+    @required this.timerController,
+    @required this.timerControllerCallback,
+    @required this.timerState,
+  });
 
   @override
   Widget build(BuildContext context) {

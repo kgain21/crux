@@ -1,9 +1,9 @@
-import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_bloc.dart';
-import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_event.dart';
-import 'package:crux/backend/blocs/hangboard/exercises/hangboard_exercise_state.dart';
-import 'package:crux/backend/blocs/timer/timer_bloc.dart';
-import 'package:crux/backend/blocs/timer/timer_event.dart';
-import 'package:crux/backend/blocs/timer/timer_state.dart';
+import 'package:crux/backend/bloc/hangboard/exercise/hangboard_exercise_bloc.dart';
+import 'package:crux/backend/bloc/hangboard/exercise/hangboard_exercise_event.dart';
+import 'package:crux/backend/bloc/hangboard/exercise/hangboard_exercise_state.dart';
+import 'package:crux/backend/bloc/timer/timer_bloc.dart';
+import 'package:crux/backend/bloc/timer/timer_event.dart';
+import 'package:crux/backend/bloc/timer/timer_state.dart';
 import 'package:crux/backend/models/hangboard/hangboard_exercise.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/frontend/widgets/circular_timer.dart';
@@ -40,31 +40,31 @@ class _HangboardPageState extends State<HangboardPage>
   void initState() {
 //    _timerBloc = TimerBloc(hangboardExerciseBloc: _hangboardExerciseBloc);
     _hangboardExerciseBloc = HangboardExerciseBloc(
-      /*hangboardExercise: widget.hangboardExercise,
+        /*hangboardExercise: widget.hangboardExercise,
         firestore: widget.firestoreHangboardWorkoutsRepository*/
         )
-      ..dispatch(LoadHangboardExercise(widget.hangboardExercise));
+      ..add(HangboardExerciseLoaded(widget.hangboardExercise));
 //    _hangboardExerciseBloc = BlocProvider.of<HangboardExerciseBloc>(context);
 
     _timerBloc = new TimerBloc()
-      ..dispatch(LoadTimer(widget.hangboardExercise, false));
+      ..add(TimerLoaded(widget.hangboardExercise, false));
 
     _timerController = AnimationController(
         vsync: this,
         value: 1.0,
         duration: Duration(seconds: widget.hangboardExercise.restDuration),
         reverseDuration:
-        Duration(seconds: widget.hangboardExercise.repDuration));
+            Duration(seconds: widget.hangboardExercise.repDuration));
 
     super.initState();
   }
 
   @override
   void dispose() {
-//    _timerBloc.dispatch(DisposeTimer());
-//    _hangboardExerciseBloc.dispatch(DisposeHangboardExercise());
-    _timerBloc.dispose();
-    _hangboardExerciseBloc.dispose();
+//    _timerBloc.add(DisposeTimer());
+//    _hangboardExerciseBloc.add(DisposeHangboardExercise());
+    _timerBloc.close();
+    _hangboardExerciseBloc.close();
     _timerController.dispose();
     super.dispose();
   }
@@ -74,7 +74,7 @@ class _HangboardPageState extends State<HangboardPage>
     return BlocListener(
       bloc: _hangboardExerciseBloc,
       listener: (BuildContext context, HangboardExerciseState state) {
-        if(state is HangboardExerciseLoaded &&
+        if(state is HangboardExerciseLoadSuccess &&
             state.hangboardExercise.hangsPerSet == 0) {
           _showSetCompleteSnackBar(context);
         }
@@ -82,8 +82,8 @@ class _HangboardPageState extends State<HangboardPage>
       child: BlocBuilder(
         bloc: _hangboardExerciseBloc,
         builder: (BuildContext context, HangboardExerciseState state) {
-          if(state is ClearTimerPreferences) {}
-          if(state is HangboardExerciseLoaded) {
+          if(state is HangboardExercisePreferencesCleared) {}
+          if(state is HangboardExerciseLoadSuccess) {
             //todo: need to check for sharedPrefs and load from there if possible
             return _buildHangboardPage(state);
           } else {
@@ -114,7 +114,7 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Widget _titleTile(HangboardExerciseLoaded state) {
+  Widget _titleTile(HangboardExerciseLoadSuccess state) {
     return ExerciseTile(
       tileColor: Theme
           .of(context)
@@ -161,11 +161,11 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Widget _workoutTimerTile(HangboardExerciseLoaded hangboardState) {
+  Widget _workoutTimerTile(HangboardExerciseLoadSuccess hangboardState) {
     return BlocBuilder(
       bloc: _timerBloc,
       builder: (BuildContext context, TimerState timerState) {
-        if(timerState is TimerLoaded) {
+        if(timerState is TimerLoadSuccess) {
           VoidCallback timerControllerCallback =
           _determineTimerAnimation(hangboardState, timerState);
 
@@ -204,7 +204,8 @@ class _HangboardPageState extends State<HangboardPage>
   /// could also make use of the animation controller. It ended up being easier
   /// to define the controller at a higher level and pass it down to the timer.
   VoidCallback _determineTimerAnimation(
-      HangboardExerciseLoaded hangboardExerciseState, TimerLoaded timerState) {
+      HangboardExerciseLoadSuccess hangboardExerciseState,
+      TimerLoadSuccess timerState) {
     _timerController.value = timerState.controllerValue;
 
     if(timerState.timer.direction == TimerDirection.COUNTERCLOCKWISE) {
@@ -213,7 +214,7 @@ class _HangboardPageState extends State<HangboardPage>
       return () {
         _timerController.reverse().whenComplete(() {
           if(_timerController.status == AnimationStatus.dismissed) {
-            _hangboardExerciseBloc.dispatch(ReverseComplete(
+            _hangboardExerciseBloc.add(HangboardExerciseReverseComplete(
               hangboardExerciseState.hangboardExercise,
               timerState.timer,
               _timerBloc,
@@ -229,7 +230,7 @@ class _HangboardPageState extends State<HangboardPage>
       return () {
         _timerController.forward().whenComplete(() {
           if(_timerController.status == AnimationStatus.completed) {
-            _hangboardExerciseBloc.dispatch(ForwardComplete(
+            _hangboardExerciseBloc.add(HangboardExerciseForwardComplete(
               hangboardExerciseState.hangboardExercise,
               timerState.timer,
               _timerBloc,
@@ -245,7 +246,7 @@ class _HangboardPageState extends State<HangboardPage>
 
   /// Positions and scales the [CircularTimer] for the [HangboardPage]
   Positioned _workoutTimer(BuildContext context,
-      VoidCallback timerControllerCallback, TimerLoaded timerState) {
+      VoidCallback timerControllerCallback, TimerLoadSuccess timerState) {
     return Positioned(
       top: 0.0,
       bottom: 0.0,
@@ -272,7 +273,7 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Positioned _timerSwitchButtons(HangboardExerciseLoaded hangboardState) {
+  Positioned _timerSwitchButtons(HangboardExerciseLoadSuccess hangboardState) {
     return Positioned(
       bottom: 0.0,
       left: 0.0,
@@ -291,8 +292,9 @@ class _HangboardPageState extends State<HangboardPage>
                     .width / 15.0,
               ),
               onPressed: () {
-                _hangboardExerciseBloc.dispatch(ForwardSwitchButtonPressed(
-                    hangboardState.hangboardExercise, _timerBloc));
+                _hangboardExerciseBloc.add(
+                    HangboardExerciseForwardSwitchButtonPressed(
+                        hangboardState.hangboardExercise, _timerBloc));
               },
             ),
             IconButton(
@@ -309,8 +311,9 @@ class _HangboardPageState extends State<HangboardPage>
                 textDirection: TextDirection.rtl,
               ),
               onPressed: () {
-                _hangboardExerciseBloc.dispatch(ReverseSwitchButtonPressed(
-                    hangboardState.hangboardExercise, _timerBloc));
+                _hangboardExerciseBloc.add(
+                    HangboardExerciseReverseSwitchButtonPressed(
+                        hangboardState.hangboardExercise, _timerBloc));
               },
             ),
           ],
@@ -319,7 +322,7 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Widget _hangsAndResistanceTile(HangboardExerciseLoaded state) {
+  Widget _hangsAndResistanceTile(HangboardExerciseLoadSuccess state) {
     var currentHangsPerSet = state.hangboardExercise.hangsPerSet;
     return Container(
       constraints:
@@ -351,8 +354,8 @@ class _HangboardPageState extends State<HangboardPage>
                         if(currentHangsPerSet !=
                             _hangboardExerciseBloc.originalNumberOfHangs) {
                           _timerController.stop(canceled: false);
-                          _hangboardExerciseBloc.dispatch(
-                              IncreaseNumberOfHangsButtonPressed(
+                          _hangboardExerciseBloc.add(
+                              HangboardExerciseIncreaseNumberOfHangsButtonPressed(
                                   state.hangboardExercise, _timerBloc));
                         }
                       })
@@ -388,8 +391,8 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () {
                       if(currentHangsPerSet != 0) {
                         _timerController.stop(canceled: false);
-                        _hangboardExerciseBloc.dispatch(
-                            DecreaseNumberOfHangsButtonPressed(
+                        _hangboardExerciseBloc.add(
+                            HangboardExerciseDecreaseNumberOfHangsButtonPressed(
                                 state.hangboardExercise, _timerBloc));
                       }
                     },
@@ -438,7 +441,7 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Widget _setsTile(HangboardExerciseLoaded state) {
+  Widget _setsTile(HangboardExerciseLoadSuccess state) {
     var currentNumberOfSets = state.hangboardExercise.numberOfSets;
 
     return Container(
@@ -472,8 +475,8 @@ class _HangboardPageState extends State<HangboardPage>
                       if(currentNumberOfSets !=
                           _hangboardExerciseBloc.originalNumberOfSets) {
                         _timerController.stop(canceled: false);
-                        _hangboardExerciseBloc.dispatch(
-                            IncreaseNumberOfSetsButtonPressed(
+                        _hangboardExerciseBloc.add(
+                            HangboardExerciseIncreaseNumberOfSetsButtonPressed(
                                 state.hangboardExercise, _timerBloc));
                       }
                     },
@@ -512,8 +515,8 @@ class _HangboardPageState extends State<HangboardPage>
                     onPressed: () {
                       if(currentNumberOfSets != 0) {
                         _timerController.stop(canceled: false);
-                        _hangboardExerciseBloc.dispatch(
-                            DecreaseNumberOfSetsButtonPressed(
+                        _hangboardExerciseBloc.add(
+                            HangboardExerciseDecreaseNumberOfSetsButtonPressed(
                                 state.hangboardExercise, _timerBloc));
                       }
                     },
@@ -556,7 +559,7 @@ class _HangboardPageState extends State<HangboardPage>
     );
   }
 
-  Widget _notesTile(HangboardExerciseLoaded state) {
+  Widget _notesTile(HangboardExerciseLoadSuccess state) {
     return ExerciseTile(
       child: Padding(
         padding: const EdgeInsets.all(8.0),

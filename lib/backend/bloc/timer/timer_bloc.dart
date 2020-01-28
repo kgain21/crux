@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:crux/backend/blocs/timer/timer_event.dart';
-import 'package:crux/backend/blocs/timer/timer_state.dart';
+import 'package:crux/backend/bloc/timer/timer_event.dart';
+import 'package:crux/backend/bloc/timer/timer_state.dart';
 import 'package:crux/backend/models/timer/timer.dart';
 import 'package:crux/backend/models/timer/timer_direction.dart';
 import 'package:crux/backend/services/preferences.dart';
@@ -22,23 +22,23 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     });
   }*/
   @override
-  TimerState get initialState => TimerLoading();
+  TimerState get initialState => TimerLoadInProgress();
 
   @override
   Stream<TimerState> mapEventToState(TimerEvent event) async* {
-    if(event is LoadTimer) {
+    if (event is TimerLoaded) {
       yield* _mapLoadTimerToState(event);
-    } else if(event is TimerComplete) {
+    } else if (event is TimerCompleted) {
       yield* _mapTimerCompleteToState(event);
-    } else if(event is ReplaceWithRepTimer) {
+    } else if (event is TimerReplacedWithRepTimer) {
       yield* _mapReplaceWithRepTimerToState(event);
-    } else if(event is ReplaceWithRestTimer) {
+    } else if (event is TimerReplacedWithRestTimer) {
       yield* _mapReplaceWithRestTimerToState(event);
-    } else if(event is ReplaceWithBreakTimer) {
-      yield* _mapReplaceWithBreakTimerToState(event);
-    } else if(event is DisposeTimer) {
+    } else if (event is TimerReplacedWithBreakTimer) {
+      yield* _mapTimerReplacedWithBreakTimerToState(event);
+    } else if (event is TimerDisposed) {
       yield* _mapDisposeTimerToState(event);
-    } else if(event is ClearTimerPreferences) {
+    } else if (event is TimerPreferencesCleared) {
       yield* _mapClearTimerPreferencesToState(event);
     }
   }
@@ -54,7 +54,7 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   /// [Timer] before and navigated away. The appropriate controller value is
   /// calculated based on how much time has elapsed and is passed back to
   /// the ExercisePage.
-  Stream<TimerState> _mapLoadTimerToState(LoadTimer event) async* {
+  Stream<TimerState> _mapLoadTimerToState(TimerLoaded event) async* {
     try {
       final timerEntity = Preferences()
           .getTimerPreferences(event.hangboardExercise.exerciseTitle);
@@ -62,10 +62,10 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       if(timerEntity != null) {
         Timer timer = Timer.fromEntity(timerEntity);
         double controllerValue = determineControllerValue(timer);
-        yield TimerLoaded(
+        yield TimerLoadSuccess(
             timer, controllerValue);
       } else {
-        yield TimerLoaded(
+        yield TimerLoadSuccess(
             Timer(
               event.hangboardExercise.exerciseTitle,
               event.hangboardExercise.repDuration,
@@ -78,13 +78,13 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
       }
     } catch(exception) {
       print(exception);
-      yield TimerNotLoaded();
+      yield TimerLoadFailure();
     }
   }
 
   Stream<TimerState> _mapReplaceWithRepTimerToState(
-      ReplaceWithRepTimer event) async* {
-    yield TimerLoaded(
+      TimerReplacedWithRepTimer event) async* {
+    yield TimerLoadSuccess(
         Timer(
           event.hangboardExercise.exerciseTitle,
           event.hangboardExercise.repDuration,
@@ -97,8 +97,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
   }
 
   Stream<TimerState> _mapReplaceWithRestTimerToState(
-      ReplaceWithRestTimer event) async* {
-    yield TimerLoaded(
+      TimerReplacedWithRestTimer event) async* {
+    yield TimerLoadSuccess(
         Timer(
           event.hangboardExercise.exerciseTitle,
           event.hangboardExercise.restDuration,
@@ -110,9 +110,9 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
         0.0);
   }
 
-  Stream<TimerState> _mapReplaceWithBreakTimerToState(
-      ReplaceWithBreakTimer event) async* {
-    yield TimerLoaded(
+  Stream<TimerState> _mapTimerReplacedWithBreakTimerToState(
+      TimerReplacedWithBreakTimer event) async* {
+    yield TimerLoadSuccess(
         Timer(
           event.hangboardExercise.exerciseTitle,
           event.hangboardExercise.breakDuration,
@@ -132,8 +132,8 @@ class TimerBloc extends Bloc<TimerEvent, TimerState> {
     return null;
   }
 
-  Stream<TimerState> _mapDisposeTimerToState(DisposeTimer event) async* {
-    if(currentState is TimerLoaded) {
+  Stream<TimerState> _mapDisposeTimerToState(TimerDisposed event) async* {
+    if(state is TimerLoaded) {
       _saveTimer(event.timer);
 //      yield TimerDisposed();
     }
